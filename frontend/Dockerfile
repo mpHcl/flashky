@@ -1,18 +1,15 @@
-FROM node:24-slim
-
+FROM node:24.9
 WORKDIR /app
 
 COPY frontend/package*.json ./
-COPY frontend/postcss.config.mjs ./
-COPY frontend/tsconfig.json ./
-COPY frontend/next*.ts ./
-COPY frontend/eslint*.json ./
-
 RUN npm install
 
-COPY frontend/src /app/src
+COPY frontend/ .
 
+ENV NODE_ENV=development
 ENV CHOKIDAR_USEPOLLING=true
 ENV WATCHPACK_POLLING=true
+ENV WATCHPACK_POLLING_INTERVAL=1000
 
-CMD ["npm", "run", "dev"]
+EXPOSE 3000
+CMD ["npm", "run", "dev", "--turbo=false"]

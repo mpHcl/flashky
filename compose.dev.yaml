@@ -9,16 +9,17 @@ services:
             - ./backend/src:/src/
         environment:
             - ENV=dev
-    front: 
-        build: 
+    front:
+        build:
             context: .
             dockerfile: frontend/Dockerfile
         ports:
             - "3000:3000"
         volumes:
-            - ./frontend/src:/app/src/
-            - ./frontend/public:/app/public/
+            - ./frontend:/app:cached
+            - /app/node_modules
         environment:
-            - CHOKIDAR_USEPOLLING=true
-            - WATCHPACK_POLLING=true
             - NODE_ENV=development
+            - WATCHPACK_POLLING=true
+            - CHOKIDAR_USEPOLLING=true
+            - WATCHPACK_POLLING_INTERVAL="1000"

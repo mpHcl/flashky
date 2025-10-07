@@ -1,10 +1,9 @@
-version: '3.9'
-
 services:
     api: 
         build: 
             context: .
             dockerfile: backend/Dockerfile
+        command: uvicorn app.main:app --host 0.0.0.0 --port 80 --reload
         ports:
             - "8000:80"
         volumes:

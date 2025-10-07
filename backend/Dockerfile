@@ -4,4 +4,4 @@ WORKDIR /src
 COPY backend/requirements.txt /src/requirements/.txt
 RUN pip install --no-cache-dir --upgrade -r /src/requirements/.txt
 
-CMD ["fastapi", "run", "/src/app/main.py", "--port", "80", "--workers", "4"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80", "--reload"]

@@ -1,5 +1,5 @@
 services:
-    api: 
+    backend: 
         build: 
             context: .
             dockerfile: backend/Dockerfile
@@ -7,7 +7,7 @@ services:
             - "8000:80"
         volumes:
             - ./backend/src:/src/
-    front:
+    frontend:
         build:
             context: .
             dockerfile: frontend/Dockerfile

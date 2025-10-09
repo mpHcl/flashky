@@ -38,10 +38,10 @@ class RolePermission(SQLModel, table=True):
     role_id: int = Field(foreign_key="role.id")
     permission_id: int = Field(foreign_key="permission.id")
     
+
 ###########################################################
 #-------------- Flashcard Management Tables --------------#
 ###########################################################
-
 
 class Flashcard(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -110,7 +110,7 @@ class Comment(SQLModel, table=True):
     content: str
     creation_date: datetime = Field(default_factory=datetime.utcnow)
 
-class Reports(SQLModel, table=True):
+class Report(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     type: str # deck/flashcard/comment/user
     description: str
@@ -123,3 +123,4 @@ class Reports(SQLModel, table=True):
     creation_date: datetime = Field(default_factory=datetime.utcnow)
     resolution_date: Optional[datetime] = None
     verdict: Optional[str] = None # violation/no-violation
+    

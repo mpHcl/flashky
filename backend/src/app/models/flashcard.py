@@ -37,12 +37,21 @@ class Flashcard(SQLModel, table=True):
     progress_entries: List["Progress"] = Relationship(back_populates="flashcard")
 
 
+class FlashcardSideMedia(SQLModel, table=True):
+    __tablename__ = "flashcard_sides_media"
+    id: Optional[int] = Field(default=None, primary_key=True)
+    flashcard_side_id: int = Field(foreign_key="flashcard_sides.id")
+    media_id: int = Field(foreign_key="media.id")
+
+
 class FlashcardSide(SQLModel, table=True):
     __tablename__ = "flashcard_sides"
     id: Optional[int] = Field(default=None, primary_key=True)
     content: Optional[str] = None
 
-    media: List["FlashcardSideMedia"] = Relationship(back_populates="flashcard_side")
+    media: List["Media"] = Relationship(
+        back_populates="flashcard_side", link_model=FlashcardSideMedia
+    )
 
 
 class Media(SQLModel, table=True):
@@ -54,14 +63,6 @@ class Media(SQLModel, table=True):
     autoplay: bool = Field(default=False)
     upload_date: datetime = Field(default_factory=datetime.utcnow)
 
-    flashcard_sides: List["FlashcardSideMedia"] = Relationship(back_populates="media")
-
-
-class FlashcardSideMedia(SQLModel, table=True):
-    __tablename__ = "flashcard_sides_media"
-    id: Optional[int] = Field(default=None, primary_key=True)
-    flashcard_side_id: int = Field(foreign_key="flashcard_sides.id")
-    media_id: int = Field(foreign_key="media.id")
-
-    flashcard_side: "FlashcardSide" = Relationship(back_populates="media")
-    media: "Media" = Relationship(back_populates="flashcard_sides")
+    flashcard_sides: List["FlashcardSide"] = Relationship(
+        back_populates="media", link_model=FlashcardSideMedia
+    )

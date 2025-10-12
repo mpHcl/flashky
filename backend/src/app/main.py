@@ -26,8 +26,7 @@ def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
 
 
-from app.models.user import User
-
+from .new_models import User
 
 class UserRegisterDTO(BaseModel):
     username: str
@@ -52,12 +51,12 @@ def register(user: UserRegisterDTO, db: Session = Depends(get_session)):
         "settings": None
     })
     
-    user_entry = db.query(User).filter(User.email == user_data.email or User.username == user_data.username).first()
+    user_entry = db.query(User).filter(User.email == user_data["email"] or User.username == user_data["username"]).first()
 
     if user_entry: 
-        raise HTTPException(status=400, detail="User with this username or mail already exists")
+        raise HTTPException(status_code=400, detail="User with this username or mail already exists")
     
-    new_user = User(user_data)
+    new_user = User(**user_data)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)

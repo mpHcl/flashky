@@ -1,5 +1,5 @@
 from sqlalchemy import inspect
-from sqlmodel import create_engine, SQLModel
+from sqlmodel import create_engine, SQLModel, Session
 from app.models import *
 import os
 
@@ -14,8 +14,19 @@ def is_database_initialized():
 def init_db():
     if is_database_initialized():
         print("Database already initialized")
-        return
     else:
         SQLModel.metadata.create_all(engine)
         # populate_database()
         print("Database initialized")
+
+
+def get_session():
+    """
+    Dependency for FastAPI routes.
+    Yields a database session and ensures it is closed after the request.
+    """
+    db = Session(engine)
+    try:
+        yield db
+    finally:
+        db.close()

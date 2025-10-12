@@ -1,7 +1,8 @@
 from __future__ import annotations
 from sqlmodel import SQLModel, Field, Relationship
+from typing import List, Optional, TYPE_CHECKING
 from datetime import datetime
-from typing import Optional, List, TYPE_CHECKING
+from sqlalchemy.orm import Mapped
 from .relations import UserRole, SavedDeck
 
 if TYPE_CHECKING:
@@ -11,9 +12,7 @@ if TYPE_CHECKING:
     from .progress import Progress
     from .flashcard import Flashcard
 
-
 class User(SQLModel, table=True):
-    __tablename__ = "users"
     id: Optional[int] = Field(default=None, primary_key=True)
     username: str = Field(unique=True, index=True)
     email: str = Field(unique=True, index=True)
@@ -26,23 +25,23 @@ class User(SQLModel, table=True):
     avatar: Optional[str] = None
     settings: Optional[str] = None
 
-    roles: List["Role"] = Relationship(back_populates="users", link_model=UserRole)
-    decks: List["Deck"] = Relationship(back_populates="owner")
-    flashcards: List["Flashcard"] = Relationship(back_populates="owner")
-    comments: List["Comment"] = Relationship(back_populates="author")
-    reports_reported: List["Report"] = Relationship(
+    roles: Mapped[List["Role"]] = Relationship(back_populates="users", link_model=UserRole)
+    decks: Mapped[List["Deck"]] = Relationship(back_populates="owner")
+    flashcards: Mapped[List["Flashcard"]] = Relationship(back_populates="owner")
+    comments: Mapped[List["Comment"]] = Relationship(back_populates="author")
+    reports_reported: Mapped[List["Report"]] = Relationship(
         back_populates="reported_user",
-        sa_relationship_kwargs={"foreign_keys": "[Report.reported_user_id]"},
+        sa_relationship_kwargs={"foreign_keys": "[Report.reported_user_id]"}
     )
-    reports_created: List["Report"] = Relationship(
+    reports_created: Mapped[List["Report"]] = Relationship(
         back_populates="reporter",
-        sa_relationship_kwargs={"foreign_keys": "[Report.reporter_id]"},
+        sa_relationship_kwargs={"foreign_keys": "[Report.reporter_id]"}
     )
-    reports_moderated: List["Report"] = Relationship(
+    reports_moderated: Mapped[List["Report"]] = Relationship(
         back_populates="moderator",
-        sa_relationship_kwargs={"foreign_keys": "[Report.moderator_id]"},
+        sa_relationship_kwargs={"foreign_keys": "[Report.moderator_id]"}
     )
-    progress: List["Progress"] = Relationship(back_populates="user")
-    saved_decks: List["Deck"] = Relationship(
-        back_populates="saved_by_users", link_model=SavedDeck
-    )
+    progress: Mapped[List["Progress"]] = Relationship(back_populates="user")
+    saved_decks: Mapped[List["Deck"]] = Relationship(back_populates="saved_by_users", link_model=SavedDeck)
+
+User.update_forward_refs()

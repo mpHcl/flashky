@@ -5,6 +5,8 @@ import Image from 'next/image';
 import "./globals.css";
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import { Drawer, List, ListItem, ListItemText, Box } from '@mui/material';
+import TextField from '@mui/material/TextField';
+import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from "./theme";
@@ -61,6 +63,15 @@ export function SimpleSidebar() {
   );
 }
 
+export function SearchBox() {
+  return (
+    <Box display="flex" justifyContent="center" alignItems="center">
+      <TextField placeholder="Find decks and flashky" fullWidth size="small" variant="outlined" color="primary" sx={{
+      '& .MuiOutlinedInput-root': {backgroundColor: 'primary.light'}}}/>
+    </Box>
+  );
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -71,10 +82,13 @@ export default function RootLayout({
       <body>
         <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>
-          <Box sx={{ display: 'flex', margin: 2 }}>
-            <SimpleSidebar />
-            {children}
-          </Box>
+            <Box sx={{ display: 'flex', margin: 2 }}>
+              <SimpleSidebar />
+              <Stack spacing={5} sx={{ width: '100%' }}>
+                <SearchBox />
+                {children}
+              </Stack>
+            </Box>
           </ThemeProvider>
         </AppRouterCacheProvider>
       </body>

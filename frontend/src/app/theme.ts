@@ -6,6 +6,7 @@ const theme = createTheme({
     fontFamily: 'Roboto',
   },
   palette: {
+    mode: 'dark',
     primary: {
       light: '#757ce8',
       main: '#3f50b5',

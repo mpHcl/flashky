@@ -1,10 +1,24 @@
 from datetime import datetime, timedelta
+from typing import List, Optional
 from fastapi import HTTPException, Depends, Header
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 
 SECRET_KEY = 'some key'
 
+
+
+def authentication(roles: Optional[List[str]] = None, ):
+    def dependency(token: str = Depends(get_token_handler)):
+        user_id = get_id_from_token(token=token)
+        if roles == None: 
+            return user_id
+        
+        else: 
+            raise  HTTPException(status_code=404, detail="Not implemented yet")
+        
+
+    return dependency
 
 def get_token_handler(authorization: str = Header(...)):
     if not authorization.startswith("Bearer "):
@@ -33,7 +47,7 @@ def generate_token(user_id: str):
     return token
 
 
-def get_id_from_token(token: str = Depends(get_token_handler)):
+def get_id_from_token(token: str):
     """
     Retrieves the user ID from the given JWT token.
 

@@ -4,13 +4,14 @@ from fastapi import FastAPI, Depends
 
 from app.routers import authentication
 from app.database import init_db
-from app.tools.auth.authenticate import authenticate 
+from app.tools.auth.authenticate import authenticate
 
 
 app = FastAPI()
 
 # Routers
 app.include_router(authentication.router)
+
 
 @app.on_event("startup")
 def startup():

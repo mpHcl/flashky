@@ -1,5 +1,6 @@
 import hashlib
 
+
 def hash_password(password):
     """
     Hashes the given password using the SHA-512 algorithm.

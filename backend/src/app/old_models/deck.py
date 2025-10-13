@@ -19,10 +19,9 @@ class Deck(SQLModel, table=True):
     has_media: bool = Field(default=False)
     creation_date: datetime = Field(default_factory=datetime.utcnow)
     last_edit_date: datetime = Field(default_factory=datetime.utcnow)
-
     owner_id: int = Field(foreign_key="users.id")
+    
     owner: User = Relationship(back_populates="decks")
-
     flashcards: List["Flashcard"] = Relationship(
         back_populates="decks", link_model=DeckFlashcard
     )

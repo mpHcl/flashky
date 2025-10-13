@@ -1,6 +1,6 @@
 from sqlalchemy import inspect
 from sqlmodel import create_engine, SQLModel, Session
-from .new_models import *
+from .models import *
 import os
 
 DATABASE_URL = os.getenv("DATABASE_URL")

@@ -1,4 +1,3 @@
-import hashlib
 import pytest
 import jwt
 from datetime import datetime, timedelta, timezone
@@ -13,11 +12,13 @@ from app.tools.auth.jwt_handler import (
     decode_token,
     get_id_from_token,
 )
-from app.tools.auth.hash import hash_password
+from app.tools.auth.hash import hash_password, verify_password
 from app.models import ExpireTokens
 
+from argon2 import PasswordHasher
 
 # ---------- Fixtures ----------
+
 
 @pytest.fixture(autouse=True)
 def mock_db(mocker):
@@ -25,6 +26,7 @@ def mock_db(mocker):
     db = mocker.MagicMock()
     mocker.patch("app.database.get_session", return_value=db)
     return db
+
 
 @pytest.fixture
 def sample_user_id():
@@ -125,15 +127,40 @@ def test_invalidate_token_adds_to_db(mocker, mock_db, sample_token):
 def test_hash_password(mocker, mock_db, sample_token):
     # Arrange
     password = "MySecurePassword123"
-    expected_hash = hashlib.sha512(password.encode("utf-8")).hexdigest()
+    ph = PasswordHasher()
+    hashedPassword = ph.hash(password)
 
     # Act
     result = hash_password(password)
 
     # Assert
-    assert result == expected_hash
+    assert result.startswith("$argon2")
+    assert ph.verify(result, password)
     assert isinstance(result, str)
-    assert len(result) == 128  # SHA-512 hashes are 512 bits = 128 hex chars
+
+
+def test_verify_password_success():
+    # Arrange
+    ph = PasswordHasher()
+    plain_password = "correct_password"
+    stored_hash = ph.hash(plain_password)
+
+    # Act & Assert (should not raise)
+    verify_password(stored_hash, plain_password)
+
+
+def test_verify_password_failure():
+    # Arrange
+    plain_password = "wrong_password"
+    ph = PasswordHasher()
+    stored_hash = ph.hash("correct_password")
+
+    # Act & Assert (should raise HTTPException)
+    with pytest.raises(HTTPException) as exc_info:
+        verify_password(stored_hash, plain_password)
+
+    assert exc_info.value.status_code == 401
+    assert exc_info.value.detail == "Wrong password"
 
 
 # ---------- Tests for authenticate----------
@@ -178,7 +205,7 @@ def test_authenticate_with_roles_not_implemented(mocker):
     dependency = authenticate(roles=["admin"])
     mock_db = mocker.MagicMock()
     mock_db.query().filter().first.return_value = None
-    
+
     mocker.patch(
         "app.tools.auth.jwt_handler.decode_token", return_value={"sub": "user123"}
     )

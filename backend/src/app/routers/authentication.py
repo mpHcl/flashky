@@ -7,7 +7,7 @@ from sqlmodel import Session, or_
 
 from ..models import User
 from app.database import get_session
-from app.tools.auth.hash import hash_password
+from app.tools.auth.hash import hash_password, verify_password
 from app.tools.auth.jwt_handler import generate_token, invalidate_token
 
 router = APIRouter(tags=["authentication"])
@@ -73,9 +73,9 @@ def login(user: UserLoginDTO, db: Session = Depends(get_session)):
 
     if not user_entry:
         raise HTTPException(status_code=404, detail="User not found")
+    
+    verify_password(user_entry.password, user.password)  # stored_hash, plain_password
 
-    if user_entry.password != hashed_password:
-        raise HTTPException(status_code=401, detail="Wrong password")
 
     return {"token": generate_token(f"{user_entry.id}")}
 

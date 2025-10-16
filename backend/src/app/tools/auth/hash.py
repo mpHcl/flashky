@@ -1,4 +1,8 @@
-import hashlib
+from fastapi import HTTPException
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
+
+ph = PasswordHasher()
 
 
 def hash_password(password):
@@ -12,5 +16,12 @@ def hash_password(password):
         str: The hashed password.
 
     """
-    hashedPassword = hashlib.sha512(password.encode("utf-8")).hexdigest()
+    hashedPassword = ph.hash(password)
     return hashedPassword
+
+
+def verify_password(password_request, password_orig):
+    try:
+        ph.verify(password_request, password_orig)  # stored_hash, plain_password
+    except VerifyMismatchError:
+        raise HTTPException(status_code=401, detail="Wrong password")

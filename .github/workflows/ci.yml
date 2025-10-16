@@ -40,7 +40,7 @@ jobs:
           flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics || true
           flake8 src --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-      - name: Run backend tests (placeholder)
+      - name: Run backend tests
         env:
               PYTHONPATH: ${{ github.workspace }}/backend/src
         run: |

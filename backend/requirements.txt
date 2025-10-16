@@ -3,5 +3,6 @@ pydantic==2.11.10
 sqlmodel
 psycopg2-binary
 PyJWT
+argon2-cffi==25.1.0
 pytest
 pytest-mock

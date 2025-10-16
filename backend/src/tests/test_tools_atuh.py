@@ -1,9 +1,11 @@
+import hashlib
 import pytest
 import jwt
 from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException
 
-from app.api.v1.routes.auth_utils import (
+from app.tools.auth.authenticate import authenticate
+from app.tools.auth.jwt_handler import (
     SECRET_KEY,
     get_token_handler,
     invalidate_token,
@@ -11,10 +13,12 @@ from app.api.v1.routes.auth_utils import (
     decode_token,
     get_id_from_token,
 )
-from ...models import ExpireTokens
+from app.tools.auth.hash import hash_password
+from app.models import ExpireTokens
 
 
 # ---------- Fixtures ----------
+
 
 @pytest.fixture
 def mock_db(mocker):
@@ -36,10 +40,11 @@ def sample_token(sample_user_id):
 
 # ---------- Tests for get_token_handler ----------
 
+
 def test_get_token_handler_valid():
     # Arrange
     header = "Bearer my.jwt.token"
-    # Act 
+    # Act
     token = get_token_handler(header)
     # Assert
     assert token == "my.jwt.token"
@@ -47,21 +52,22 @@ def test_get_token_handler_valid():
 
 def test_get_token_handler_invalid_format():
     invalid_header = "InvalidHeader"
-    
+
     with pytest.raises(HTTPException) as exc:
         get_token_handler(invalid_header)
-        
+
     assert exc.value.status_code == 401
     assert "Invalid Authorization header" in exc.value.detail
 
 
-# ---------- Tests for generate_token and decode_token ----------
+# ---------- Tests for jwt_handler----------
+
 
 def test_generate_and_decode_token(sample_user_id):
     token = generate_token(sample_user_id)
-   
+
     payload = decode_token(token)
-   
+
     assert payload["sub"] == sample_user_id
     assert "exp" in payload
     assert "iat" in payload
@@ -92,22 +98,15 @@ def test_decode_token_invalid():
     assert exc.value.detail == "Invalid token"
 
 
-# ---------- Tests for get_id_from_token ----------
-
 def test_get_id_from_token(sample_token, sample_user_id):
     user_id = get_id_from_token(sample_token)
     assert user_id == sample_user_id
 
 
-# ---------- Tests for invalidate_token ----------
-
 def test_invalidate_token_adds_to_db(mocker, mock_db, sample_token):
     # Mock decode_token to return a fake exp timestamp
-    fake_payload = {
-        "exp": datetime.now(tz=timezone.utc).timestamp(),
-        "sub": "user123"
-    }
-    mocker.patch("app.api.v1.routes.auth_utils.decode_token", return_value=fake_payload)
+    fake_payload = {"exp": datetime.now(tz=timezone.utc).timestamp(), "sub": "user123"}
+    mocker.patch("app.tools.auth.jwt_handler.decode_token", return_value=fake_payload)
 
     # Run function
     result = invalidate_token(sample_token, mock_db)
@@ -119,3 +118,75 @@ def test_invalidate_token_adds_to_db(mocker, mock_db, sample_token):
     # Validate result
     assert isinstance(mock_db.add.call_args[0][0], ExpireTokens)
     assert result == sample_token
+
+
+# ---------- Tests for hash_password----------
+
+
+def test_hash_password(mocker, mock_db, sample_token):
+    # Arrange
+    password = "MySecurePassword123"
+    expected_hash = hashlib.sha512(password.encode("utf-8")).hexdigest()
+
+    # Act
+    result = hash_password(password)
+
+    # Assert
+    assert result == expected_hash
+    assert isinstance(result, str)
+    assert len(result) == 128  # SHA-512 hashes are 512 bits = 128 hex chars
+
+
+# ---------- Tests for authenticate----------
+
+
+def test_authenticate_valid_token(mocker):
+    # Arrange
+    dependency = authenticate()
+    mock_db = mocker.MagicMock()
+    mock_db.query().filter().first.return_value = None
+
+    mocker.patch(
+        "app.tools.auth.jwt_handler.decode_token", return_value={"sub": "user123"}
+    )
+
+    # Act
+    user_id = dependency(token="valid_token", db=mock_db)
+
+    # Assert
+    assert user_id == "user123"
+    mock_db.query().filter().first.assert_called_once()
+
+
+def test_authenticate_invalid_token_in_db(mocker):
+    # Arrange
+    dependency = authenticate()
+    mock_db = mocker.MagicMock()
+    mock_db.query().filter().first.return_value = ExpireTokens(
+        token_value="expired", expiration_date=None
+    )
+
+    # Act & Assert
+    with pytest.raises(HTTPException) as exc:
+        dependency(token="expired", db=mock_db)
+
+    assert exc.value.status_code == 401
+    assert "Invalid token" in exc.value.detail
+
+
+def test_authenticate_with_roles_not_implemented(mocker):
+    # Arrange
+    dependency = authenticate(roles=["admin"])
+    mock_db = mocker.MagicMock()
+    mock_db.query().filter().first.return_value = None
+    
+    mocker.patch(
+        "app.tools.auth.jwt_handler.decode_token", return_value={"sub": "user123"}
+    )
+
+    # Act & Assert
+    with pytest.raises(HTTPException) as exc:
+        dependency(token="valid_token", db=mock_db)
+
+    assert exc.value.status_code == 404
+    assert "Not implemented yet" in exc.value.detail

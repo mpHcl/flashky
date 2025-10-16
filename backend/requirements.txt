@@ -4,3 +4,4 @@ sqlmodel
 psycopg2-binary
 PyJWT
 pytest
+pytest-mock

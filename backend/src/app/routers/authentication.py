@@ -12,6 +12,7 @@ from app.tools.auth.jwt_handler import generate_token, invalidate_token
 
 router = APIRouter(tags=["authentication"])
 
+
 class UserRegisterDTO(BaseModel):
     username: str
     email: EmailStr

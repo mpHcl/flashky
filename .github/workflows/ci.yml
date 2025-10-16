@@ -41,9 +41,10 @@ jobs:
           flake8 src --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
       - name: Run backend tests (placeholder)
+        env:
+              PYTHONPATH: ${{ github.workspace }}/backend/src
         run: |
           pip install pytest pytest-mock
-          ENV PYTHONPATH=/src
           pytest -v 
 
   # -----------------------

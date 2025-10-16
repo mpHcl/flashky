@@ -19,13 +19,12 @@ from app.models import ExpireTokens
 
 # ---------- Fixtures ----------
 
-
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def mock_db(mocker):
-    """Mock database session with add() and commit() methods."""
+    """Automatically mock the database for all tests"""
     db = mocker.MagicMock()
+    mocker.patch("app.database.get_session", return_value=db)
     return db
-
 
 @pytest.fixture
 def sample_user_id():

@@ -43,6 +43,7 @@ jobs:
       - name: Run backend tests (placeholder)
         run: |
           pip install pytest pytest-mock
+          ENV PYTHONPATH=/src
           pytest -v 
 
   # -----------------------

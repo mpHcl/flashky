@@ -5,13 +5,20 @@ from fastapi import FastAPI, Depends
 from app.routers import authentication
 from app.database import init_db
 from app.tools.auth.authenticate import authenticate
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI()
 
 # Routers
 app.include_router(authentication.router)
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", 'http://127.0.0.1:3000'],  # or ["*"] for all origins (not recommended for prod)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.on_event("startup")
 def startup():

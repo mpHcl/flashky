@@ -2,7 +2,7 @@ from typing import Union
 
 from fastapi import FastAPI, Depends
 
-from app.routers import authentication
+from app.routers import authentication, flashcards
 from app.database import init_db
 from app.tools.auth.authenticate import authenticate
 
@@ -11,6 +11,7 @@ app = FastAPI()
 
 # Routers
 app.include_router(authentication.router)
+app.include_router(flashcards.router)
 
 
 @app.on_event("startup")

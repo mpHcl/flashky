@@ -69,7 +69,7 @@ export default function Register() {
 
     fetch("http://127.0.0.1:8000/register", requestOptions)
       .then((response) => {
-=        return response.json()
+        return response.json()
       })
       .then((result) => {
         if (result['token']) {

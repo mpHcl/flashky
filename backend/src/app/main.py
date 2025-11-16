@@ -2,7 +2,7 @@ from typing import Union
 
 from fastapi import FastAPI, Depends
 
-from app.routers import authentication, flashcards, decks
+from app.routers import authentication, decks, flashcards
 from app.database import init_db
 from app.tools.auth.authenticate import authenticate
 from fastapi.middleware.cors import CORSMiddleware

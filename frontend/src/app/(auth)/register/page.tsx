@@ -60,8 +60,6 @@ export default function Register() {
       "password": password
     });
 
-    console.log(raw);
-
     const requestOptions = {
       method: "POST",
       headers: myHeaders,
@@ -71,8 +69,7 @@ export default function Register() {
 
     fetch("http://127.0.0.1:8000/register", requestOptions)
       .then((response) => {
-        console.log(response)
-        return response.json()
+=        return response.json()
       })
       .then((result) => {
         if (result['token']) {

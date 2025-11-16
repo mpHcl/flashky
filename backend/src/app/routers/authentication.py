@@ -9,6 +9,8 @@ from ..models import User
 from app.database import get_session
 from app.tools.auth.hash import hash_password, verify_password
 from app.tools.auth.jwt_handler import generate_token, invalidate_token
+from app.tools.auth.validation import check_password
+from app.tools.auth.authenticate import authenticate
 
 router = APIRouter(tags=["authentication"])
 
@@ -37,6 +39,10 @@ def register(user: UserRegisterDTO, db: Session = Depends(get_session)):
             "settings": None,
         }
     )
+        
+    password_errors = check_password(user_data["password"])
+    if len(password_errors) > 0:
+        raise HTTPException(status_code=400, detail={"errors": password_errors})
 
     user_data["password"] = hash_password(user_data["password"])
     user_entry = (
@@ -51,7 +57,7 @@ def register(user: UserRegisterDTO, db: Session = Depends(get_session)):
 
     if user_entry:
         raise HTTPException(
-            status_code=400, detail="User with this username or mail already exists"
+            status_code=409, detail="User with this username or mail already exists."
         )
 
     new_user = User(**user_data)
@@ -64,7 +70,6 @@ def register(user: UserRegisterDTO, db: Session = Depends(get_session)):
 
 @router.post("/login")
 def login(user: UserLoginDTO, db: Session = Depends(get_session)):
-    hashed_password = hash_password(user.password)
     user_entry = (
         db.query(User)
         .filter(or_(User.username == user.login, User.email == user.login))
@@ -73,13 +78,17 @@ def login(user: UserLoginDTO, db: Session = Depends(get_session)):
 
     if not user_entry:
         raise HTTPException(status_code=404, detail="User not found")
-    
-    verify_password(user_entry.password, user.password)  # stored_hash, plain_password
 
+    verify_password(user_entry.password, user.password)
 
     return {"token": generate_token(f"{user_entry.id}")}
 
 
 @router.post("/logout")
 def logout(token: str = Depends(invalidate_token)):
-    return f"token {token} invalidated"
+    return {"message": f"token {token} invalidated"}
+
+
+@router.get("/check_token")
+def check_token(user_id = Depends(authenticate())):
+    return {"message": f"Valid token for user: {user_id}"}

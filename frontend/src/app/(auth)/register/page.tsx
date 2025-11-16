@@ -80,9 +80,22 @@ export default function Register() {
           router.push("/");
         }
         else {
-          alert(result.detail)
+          if (result.detail) {
+            if (Array.isArray(result.detail)) {
+              const errorMessages = result.detail.map(err => err.ctx.reason).join('\n');
+              alert(errorMessages);
+            }
+            else if (result.detail.errors && Array.isArray(result.detail.errors)) {
+              const errorMessages = result.detail.errors.join('\n');
+              alert(errorMessages);
+            }
+            else {
+              alert('Registration failed. Please try again.');
+            }
+
+          }
         }
-      })
+  })
       .catch((error) => console.log(error));
   }
 

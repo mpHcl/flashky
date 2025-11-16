@@ -12,6 +12,7 @@ from app.tools.auth.jwt_handler import (
     decode_token,
     get_id_from_token,
 )
+from app.tools.auth.validation import check_password
 from app.tools.auth.hash import hash_password, verify_password
 from app.models import ExpireTokens
 
@@ -216,3 +217,30 @@ def test_authenticate_with_roles_not_implemented(mocker):
 
     assert exc.value.status_code == 404
     assert "Not implemented yet" in exc.value.detail
+
+
+# ---------- Tests for validation----------
+
+password_data = [
+    # (password_str, num_of_errors)
+    ("a", 4), 
+    ("A", 4), 
+    ("3", 4), 
+    ("!", 4), 
+    ("aA", 3), 
+    ("aA!", 2),
+    ("Aa123!", 1), 
+    ("Aaaaaaaaaaaa123", 1), 
+    ("Aaaa123#", 0), 
+     
+]
+
+@pytest.mark.parametrize("password_str,num_of_errors", password_data)
+def test_check_password(password_str, num_of_errors):
+    # Arrange 
+    
+    # Act 
+    result = check_password(password=password_str)
+    
+    # Assert 
+    assert len(result) == num_of_errors

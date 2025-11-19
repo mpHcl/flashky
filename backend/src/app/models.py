@@ -385,10 +385,10 @@ class Flashcard(SQLModel, table=True):
     # Relationships
     owner: Mapped["User"] = Relationship(back_populates="flashcards")
     front_side: Mapped["FlashcardSide"] = Relationship(
-        sa_relationship_kwargs={"foreign_keys": "[Flashcard.front_side_id]"}
+        sa_relationship_kwargs={"foreign_keys": "[Flashcard.front_side_id]", "cascade": "delete"}
     )
     back_side: Mapped["FlashcardSide"] = Relationship(
-        sa_relationship_kwargs={"foreign_keys": "[Flashcard.back_side_id]"}
+        sa_relationship_kwargs={"foreign_keys": "[Flashcard.back_side_id]", "cascade": "delete"}
     )
 
     decks: Mapped[List["Deck"]] = Relationship(

@@ -20,8 +20,11 @@ class FlashcardCreateDTO(BaseModel):
 
 @router.post("/")
 def createFlashcard(flashcardDTO: FlashcardCreateDTO, sideFront: FlashcardSideCreateDTO, sideBack: FlashcardSideCreateDTO, user_id=Depends(authenticate()), db: Session = Depends(get_session)):
-    user_id = int(user_id)
     if not user_id:
+        raise HTTPException(status_code=404, detail="User not found")
+    user_id = int(user_id)
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
         raise HTTPException(status_code=404, detail="User not found")
     flashcardFront = FlashcardSide(content=sideFront.content)
     flashcardBack = FlashcardSide(content=sideBack.content)
@@ -31,9 +34,6 @@ def createFlashcard(flashcardDTO: FlashcardCreateDTO, sideFront: FlashcardSideCr
     db.refresh(flashcardFront)
     db.refresh(flashcardBack)
 
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
     flashcard = Flashcard(name=flashcardDTO.name, owner_id=user_id, owner=user, front_side_id=flashcardFront.id, front_side=flashcardFront, back_side_id=flashcardBack.id, back_side=flashcardBack)
     db.add(flashcard)
     db.commit()
@@ -50,9 +50,9 @@ def getFlashcards(db: Session = Depends(get_session)):
 
 @router.get("/myflashcards")
 def getMyFlashcards(user_id=Depends(authenticate()), db: Session = Depends(get_session)):
-    user_id = int(user_id)
     if not user_id:
         raise HTTPException(status_code=404, detail="User not found")
+    user_id = int(user_id)
     flashcards = db.query(Flashcard).filter(Flashcard.owner_id == user_id).all()
     return flashcards
 
@@ -67,9 +67,9 @@ def getFlashcardById(id: int, db: Session = Depends(get_session)):
 
 @router.put("/{id}")
 def updateFlashcard(id: int, flashcardDTO: FlashcardCreateDTO | None = None, sideFront: FlashcardSideCreateDTO | None = None, sideBack: FlashcardSideCreateDTO | None = None, user_id=Depends(authenticate()), db: Session = Depends(get_session)):
-    user_id = int(user_id)
     if not user_id:
         raise HTTPException(status_code=404, detail="User not found")
+    user_id = int(user_id)
     flashcard = db.query(Flashcard).filter(Flashcard.id == id).first()
     if not flashcard:
         raise HTTPException(status_code=404, detail="Flashcard not found")
@@ -93,9 +93,9 @@ def updateFlashcard(id: int, flashcardDTO: FlashcardCreateDTO | None = None, sid
 
 @router.delete("/{id}")
 def deleteFlashcard(id: int, user_id=Depends(authenticate()), db: Session = Depends(get_session)):
-    user_id = int(user_id)
     if not user_id:
         raise HTTPException(status_code=404, detail="User not found")
+    user_id = int(user_id)
     flashcard = db.query(Flashcard).filter(Flashcard.id == id).first()
     if not flashcard:
         raise HTTPException(status_code=404, detail="Flashcard not found")

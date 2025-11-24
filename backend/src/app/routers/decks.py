@@ -12,7 +12,7 @@ from app.tools.auth.authenticate import authenticate
 router = APIRouter(tags=["decks"])
 
 
-class DeckDTO(BaseModel):
+class DeckPostDTO(BaseModel):
     name: str
     description: Optional[str] = None
     public: Optional[bool] = False
@@ -29,24 +29,22 @@ class DeckUpdateDTO(BaseModel):
     tags: Optional[list[str]] = None
 
 
-from pydantic import BaseModel
-
-class FlashcardSchema(BaseModel):
+class FlashcardDTO(BaseModel):
     id: int
     name: str
     creation_date: datetime
 
     class Config:
         from_attributes = True
-        
 
-class DeckSchema(BaseModel):
+
+class DeckGetDTO(BaseModel):
     id: int
     name: str
     description: str | None
     public: bool
     has_media: bool
-    flashcards: list[FlashcardSchema]
+    flashcards: list[FlashcardDTO]
 
     class Config:
         from_attributes = True
@@ -54,7 +52,7 @@ class DeckSchema(BaseModel):
 
 @router.post("/decks")
 def createDeck(
-    deck_data: DeckDTO,
+    deck_data: DeckPostDTO,
     user_id: int = Depends(authenticate()),
     db: Session = Depends(get_session),
 ):
@@ -94,7 +92,7 @@ def createDeck(
     return deck
 
 
-@router.get("/decks", response_model=list[DeckSchema])
+@router.get("/decks", response_model=list[DeckGetDTO])
 def getDecks(
     user_id: int = Depends(authenticate()), db: Session = Depends(get_session)
 ):
@@ -106,7 +104,7 @@ def getDecks(
     return decks
 
 
-@router.get("/decks/{deck_id}")
+@router.get("/decks/{deck_id}", response_model=DeckGetDTO)
 def getDeck(
     deck_id: int,
     user_id: int = Depends(authenticate()),
@@ -148,7 +146,7 @@ def deleteDeck(
     return {"message": "Deck deleted successfully"}
 
 
-@router.put("/decks/{deck_id}")
+@router.put("/decks/{deck_id}", response_model=DeckGetDTO)
 def updateDeck(
     deck_id: int,
     deck_data: DeckUpdateDTO,

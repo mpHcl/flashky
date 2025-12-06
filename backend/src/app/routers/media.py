@@ -13,7 +13,7 @@ from app.database import get_session
 from app.tools.auth.authenticate import authenticate
 
 router = APIRouter(prefix="/media", tags=["media"])
-image_dir = "./images/"
+files_dir = "./files/"
 
 class MediaUpdateDTO(BaseModel):
     alt: Optional[str] = None
@@ -30,7 +30,7 @@ def uploadMedia(side_id: int, file: UploadFile, db: Session = Depends(get_sessio
     name_split = file.filename.split(".")
     filepath = str(uuid.uuid4()) + "." + name_split[len(name_split) - 1]
     f = file.file.read()
-    with open(image_dir + filepath, "wb") as new_file:
+    with open(files_dir + filepath, "wb") as new_file:
         new_file.write(f)
     media = Media(path=filepath, type=type, autoplay=False, flashcard_sides=[flashcard_side])
     db.add(media)
@@ -58,9 +58,9 @@ def getOneMediaFile(id: int, db: Session = Depends(get_session)):
     media = db.query(Media).filter(Media.id == id).first()
     if not media:
         raise HTTPException(status_code=404, detail="Media not found")
-    if not os.path.exists(image_dir + media.path):
+    if not os.path.exists(files_dir + media.path):
         raise HTTPException(status_code=404, detail="Filepath " + media.path + " does not exist")
-    return FileResponse(image_dir + media.path)
+    return FileResponse(files_dir + media.path)
 
 @router.put("/{id}")
 def updateMediaInfo(id: int, mediaDTO: MediaUpdateDTO, db: Session = Depends(get_session)):
@@ -80,10 +80,10 @@ def deleteMedia(id: int, db: Session = Depends(get_session)):
     media = db.query(Media).filter(Media.id == id).first()
     if not media:
         raise HTTPException(status_code=404, detail="Media not found")
-    if not os.path.exists(image_dir + media.path):
+    if not os.path.exists(files_dir + media.path):
         raise HTTPException(status_code=404, detail="Filepath " + media.path + " does not exist")
     else:
-        os.remove(image_dir + media.path)
+        os.remove(files_dir + media.path)
     db.delete(media)
     db.commit()
     return "Media deleted successfully"

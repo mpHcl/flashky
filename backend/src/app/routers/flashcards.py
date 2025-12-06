@@ -43,16 +43,14 @@ def createFlashcard(flashcardDTO: FlashcardCreateDTO, user_id=Depends(authentica
         raise HTTPException(status_code=404, detail="User not found")
     flashcardFront = FlashcardSide(content=flashcardDTO.front.content)
     flashcardBack = FlashcardSide(content=flashcardDTO.back.content)
+    flashcard = Flashcard(name=flashcardDTO.name, owner_id=user_id, owner=user, front_side=flashcardFront, back_side=flashcardBack)
     db.add(flashcardFront)
     db.add(flashcardBack)
-    db.commit()
-    db.refresh(flashcardFront)
-    db.refresh(flashcardBack)
-
-    flashcard = Flashcard(name=flashcardDTO.name, owner_id=user_id, owner=user, front_side_id=flashcardFront.id, front_side=flashcardFront, back_side_id=flashcardBack.id, back_side=flashcardBack)
     db.add(flashcard)
     db.commit()
     db.refresh(flashcard)
+    db.refresh(flashcardFront)
+    db.refresh(flashcardBack)
     dto = FlashcardGetDTO(id=flashcard.id, name=flashcard.name, creation_date=flashcard.creation_date, owner_id=flashcard.owner_id, front_side=flashcardFront, back_side=flashcardBack)
     # nie wypisało contentu stron, ale dodane poprawnie
     return dto
@@ -63,9 +61,7 @@ def getFlashcards(db: Session = Depends(get_session)):
     flashcards = db.query(Flashcard).all()
     dtos = list[FlashcardGetDTO]()
     for flashcard in flashcards:
-        front = db.query(FlashcardSide).filter(FlashcardSide.id == flashcard.front_side_id).first()
-        back = db.query(FlashcardSide).filter(FlashcardSide.id == flashcard.back_side_id).first()
-        dto = FlashcardGetDTO(id=flashcard.id, name=flashcard.name, creation_date=flashcard.creation_date, owner_id=flashcard.owner_id, front_side=front, back_side=back)
+        dto = FlashcardGetDTO(id=flashcard.id, name=flashcard.name, creation_date=flashcard.creation_date, owner_id=flashcard.owner_id, front_side=flashcard.front_side, back_side=flashcard.back_side)
         dtos.append(dto)
     return dtos
 
@@ -77,9 +73,7 @@ def getMyFlashcards(user_id=Depends(authenticate()), db: Session = Depends(get_s
     flashcards = db.query(Flashcard).filter(Flashcard.owner_id == user_id).all()
     dtos = list[FlashcardGetDTO]()
     for flashcard in flashcards:
-        front = db.query(FlashcardSide).filter(FlashcardSide.id == flashcard.front_side_id).first()
-        back = db.query(FlashcardSide).filter(FlashcardSide.id == flashcard.back_side_id).first()
-        dto = FlashcardGetDTO(id=flashcard.id, name=flashcard.name, creation_date=flashcard.creation_date, owner_id=flashcard.owner_id, front_side=front, back_side=back)
+        dto = FlashcardGetDTO(id=flashcard.id, name=flashcard.name, creation_date=flashcard.creation_date, owner_id=flashcard.owner_id, front_side=flashcard.front_side, back_side=flashcard.back_side)
         dtos.append(dto)
     return dtos
 
@@ -88,9 +82,7 @@ def getFlashcardById(id: int, db: Session = Depends(get_session)):
     flashcard = db.query(Flashcard).filter(Flashcard.id == id).first()
     if not flashcard:
         raise HTTPException(status_code=404, detail="Flashcard not found")
-    front = db.query(FlashcardSide).filter(FlashcardSide.id == flashcard.front_side_id).first()
-    back = db.query(FlashcardSide).filter(FlashcardSide.id == flashcard.back_side_id).first()
-    dto = FlashcardGetDTO(id=flashcard.id, name=flashcard.name, creation_date=flashcard.creation_date, owner_id=flashcard.owner_id, front_side=front, back_side=back)
+    dto = FlashcardGetDTO(id=flashcard.id, name=flashcard.name, creation_date=flashcard.creation_date, owner_id=flashcard.owner_id, front_side=flashcard.front_side, back_side=flashcard.back_side)
     return dto
 
 @router.put("/{id}", response_model=FlashcardGetDTO)
@@ -103,8 +95,8 @@ def updateFlashcard(id: int, flashcardDTO: FlashcardEditDTO, user_id=Depends(aut
         raise HTTPException(status_code=404, detail="Flashcard not found")
     if flashcard.owner_id != user_id:
         raise HTTPException(status_code=403, detail="You are not the owner of this flashcard")
-    front = db.query(FlashcardSide).filter(FlashcardSide.id == flashcard.front_side_id).first()
-    back = db.query(FlashcardSide).filter(FlashcardSide.id == flashcard.back_side_id).first()
+    front = flashcard.front_side
+    back = flashcard.back_side
     
     if flashcardDTO.name is not None:
         flashcard.name = flashcardDTO.name
@@ -115,9 +107,7 @@ def updateFlashcard(id: int, flashcardDTO: FlashcardEditDTO, user_id=Depends(aut
 
     db.commit()
     db.refresh(flashcard)
-    db.refresh(front)
-    db.refresh(back)
-    dto = FlashcardGetDTO(id=flashcard.id, name=flashcard.name, creation_date=flashcard.creation_date, owner_id=flashcard.owner_id, front_side=front, back_side=back)
+    dto = FlashcardGetDTO(id=flashcard.id, name=flashcard.name, creation_date=flashcard.creation_date, owner_id=flashcard.owner_id, front_side=flashcard.front_side, back_side=flashcard.back_side)
     return dto
 
 @router.delete("/{id}")

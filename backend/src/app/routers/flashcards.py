@@ -3,9 +3,9 @@ from typing import Optional
 from datetime import datetime
 from fastapi import HTTPException, Depends, APIRouter
 from pydantic import BaseModel
-from sqlmodel import Session
+from sqlmodel import Session, or_
 
-from ..models import Flashcard, FlashcardSide, User
+from ..models import Flashcard, FlashcardSide, User, Media
 from app.database import get_session
 from app.tools.auth.authenticate import authenticate
 
@@ -33,6 +33,11 @@ class FlashcardGetDTO(BaseModel):
     back_side: FlashcardSide
 
 
+class FlashcardAddMediaDTO(BaseModel):
+    media_id: int
+    side: str
+
+
 @router.post("/", response_model=FlashcardGetDTO)
 def createFlashcard(flashcardDTO: FlashcardCreateDTO, user_id=Depends(authenticate()), db: Session = Depends(get_session)):
     if not user_id:
@@ -54,6 +59,37 @@ def createFlashcard(flashcardDTO: FlashcardCreateDTO, user_id=Depends(authentica
     dto = FlashcardGetDTO(id=flashcard.id, name=flashcard.name, creation_date=flashcard.creation_date, owner_id=flashcard.owner_id, front_side=flashcardFront, back_side=flashcardBack)
     # nie wypisało contentu stron, ale dodane poprawnie
     return dto
+
+
+@router.post("/{id}/media")
+def addMediaToFlashcardSide(id: int, flashcardAddMediaDTO: FlashcardAddMediaDTO, user_id=Depends(authenticate()), db: Session = Depends(get_session)):
+    if flashcardAddMediaDTO.side not in ["front", "back"]:
+        raise HTTPException(status_code=400, detail="Side is not 'front' or 'back'")
+    if not user_id:
+        raise HTTPException(status_code=404, detail="User not found")
+    user_id = int(user_id)
+
+    flashcard = db.query(Flashcard).filter(Flashcard.id == id).first()
+    if not flashcard:
+        raise HTTPException(status_code=404, detail="Flashcard not found")
+    if flashcard.owner_id != user_id:
+        raise HTTPException(status_code=403, detail="You are not the owner of this flashcard")
+    
+    media = db.query(Media).filter(Media.id == flashcardAddMediaDTO.media_id).first()
+    if not media:
+        raise HTTPException(status_code=404, detail="Media not found")
+    flashcard_media = db.query(Flashcard).filter(or_(Flashcard.front_side_id == media.flashcard_sides[0].id, Flashcard.back_side_id == media.flashcard_sides[0].id)).first()
+    if (flashcard_media.owner_id != user_id):
+        raise HTTPException(status_code=403, detail="You are not the owner of this media's flashcards")
+    
+    if flashcardAddMediaDTO.side == "front":
+        media.flashcard_sides.append(flashcard.front_side)
+    else:
+        media.flashcard_sides.append(flashcard.back_side)
+    db.commit()
+    return "Media added successfully"
+    
+
 
 
 @router.get("/", response_model=list[FlashcardGetDTO])

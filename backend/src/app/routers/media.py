@@ -6,9 +6,9 @@ from datetime import datetime
 from fastapi import HTTPException, Depends, APIRouter, File, UploadFile
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from sqlmodel import Session
+from sqlmodel import Session, or_
 
-from ..models import Media, FlashcardSide, User, FlashcardSideMedia
+from ..models import Media, FlashcardSide, Flashcard, User, FlashcardSideMedia
 from app.database import get_session
 from app.tools.auth.authenticate import authenticate
 
@@ -20,10 +20,16 @@ class MediaUpdateDTO(BaseModel):
     autoplay: Optional[bool] = None
 
 @router.post("/{side_id}")
-def uploadMedia(side_id: int, file: UploadFile, db: Session = Depends(get_session)):
+def uploadMedia(side_id: int, file: UploadFile, user_id=Depends(authenticate()), db: Session = Depends(get_session)):
+    if not user_id:
+        raise HTTPException(status_code=404, detail="User not found")
+    user_id = int(user_id)
     flashcard_side = db.query(FlashcardSide).filter(FlashcardSide.id == side_id).first()
     if not flashcard_side:
         raise HTTPException(status_code=404, detail="Flashcard side not found")
+    flashcard = db.query(Flashcard).filter(or_(Flashcard.front_side_id == side_id, Flashcard.back_side_id == side_id)).first()
+    if (flashcard.owner_id != user_id):
+        raise HTTPException(status_code=403, detail="You are not the owner of this flashcard")
     type = file.content_type.split("/")[0]
     if type not in ["audio", "image", "video"]:
         raise HTTPException(status_code=415, detail="Unsupported media type")
@@ -63,23 +69,38 @@ def getOneMediaFile(id: int, db: Session = Depends(get_session)):
     return FileResponse(files_dir + media.path)
 
 @router.put("/{id}")
-def updateMediaInfo(id: int, mediaDTO: MediaUpdateDTO, db: Session = Depends(get_session)):
+def updateMediaInfo(id: int, mediaDTO: MediaUpdateDTO, user_id=Depends(authenticate()), db: Session = Depends(get_session)):
+    if not user_id:
+        raise HTTPException(status_code=404, detail="User not found")
+    user_id = int(user_id)
+
     media = db.query(Media).filter(Media.id == id).first()
     if not media:
         raise HTTPException(status_code=404, detail="Media not found")
+    
+    flashcard = db.query(Flashcard).filter(or_(Flashcard.front_side_id == media.flashcard_sides[0].id, Flashcard.back_side_id == media.flashcard_sides[0].id)).first()
+    if (flashcard.owner_id != user_id):
+        raise HTTPException(status_code=403, detail="You are not the owner of this media's flashcards")
     if media.type != "image" and mediaDTO.autoplay is not None:
         media.autoplay = mediaDTO.autoplay
     if mediaDTO.alt:
         media.alt = mediaDTO.alt
     db.commit()
     db.refresh(media)
-    return media
+    return media, user_id
 
 @router.delete("/{id}")
-def deleteMedia(id: int, db: Session = Depends(get_session)):
+def deleteMedia(id: int, user_id=Depends(authenticate()), db: Session = Depends(get_session)):
+    if not user_id:
+        raise HTTPException(status_code=404, detail="User not found")
+    user_id = int(user_id)
+
     media = db.query(Media).filter(Media.id == id).first()
     if not media:
         raise HTTPException(status_code=404, detail="Media not found")
+    flashcard = db.query(Flashcard).filter(or_(Flashcard.front_side_id == media.flashcard_sides[0].id, Flashcard.back_side_id == media.flashcard_sides[0].id)).first()
+    if (flashcard.owner_id != user_id):
+        raise HTTPException(status_code=403, detail="You are not the owner of this media's flashcards")
     if not os.path.exists(files_dir + media.path):
         raise HTTPException(status_code=404, detail="Filepath " + media.path + " does not exist")
     else:

@@ -3,9 +3,9 @@ from typing import Optional
 from datetime import datetime
 from fastapi import HTTPException, Depends, APIRouter
 from pydantic import BaseModel
-from sqlmodel import Session
+from sqlmodel import Session, or_
 
-from ..models import Flashcard, FlashcardSide, User
+from ..models import Flashcard, FlashcardSide, User, Media
 from app.database import get_session
 from app.tools.auth.authenticate import authenticate
 
@@ -16,57 +16,113 @@ class FlashcardSideCreateDTO(BaseModel):
 
 class FlashcardCreateDTO(BaseModel):
     name: str
+    front: FlashcardSideCreateDTO
+    back: FlashcardSideCreateDTO
+
+class FlashcardEditDTO(BaseModel):
+    name: Optional[str] = None
+    front: Optional[FlashcardSideCreateDTO] = None
+    back: Optional[FlashcardSideCreateDTO] = None
+
+class FlashcardGetDTO(BaseModel):
+    id: int
+    name: str
+    creation_date: datetime
+    owner_id: int
+    front_side: FlashcardSide
+    back_side: FlashcardSide
 
 
-@router.post("/")
-def createFlashcard(flashcardDTO: FlashcardCreateDTO, sideFront: FlashcardSideCreateDTO, sideBack: FlashcardSideCreateDTO, user_id=Depends(authenticate()), db: Session = Depends(get_session)):
+class FlashcardAddMediaDTO(BaseModel):
+    media_id: int
+    side: str
+
+
+@router.post("/", response_model=FlashcardGetDTO)
+def createFlashcard(flashcardDTO: FlashcardCreateDTO, user_id=Depends(authenticate()), db: Session = Depends(get_session)):
     if not user_id:
         raise HTTPException(status_code=404, detail="User not found")
     user_id = int(user_id)
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    flashcardFront = FlashcardSide(content=sideFront.content)
-    flashcardBack = FlashcardSide(content=sideBack.content)
+    flashcardFront = FlashcardSide(content=flashcardDTO.front.content)
+    flashcardBack = FlashcardSide(content=flashcardDTO.back.content)
+    flashcard = Flashcard(name=flashcardDTO.name, owner_id=user_id, owner=user, front_side=flashcardFront, back_side=flashcardBack)
     db.add(flashcardFront)
     db.add(flashcardBack)
-    db.commit()
-    db.refresh(flashcardFront)
-    db.refresh(flashcardBack)
-
-    flashcard = Flashcard(name=flashcardDTO.name, owner_id=user_id, owner=user, front_side_id=flashcardFront.id, front_side=flashcardFront, back_side_id=flashcardBack.id, back_side=flashcardBack)
     db.add(flashcard)
     db.commit()
     db.refresh(flashcard)
+    db.refresh(flashcardFront)
+    db.refresh(flashcardBack)
+    dto = FlashcardGetDTO(id=flashcard.id, name=flashcard.name, creation_date=flashcard.creation_date, owner_id=flashcard.owner_id, front_side=flashcardFront, back_side=flashcardBack)
     # nie wypisało contentu stron, ale dodane poprawnie
-    return {"flashcard": flashcard, "front": flashcardFront, "back": flashcardBack}
+    return dto
 
 
-@router.get("/")
+@router.post("/{id}/media")
+def addMediaToFlashcardSide(id: int, flashcardAddMediaDTO: FlashcardAddMediaDTO, user_id=Depends(authenticate()), db: Session = Depends(get_session)):
+    if flashcardAddMediaDTO.side not in ["front", "back"]:
+        raise HTTPException(status_code=400, detail="Side is not 'front' or 'back'")
+    if not user_id:
+        raise HTTPException(status_code=404, detail="User not found")
+    user_id = int(user_id)
+
+    flashcard = db.query(Flashcard).filter(Flashcard.id == id).first()
+    if not flashcard:
+        raise HTTPException(status_code=404, detail="Flashcard not found")
+    if flashcard.owner_id != user_id:
+        raise HTTPException(status_code=403, detail="You are not the owner of this flashcard")
+    
+    media = db.query(Media).filter(Media.id == flashcardAddMediaDTO.media_id).first()
+    if not media:
+        raise HTTPException(status_code=404, detail="Media not found")
+    flashcard_media = db.query(Flashcard).filter(or_(Flashcard.front_side_id == media.flashcard_sides[0].id, Flashcard.back_side_id == media.flashcard_sides[0].id)).first()
+    if (flashcard_media.owner_id != user_id):
+        raise HTTPException(status_code=403, detail="You are not the owner of this media's flashcards")
+    
+    if flashcardAddMediaDTO.side == "front":
+        media.flashcard_sides.append(flashcard.front_side)
+    else:
+        media.flashcard_sides.append(flashcard.back_side)
+    db.commit()
+    return "Media added successfully"
+    
+
+
+
+@router.get("/", response_model=list[FlashcardGetDTO])
 def getFlashcards(db: Session = Depends(get_session)):
     flashcards = db.query(Flashcard).all()
-    sides = db.query(FlashcardSide).all()
-    return {"flashcards": flashcards, "sides": sides}
+    dtos = list[FlashcardGetDTO]()
+    for flashcard in flashcards:
+        dto = FlashcardGetDTO(id=flashcard.id, name=flashcard.name, creation_date=flashcard.creation_date, owner_id=flashcard.owner_id, front_side=flashcard.front_side, back_side=flashcard.back_side)
+        dtos.append(dto)
+    return dtos
 
-@router.get("/myflashcards")
+@router.get("/myflashcards", response_model=list[FlashcardGetDTO])
 def getMyFlashcards(user_id=Depends(authenticate()), db: Session = Depends(get_session)):
     if not user_id:
         raise HTTPException(status_code=404, detail="User not found")
     user_id = int(user_id)
     flashcards = db.query(Flashcard).filter(Flashcard.owner_id == user_id).all()
-    return flashcards
+    dtos = list[FlashcardGetDTO]()
+    for flashcard in flashcards:
+        dto = FlashcardGetDTO(id=flashcard.id, name=flashcard.name, creation_date=flashcard.creation_date, owner_id=flashcard.owner_id, front_side=flashcard.front_side, back_side=flashcard.back_side)
+        dtos.append(dto)
+    return dtos
 
-@router.get("/{id}")
+@router.get("/{id}", response_model=FlashcardGetDTO)
 def getFlashcardById(id: int, db: Session = Depends(get_session)):
     flashcard = db.query(Flashcard).filter(Flashcard.id == id).first()
     if not flashcard:
         raise HTTPException(status_code=404, detail="Flashcard not found")
-    front = db.query(FlashcardSide).filter(FlashcardSide.id == flashcard.front_side_id).first()
-    back = db.query(FlashcardSide).filter(FlashcardSide.id == flashcard.back_side_id).first()
-    return {"flashcard": flashcard, "front": front, "back": back}
+    dto = FlashcardGetDTO(id=flashcard.id, name=flashcard.name, creation_date=flashcard.creation_date, owner_id=flashcard.owner_id, front_side=flashcard.front_side, back_side=flashcard.back_side)
+    return dto
 
-@router.put("/{id}")
-def updateFlashcard(id: int, flashcardDTO: FlashcardCreateDTO | None = None, sideFront: FlashcardSideCreateDTO | None = None, sideBack: FlashcardSideCreateDTO | None = None, user_id=Depends(authenticate()), db: Session = Depends(get_session)):
+@router.put("/{id}", response_model=FlashcardGetDTO)
+def updateFlashcard(id: int, flashcardDTO: FlashcardEditDTO, user_id=Depends(authenticate()), db: Session = Depends(get_session)):
     if not user_id:
         raise HTTPException(status_code=404, detail="User not found")
     user_id = int(user_id)
@@ -75,21 +131,20 @@ def updateFlashcard(id: int, flashcardDTO: FlashcardCreateDTO | None = None, sid
         raise HTTPException(status_code=404, detail="Flashcard not found")
     if flashcard.owner_id != user_id:
         raise HTTPException(status_code=403, detail="You are not the owner of this flashcard")
-    front = db.query(FlashcardSide).filter(FlashcardSide.id == flashcard.front_side_id).first()
-    back = db.query(FlashcardSide).filter(FlashcardSide.id == flashcard.back_side_id).first()
+    front = flashcard.front_side
+    back = flashcard.back_side
     
-    if flashcardDTO is not None:
+    if flashcardDTO.name is not None:
         flashcard.name = flashcardDTO.name
-    if sideFront is not None and sideFront.content is not None:
-        front.content = sideFront.content
-    if sideBack is not None and sideBack.content is not None:
-        back.content = sideBack.content
+    if flashcardDTO.front is not None and flashcardDTO.front.content is not None:
+        front.content = flashcardDTO.front.content
+    if flashcardDTO.back is not None and flashcardDTO.back.content is not None:
+        back.content = flashcardDTO.back.content
 
     db.commit()
     db.refresh(flashcard)
-    db.refresh(front)
-    db.refresh(back)
-    return {"flashcard": flashcard, "front": front, "back": back}
+    dto = FlashcardGetDTO(id=flashcard.id, name=flashcard.name, creation_date=flashcard.creation_date, owner_id=flashcard.owner_id, front_side=flashcard.front_side, back_side=flashcard.back_side)
+    return dto
 
 @router.delete("/{id}")
 def deleteFlashcard(id: int, user_id=Depends(authenticate()), db: Session = Depends(get_session)):

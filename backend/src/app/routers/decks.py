@@ -9,8 +9,7 @@ from ..models import Deck, Flashcard
 from app.database import get_session
 from app.tools.auth.authenticate import authenticate
 
-router = APIRouter(tags=["decks"])
-
+router = APIRouter(prefix="/decks",tags=["decks"])
 
 class DeckPostDTO(BaseModel):
     name: str
@@ -50,7 +49,7 @@ class DeckGetDTO(BaseModel):
         from_attributes = True
 
 
-@router.post("/decks")
+@router.post("/")
 def createDeck(
     deck_data: DeckPostDTO,
     user_id: int = Depends(authenticate()),
@@ -60,7 +59,6 @@ def createDeck(
     if not user_id:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # TODO: CHECK IF WORKS AFTER IMPLEMENTATION OF FLASHCARDS
     flashcards = getFlashcardsByIds(deck_data.flashcards_ids, db)
 
     has_media = False
@@ -85,14 +83,13 @@ def createDeck(
         last_edit_date=datetime.now(),
     )
 
-    print(len(deck.flashcards))
     db.add(deck)
     db.commit()
     db.refresh(deck)
     return deck
 
 
-@router.get("/decks", response_model=list[DeckGetDTO])
+@router.get("/", response_model=list[DeckGetDTO])
 def getDecks(
     user_id: int = Depends(authenticate()), db: Session = Depends(get_session)
 ):
@@ -104,7 +101,18 @@ def getDecks(
     return decks
 
 
-@router.get("/decks/{deck_id}", response_model=DeckGetDTO)
+@router.get("/mydecks")
+def getMyDecks(
+    user_id=Depends(authenticate()), db: Session = Depends(get_session)
+):
+    if not user_id:
+        raise HTTPException(status_code=404, detail="User not found")
+    user_id = int(user_id)
+    decks = db.query(Deck).filter(Deck.owner_id == user_id).all()
+    return decks
+
+
+@router.get("/{deck_id}", response_model=DeckGetDTO)
 def getDeck(
     deck_id: int,
     user_id: int = Depends(authenticate()),
@@ -121,7 +129,7 @@ def getDeck(
     return deck
 
 
-@router.delete("/decks/{deck_id}")
+@router.delete("/{deck_id}")
 def deleteDeck(
     deck_id: int,
     user_id: int = Depends(authenticate()),
@@ -146,7 +154,7 @@ def deleteDeck(
     return {"message": "Deck deleted successfully"}
 
 
-@router.put("/decks/{deck_id}", response_model=DeckGetDTO)
+@router.put("/{deck_id}", response_model=DeckGetDTO)
 def updateDeck(
     deck_id: int,
     deck_data: DeckUpdateDTO,

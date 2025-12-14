@@ -14,6 +14,7 @@ app = FastAPI()
 app.include_router(authentication.router)
 app.include_router(decks.router)
 app.include_router(flashcards.router)
+app.include_router(media.router)
 
 app.add_middleware(
     CORSMiddleware,

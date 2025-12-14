@@ -11,8 +11,10 @@ from app.tools.auth.authenticate import authenticate
 
 router = APIRouter(prefix="/flashcards", tags=["flashcards"])
 
+
 class FlashcardSideCreateDTO(BaseModel):
     content: Optional[str] = None
+
 
 class FlashcardCreateDTO(BaseModel):
     name: str
@@ -146,8 +148,11 @@ def updateFlashcard(id: int, flashcardDTO: FlashcardEditDTO, user_id=Depends(aut
     dto = FlashcardGetDTO(id=flashcard.id, name=flashcard.name, creation_date=flashcard.creation_date, owner_id=flashcard.owner_id, front_side=flashcard.front_side, back_side=flashcard.back_side)
     return dto
 
+
 @router.delete("/{id}")
-def deleteFlashcard(id: int, user_id=Depends(authenticate()), db: Session = Depends(get_session)):
+def deleteFlashcard(
+    id: int, user_id=Depends(authenticate()), db: Session = Depends(get_session)
+):
     if not user_id:
         raise HTTPException(status_code=404, detail="User not found")
     user_id = int(user_id)
@@ -155,9 +160,10 @@ def deleteFlashcard(id: int, user_id=Depends(authenticate()), db: Session = Depe
     if not flashcard:
         raise HTTPException(status_code=404, detail="Flashcard not found")
     if flashcard.owner_id != user_id:
-        raise HTTPException(status_code=403, detail="You are not the owner of this flashcard")
-    
+        raise HTTPException(
+            status_code=403, detail="You are not the owner of this flashcard"
+        )
+
     db.delete(flashcard)
     db.commit()
     return "Flashcard deleted successfully"
-

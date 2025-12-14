@@ -184,7 +184,6 @@ def updateDeck(
     deck.description = deck_data.description
     deck.public = deck_data.public
     deck.last_edit_date = datetime.now()
-
     db.commit()
     db.refresh(deck)
     return deck

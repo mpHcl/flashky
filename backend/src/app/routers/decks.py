@@ -61,12 +61,7 @@ def createDeck(
 
     flashcards = getFlashcardsByIds(deck_data.flashcards_ids, db)
 
-    has_media = False
-    for flashcard in flashcards:
-        media = flashcard.front_side.media or flashcard.back_side.media
-        if media:
-            has_media = True
-            break
+    has_media = any(flashcard.front_side.media or flashcard.back_side.media for flashcard in flashcards)
 
     # TODO: HANDLE TAGS (NOT IMPLEMENTED YET)
     if deck_data.tags:

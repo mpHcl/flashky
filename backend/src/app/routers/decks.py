@@ -1,15 +1,16 @@
 from typing import Optional
 
 from datetime import datetime
-from fastapi import HTTPException, Depends, APIRouter
+from fastapi import HTTPException, Depends, APIRouter, Query
 from pydantic import BaseModel
 from sqlmodel import Session
 
-from ..models import Deck, Flashcard
+from ..models import Deck, Flashcard, User
 from app.database import get_session
 from app.tools.auth.authenticate import authenticate
 
-router = APIRouter(prefix="/decks",tags=["decks"])
+router = APIRouter(prefix="/decks", tags=["decks"])
+
 
 class DeckPostDTO(BaseModel):
     name: str
@@ -49,6 +50,11 @@ class DeckGetDTO(BaseModel):
         from_attributes = True
 
 
+class DeckGetAllDTO(BaseModel):
+    total_number: int
+    decks: list[DeckGetDTO]
+
+
 @router.post("/")
 def createDeck(
     deck_data: DeckPostDTO,
@@ -61,7 +67,10 @@ def createDeck(
 
     flashcards = getFlashcardsByIds(deck_data.flashcards_ids, db)
 
-    has_media = any(flashcard.front_side.media or flashcard.back_side.media for flashcard in flashcards)
+    has_media = any(
+        flashcard.front_side.media or flashcard.back_side.media
+        for flashcard in flashcards
+    )
 
     # TODO: HANDLE TAGS (NOT IMPLEMENTED YET)
     if deck_data.tags:
@@ -84,22 +93,51 @@ def createDeck(
     return deck
 
 
-@router.get("/", response_model=list[DeckGetDTO])
-def getDecks(
-    user_id: int = Depends(authenticate()), db: Session = Depends(get_session)
+@router.get("/", response_model=DeckGetAllDTO)
+def get_decks(
+    # auth
+    user_id: int = Depends(authenticate()),
+    # query params
+    q: Optional[str] = Query(None, description="Search query"),
+    owner: Optional[str] = Query(None, description="Owner username or id"),
+    tags: Optional[str] = Query(None, description="Comma-separated tags"),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100),
+    sort: Optional[str] = Query("created_at"),
+    # db
+    db: Session = Depends(get_session),
 ):
     user_id = int(user_id)
     if not user_id:
         raise HTTPException(status_code=404, detail="User not found")
 
-    decks = db.query(Deck).all()
-    return decks
+    query = db.query(Deck)
+
+    if q:
+        query = query.filter(Deck.name.ilike(f"%{q}%"))
+
+    if owner:
+        query = query.join(Deck.owner).filter(User.username == owner)
+
+    # TODO not working yet
+    if tags:
+        tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+        if tag_list:
+            query = query.filter(Deck.tags.overlap(tag_list))
+
+    total_number = query.count()
+
+    if sort == 1:
+        query = query.order_by(Deck.created_at.desc())
+
+    offset = (page - 1) * page_size
+    decks = query.offset(offset).limit(page_size).all()
+
+    return {"total_number": total_number, "decks": decks}
 
 
 @router.get("/mydecks")
-def getMyDecks(
-    user_id=Depends(authenticate()), db: Session = Depends(get_session)
-):
+def getMyDecks(user_id=Depends(authenticate()), db: Session = Depends(get_session)):
     if not user_id:
         raise HTTPException(status_code=404, detail="User not found")
     user_id = int(user_id)

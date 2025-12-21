@@ -32,19 +32,39 @@ export default function SearchClient({ query }: { query: string }) {
 
     const fetchData = async () => {
       setLoading(true);
-      //const res = await fetch(buildUrl());
-      //const data = await res.json();
+      const myHeaders = new Headers();
+      let token = localStorage.getItem("token")
+      myHeaders.append("Content-Type", "application/json");
+      myHeaders.append("Authorization", `Bearer ${token}`);
 
-      //setDecks(data.items);
-      //setTotal(data.total);
+      const requestOptions = {
+        method: "GET",
+        headers: myHeaders,
+      };
+
+      try {
+        const response = await fetch("http://127.0.0.1:8000" + buildUrl(), requestOptions);
+        const result = await response.json();
+
+        setDecks(result.decks);
+        setTotal(result.total_number);
+        console.log(total)
+      }
+      catch (error) {
+        console.error(error);
+      }
+
       setLoading(false);
     };
 
     fetchData();
   }, [query, owner, tags, page, sort]);
 
+  useEffect(() => {
+    setPage(0);
+  }, [query, owner, tags, sort]);
 
-   const addTag = () => {
+  const addTag = () => {
     const tag = tagsInput.trim();
     if (!tag || tags.includes(tag)) return;
 
@@ -69,8 +89,8 @@ export default function SearchClient({ query }: { query: string }) {
     return `/decks?q=${encodeURIComponent(query)}` +
       `${(owner !== '' ? "&owner=" + encodeURIComponent(owner) : "")}` +
       `${(tags.length > 0 ? "&tags=" + encodeURIComponent(tags.join(",")) : "")}` +
-      `&page=${encodeURIComponent(page)}` +
-      `&pageSize=${encodeURIComponent(pageSize)}` +
+      `&page=${encodeURIComponent(page + 1)}` +
+      `&page_size=${encodeURIComponent(pageSize)}` +
       `&sort=${encodeURIComponent(sort)}`;
   }
 
@@ -133,8 +153,11 @@ export default function SearchClient({ query }: { query: string }) {
     {loading ? (
       <Typography>Loading…</Typography>
     ) : (
-      <Box component="pre">{buildUrl()}</Box>
-    )}
+      <><Box component="pre">{buildUrl()}</Box>
+        {decks?.map((e, i) => (<p>{e.name}</p>))}
+      </>
+    )
+    }
 
     {/* Pagination */}
     <Stack direction="row" justifyContent="space-between" alignItems="center">

@@ -15,16 +15,16 @@ export const metadata: Metadata = {
 
 const routes = [
   {name: "Home", route: "/"},
-  {name: "Profile", route: "/profile"},
   {name: "My Decks", route: "/mydecks"},
   {name: "My Flashky", route: "/myflashky"},
+  {name: "Account", route: "/profile", subroutes:[
+    {name: "Profile", route: "/profile"},
+    {name: "Settings", route: "/profile/settings"},
+    {name: "Logout", route: "/logout"},
+  ]},
 ];
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children, }: Readonly<{ children: React.ReactNode;}>) {
   return (
     <html lang="en">
       <body>

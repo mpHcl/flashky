@@ -1,32 +1,54 @@
 "use client";
-import React, { useState } from "react";
-import { Box, Stack, Button } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Box, Stack, Button, useRadioGroup } from "@mui/material";
 import ProfileTile from "../components/profileTile";
 import ConfirmDialog from "../components/confirmDialog";
 import ChangePasswordDialog from "./changePasswordDialog";
+import { fetchAuthDELETE, fetchAuthGET, fetchAuthPUT, OK } from "../lib/fetch";
+import { logoutFetch } from "../(auth)/lib/fetch";
+import { useRouter } from "next/navigation";
+import { error } from "console";
 
 export default function Profile() {
-  // Mock profile data
-  const [profile, setProfile] = useState({
-    username: "John Doe",
-    email: "john.doe@example.com",
-    avatar: "https://i.pravatar.cc/150?img=3",
-    bio: "Full-stack developer and tech enthusiast.",
-    creation_date: "12-05-2020",
-    verified: true,
-    active: true,
-  });
-
+  const router = useRouter();
   const [editable, setEditable] = useState(false);
   const [wasChange, setWasChange] = useState(false);
   const [saveConfirmOpen, setSaveConfirmOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [profile, setProfile] = useState({
+    username: "Loading...",
+    email: "Loading...",
+    avatar: "",
+    description: "Loading...",
+    creation_date: "Loading...",
+    verified: false,
+    active: false,
+  });
+
+  const loadProfile = () => {
+    const onSuccess = async (response: Response) => {
+      const result = await response.json();
+      if (result.description === null)
+        result.description = "";
+      
+      setProfile(result);
+    }
+
+    fetchAuthGET("users/me", OK, onSuccess);
+    setWasChange(false);
+  }
+
+  useEffect(() => {
+    loadProfile();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    if (value !== profile[name as keyof typeof profile])
+    console.log(name, value);
+    if (value !== profile[name as keyof typeof profile]) 
       setWasChange(true);
+
     setProfile((prev) => ({
       ...prev,
       [name]: value,
@@ -41,29 +63,68 @@ export default function Profile() {
   };
 
   const saveChanges = () => {
-    // Implement save logic here
+    const data = {
+      username: profile.username,
+      email: profile.email,
+      description: profile.description,
+    }
+
+    const onSuccess = async (response: Response) => {
+      const result = await response.json();
+      setProfile(result);
+    }
+    fetchAuthPUT("users/me", OK, data, onSuccess);
 
     setSaveConfirmOpen(false);
   };
 
   const deleteProfile = () => {
-    // Implement delete logic here
+    const onSuccess = async (response: Response) => {
+      logoutFetch(router);
+    }
+
+    const onFail = async (response: Response) => {
+      alert("Failed to delete profile");
+    }
+    
+    fetchAuthDELETE("users/me", OK, onSuccess, onFail);
 
     setDeleteConfirmOpen(false);
   };
 
   const changePassword = (oldPassword: string, newPassword: string) => {
-    // Implement change password logic here
+    const onSuccess = async (response: Response) => {
+      alert("Password changed successfully");
+    }
+
+    const onFail = async (response: Response) => {
+      await response.json().then(results => {
+        var errorsString = "";
+        if (results.detail.errors !== undefined) {
+          results.detail.errors.forEach((error: string) => {
+            errorsString += error + "\n";
+          });
+        }
+        else {
+          errorsString = results.detail;
+        }
+
+        alert("Failed to change password\nDetails:\n" + errorsString);
+      });
+    }
+
+    const data = { old_password: oldPassword.trim(), new_password: newPassword.trim() };
+    fetchAuthPUT("users/change_password", OK, data, onSuccess, onFail);
 
     setChangePasswordOpen(false);
   };
 
   return (
     <>
-      <ConfirmDialog open={saveConfirmOpen}   action="Are you sure you want to save your changes?"   onYes={() => {saveChanges()}}   onNo={() => setSaveConfirmOpen(false)} />
-      <ConfirmDialog open={deleteConfirmOpen} action="Are you sure you want to delete your account?" onYes={() => {deleteProfile()}} onNo={() => setDeleteConfirmOpen(false)} />
-      <ChangePasswordDialog open={changePasswordOpen} onConfirm={(data) => {changePassword(data.oldPassword, data.newPassword)}} onCancel={() => setChangePasswordOpen(false)} />
-      <Box minHeight={"80vh"} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+      <ConfirmDialog open={saveConfirmOpen} action="Are you sure you want to save your changes?" onYes={() => { saveChanges() }} onNo={() => {loadProfile(); setSaveConfirmOpen(false)}} />
+      <ConfirmDialog open={deleteConfirmOpen} action="Are you sure you want to delete your account?" onYes={() => { deleteProfile() }} onNo={() => setDeleteConfirmOpen(false)} />
+      <ChangePasswordDialog open={changePasswordOpen} onConfirm={(data) => { changePassword(data.oldPassword, data.newPassword) }} onCancel={() => setChangePasswordOpen(false)} />
+      <Box minHeight={"80vh"} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <Stack spacing={5} justifyContent="center" alignItems="center">
           <ProfileTile profileData={profile} handleChange={handleChange} editable={editable} />
 

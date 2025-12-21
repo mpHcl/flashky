@@ -206,6 +206,7 @@ export default function NewFlashky() {
       URL.revokeObjectURL(prev[index].url);
       return prev.filter((_, i) => i !== index);
     });
+    setFrontMediaFiles(prev => prev.filter((_, i) => i !== index));
   }, []);
 
   const handleRemoveBackMedia = React.useCallback((index: number) => {
@@ -213,6 +214,7 @@ export default function NewFlashky() {
       URL.revokeObjectURL(prev[index].url);
       return prev.filter((_, i) => i !== index);
     });
+    setBackMediaFiles(prev => prev.filter((_, i) => i !== index));
   }, []);
 
   React.useEffect(() => {

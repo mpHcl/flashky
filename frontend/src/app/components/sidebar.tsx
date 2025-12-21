@@ -1,15 +1,17 @@
-import { Drawer, List, ListItem, ListItemText} from '@mui/material';
+import { Drawer, List, ListItem, ListItemButton, ListItemText} from '@mui/material';
 import Typography from '@mui/material/Typography';
+import SidebarItemSubmenu from './sidebarItemSubmenu';
 
 const drawerWidth = 200;
 
 interface Route {
   name: string;
   route: string;
+  subroutes?: Route[];
 }
 
 interface Routes {
-    routes: Route[];
+  routes: Route[];
 }
 
 export default function Sidebar({routes}: Routes) {
@@ -24,14 +26,26 @@ export default function Sidebar({routes}: Routes) {
             boxSizing: 'border-box',
             paddingTop: 2,
           },
+          height: '100vh',
         }}
       >
-        <List>
-          {routes.map((el) => (
-            <ListItem button='true' key={el.name} component="a" href={el.route}>
-              <ListItemText disableTypography><Typography color={"primary.contrastText"}>{el.name}</Typography></ListItemText>
-            </ListItem>
-          ))}
+        <List sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+          {routes.map((el) => {
+            return el.subroutes ? <SidebarItemSubmenu routeParam={el} key={el.name} /> : 
+            (
+              <ListItem key={el.name} disablePadding>
+                <ListItemButton
+                component="a"
+                href={el.route}>
+                <ListItemText disableTypography>
+                  <Typography color="primary.contrastText">
+                    {el.name}
+                  </Typography>
+                </ListItemText>
+              </ListItemButton>
+              </ListItem>
+            );
+          })}
         </List>
       </Drawer>
   );

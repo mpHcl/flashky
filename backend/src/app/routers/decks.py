@@ -3,7 +3,7 @@ from typing import Optional
 from datetime import datetime
 from fastapi import HTTPException, Depends, APIRouter, Query
 from pydantic import BaseModel
-from sqlmodel import Session
+from sqlmodel import Session, or_
 
 from ..models import Deck, Flashcard, User
 from app.database import get_session
@@ -112,6 +112,7 @@ def get_decks(
         raise HTTPException(status_code=404, detail="User not found")
 
     query = db.query(Deck)
+    query = query.filter(or_(Deck.public, Deck.owner_id == user_id))
 
     if q:
         query = query.filter(Deck.name.ilike(f"%{q}%"))

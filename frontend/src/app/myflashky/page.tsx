@@ -1,11 +1,7 @@
 "use client";
 import { useEffect, useState, Suspense } from "react";
 import Box from '@mui/material/Box';
-import List from '@mui/material/List';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
 import CrudList from "../components/crudlist";
-import { ListElement } from "../components/crudlist";
 
 
 export default function MyFlashky()
@@ -36,7 +32,7 @@ export default function MyFlashky()
 
     return (<Box>
         <Suspense fallback={<div>Loading...</div>}>
-            <CrudList data={data.map((el) => ({id:el.id, name:el.name}))}></CrudList>
+            <CrudList data={data.map((el) => ({id:el.id, name:el.name}))} showUpdateDeleteBtns={true} path="flashky"></CrudList>
         </Suspense>
         
     </Box>);

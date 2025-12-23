@@ -1,6 +1,5 @@
-"use client";
-import React, { ChangeEventHandler, useState } from "react";
-import { Box, Typography, Avatar, Stack, Paper, Grid, Button, TextField } from "@mui/material";
+import React, { ChangeEventHandler } from "react";
+import { Box, Avatar, Stack, Paper, TextField } from "@mui/material";
 
 interface ProfileData {
   username: string;
@@ -26,12 +25,13 @@ export default function ProfileTile({ profileData, handleChange, editable }: Pro
         elevation={3}
         sx={{
           maxWidth: 800,
+          minWidth: 500,
           margin: "auto",
           padding: 3,
           borderRadius: 2,
         }}
       >
-        <Stack direction="column" alignItems="center" spacing={1}>
+        <Stack direction="column" alignItems="center" spacing={3}>
           <Avatar
             src={profileData.avatar || ""}
             alt={profileData.username}

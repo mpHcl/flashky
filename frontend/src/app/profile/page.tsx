@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Box, Typography, Avatar, Stack, Paper, Grid, Button } from "@mui/material";
+import { Box, Stack, Button } from "@mui/material";
 import ProfileTile from "../components/profileTile";
 import ConfirmDialog from "../components/confirmDialog";
 import ChangePasswordDialog from "./changePasswordDialog";
@@ -63,37 +63,35 @@ export default function Profile() {
       <ConfirmDialog open={saveConfirmOpen}   action="Are you sure you want to save your changes?"   onYes={() => {saveChanges()}}   onNo={() => setSaveConfirmOpen(false)} />
       <ConfirmDialog open={deleteConfirmOpen} action="Are you sure you want to delete your account?" onYes={() => {deleteProfile()}} onNo={() => setDeleteConfirmOpen(false)} />
       <ChangePasswordDialog open={changePasswordOpen} onConfirm={(data) => {changePassword(data.oldPassword, data.newPassword)}} onCancel={() => setChangePasswordOpen(false)} />
-      <Grid container spacing={2}>
-        <Grid size={{ xs: 12, sm: 6 }} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'left', mt: 10 }}>
-          <Stack spacing={5} justifyContent="center" alignItems="left" sx={{ width: '100%' }}>
-            <ProfileTile profileData={profile} handleChange={handleChange} editable={editable} />
+      <Box minHeight={"80vh"} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+        <Stack spacing={5} justifyContent="center" alignItems="center">
+          <ProfileTile profileData={profile} handleChange={handleChange} editable={editable} />
 
-            <Box width="100%" justifyContent="center" alignItems="center">
-              <Stack direction="row" spacing={2} justifyContent="center" alignItems="center">
-                <Button
-                  variant="outlined"
-                  color="error"
-                  onClick={() => setDeleteConfirmOpen(true)}
-                >
-                  Delete Account
-                </Button>
-                <Button
-                  variant="contained"
-                  onClick={() => handleEditClick()}
-                >
-                  {editable ? "Finish Edit" : "Edit Profile"}
-                </Button>
-                <Button
-                  variant="contained"
-                  onClick={() => setChangePasswordOpen(true)}
-                >
-                  Change Password
-                </Button>
-              </Stack>
-            </Box>
-          </Stack>
-        </Grid>
-      </Grid>
+          <Box width="100%" justifyContent="center" alignItems="center">
+            <Stack direction="row" spacing={2} justifyContent="center" alignItems="center">
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={() => setDeleteConfirmOpen(true)}
+              >
+                Delete Account
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => handleEditClick()}
+              >
+                {editable ? "Finish Edit" : "Edit Profile"}
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => setChangePasswordOpen(true)}
+              >
+                Change Password
+              </Button>
+            </Stack>
+          </Box>
+        </Stack>
+      </Box>
     </>
   );
 };

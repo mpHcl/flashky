@@ -1,6 +1,6 @@
 "use client";
-import React, { useState } from "react";
-import { Box, Typography, Avatar, Stack, Paper, Grid, Button } from "@mui/material";
+import React, { ChangeEventHandler, useState } from "react";
+import { Box, Typography, Avatar, Stack, Paper, Grid, Button, TextField } from "@mui/material";
 
 interface ProfileData {
   username: string;
@@ -14,9 +14,11 @@ interface ProfileData {
 
 interface ProfileProps {
   profileData: ProfileData;
+  handleChange: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>;
+  editable: boolean;
 }
 
-export default function ProfileTile({ profileData }: ProfileProps) {
+export default function ProfileTile({ profileData, handleChange, editable }: ProfileProps) {
 
   return (
     <Box>
@@ -29,41 +31,65 @@ export default function ProfileTile({ profileData }: ProfileProps) {
           borderRadius: 2,
         }}
       >
-        <Stack direction="column" alignItems="left" spacing={1}>
-          <Box alignSelf={"center"}>
-            <Avatar
-              src={profileData.avatar || ""}
-              alt={profileData.username}
-              sx={{ width: 120, height: 120 }}
-            />
-          </Box>
-          {profileData.bio && (
-            <Box>
-              <Typography variant="subtitle2" color="textSecondary">
-                Bio
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{ textAlign: "center" }}
-              >
-                {profileData.bio}
-              </Typography>
-            </Box>
-          )}
-          <Typography variant="subtitle2" color="textSecondary">
-            Username
-          </Typography>
-          <Typography variant="body1">{profileData.username}</Typography>
+        <Stack direction="column" alignItems="center" spacing={1}>
+          <Avatar
+            src={profileData.avatar || ""}
+            alt={profileData.username}
+            sx={{ width: 120, height: 120 }}
+          />
+          
+          <TextField
+            fullWidth
+            label="Bio"
+            name="bio"
+            value={profileData.bio}
+            onChange={handleChange}
+            slotProps={{
+              input: {
+                readOnly: !editable
+              }
+            }}
+          />
 
-          <Typography variant="subtitle2" color="textSecondary">
-            Email
-          </Typography>
-          <Typography variant="body1">{profileData.email}</Typography>
+          <TextField
+            fullWidth
+            label="Username"
+            name="username"
+            value={profileData.username}
+            onChange={handleChange}
+            slotProps={{
+              input: {
+                readOnly: !editable
+              }
+            }}
+          />
 
-          <Typography variant="subtitle2" color="textSecondary">
-            Joined
-          </Typography>
-          <Typography variant="body1">{profileData.creation_date}</Typography>
+          <TextField
+            fullWidth
+            label="Email"
+            name="email"
+            value={profileData.email}
+            onChange={handleChange}
+            slotProps={{
+              input: {
+                readOnly: !editable
+              }
+            }}
+          />
+
+          <TextField
+            fullWidth
+            label="Joined"
+            name="creation_date"
+            value={profileData.creation_date}
+            onChange={handleChange}
+            slotProps={{
+              input: {
+                readOnly: !editable
+              }
+            }}
+          />
+
         </Stack>
       </Paper>
     </Box>

@@ -10,7 +10,7 @@ export default function MyFlashky()
     useEffect(() => {
         const fetchData = async () => {
         const myHeaders = new Headers();
-        let token = localStorage.getItem("token")
+        const token = localStorage.getItem("token")
         myHeaders.append("Content-Type", "application/json");
         myHeaders.append("Authorization", `Bearer ${token}`);
 

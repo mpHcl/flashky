@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
@@ -15,8 +16,9 @@ export type ListElement = {
 
 export default function CrudList({data, showUpdateDeleteBtns, path} : {data: ListElement[], showUpdateDeleteBtns: boolean, path: string})
 {
+    const router = useRouter();
     const viewOnClick = (id: number) => {
-        console.log("view " + path + " " + id);
+        router.push("/" + path + "?id=" + id);
     }
     const editOnClick = (id: number) => {
         console.log("edit " + path + " "  + id);

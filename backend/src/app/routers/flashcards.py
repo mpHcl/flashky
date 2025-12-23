@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from datetime import datetime
 from fastapi import HTTPException, Depends, APIRouter
@@ -15,6 +15,10 @@ router = APIRouter(prefix="/flashcards", tags=["flashcards"])
 class FlashcardSideCreateDTO(BaseModel):
     content: Optional[str] = None
 
+class FlashcardSideGetDTO(BaseModel):
+    id: int
+    content: str
+    media_id: List[int] = []
 
 class FlashcardCreateDTO(BaseModel):
     name: str
@@ -31,8 +35,8 @@ class FlashcardGetDTO(BaseModel):
     name: str
     creation_date: datetime
     owner_id: int
-    front_side: FlashcardSide
-    back_side: FlashcardSide
+    front_side: FlashcardSideGetDTO
+    back_side: FlashcardSideGetDTO
 
 
 class FlashcardAddMediaDTO(BaseModel):
@@ -120,7 +124,13 @@ def getFlashcardById(id: int, db: Session = Depends(get_session)):
     flashcard = db.query(Flashcard).filter(Flashcard.id == id).first()
     if not flashcard:
         raise HTTPException(status_code=404, detail="Flashcard not found")
-    dto = FlashcardGetDTO(id=flashcard.id, name=flashcard.name, creation_date=flashcard.creation_date, owner_id=flashcard.owner_id, front_side=flashcard.front_side, back_side=flashcard.back_side)
+    front = FlashcardSideGetDTO(id=flashcard.front_side.id, content=flashcard.front_side.content)
+    for media in flashcard.front_side.media:
+        front.media_id.append(media.id)
+    back = FlashcardSideGetDTO(id=flashcard.back_side.id, content=flashcard.back_side.content)
+    for media in flashcard.back_side.media:
+        back.media_id.append(media.id)
+    dto = FlashcardGetDTO(id=flashcard.id, name=flashcard.name, creation_date=flashcard.creation_date, owner_id=flashcard.owner_id, front_side=front, back_side=back)
     return dto
 
 @router.put("/{id}", response_model=FlashcardGetDTO)

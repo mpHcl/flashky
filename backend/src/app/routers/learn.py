@@ -66,6 +66,37 @@ def get_next_learning_card(
     )
 
 
+@router.get("/{deck_id}/next-date")
+def get_next_learning_card(
+    deck_id: int, user_id=Depends(authenticate()), db: Session = Depends(get_session)
+):
+    now = datetime.utcnow()
+
+    if not user_id:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    stmt = (
+        select(Flashcard, Progress)
+        .join(DeckFlashcard)
+        .join(Progress)
+        .where(
+            DeckFlashcard.deck_id == deck_id,
+            Progress.user_id == user_id,
+        )
+        .order_by(Progress.next_review_date.asc())
+        .limit(1)
+    )
+
+    row = db.exec(stmt).first()
+
+    if not row:
+        return None
+
+    _, progress = row
+
+    return progress.next_review_date
+
+
 @router.post("/{deck_id}/init")
 def post_init_learning(
     deck_id: int, user_id=Depends(authenticate()), db: Session = Depends(get_session)
@@ -92,38 +123,41 @@ def post_init_learning(
             )
 
     db.commit()
-    
+
     return {"status": "ok"}
 
 
 @router.post("/{flashcard_id}/review")
 def update_progress(
-    flashcard_id: int, 
+    flashcard_id: int,
     review: ReviewDTO,
     user_id=Depends(authenticate()),
-    db: Session = Depends(get_session)
+    db: Session = Depends(get_session),
 ):
     if not user_id:
         raise HTTPException(status_code=404, detail="User not found")
     user_id = int(user_id)
-    
-    
-    progress = db.query(Progress).filter(
-        and_(Progress.flashcard_id == flashcard_id, Progress.user_id == user_id)
-    ).first()
-    
-    if not progress: 
-        progress = Progress(
-            user_id=user_id, 
-            flashcard_id=flashcard_id,
-            next_review_date=datetime.utcnow()
+
+    progress = (
+        db.query(Progress)
+        .filter(
+            and_(Progress.flashcard_id == flashcard_id, Progress.user_id == user_id)
         )
-        
+        .first()
+    )
+
+    if not progress:
+        progress = Progress(
+            user_id=user_id,
+            flashcard_id=flashcard_id,
+            next_review_date=datetime.utcnow(),
+        )
+
         db.add(progress)
         db.flush()
-    
+
     next_date = update_progress_after_review(progress, review.quality)
-    
+
     db.commit()
-    
+
     return {"status": "ok", "next_review_date_utc_": next_date}

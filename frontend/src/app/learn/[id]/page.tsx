@@ -28,10 +28,11 @@ export default function Learn() {
 
 
   const [cardToLearn, setCardToLearn] = useState<CardToLearnResult>();
+  const [nextDate, setNextDate] = useState<Date>();
 
   useEffect(() => {
     initLearning(deck_id, setInitializing);
-    getNextCardToLearn(deck_id, setLoading, setCardToLearn);
+    getNextCardToLearn(deck_id, setLoading, setCardToLearn, setNextDate);
   }, [])
 
   return (
@@ -69,13 +70,13 @@ export default function Learn() {
               <Typography variant="body2">
                 <strong>Last review:</strong>{" "}
                 {cardToLearn.last_review_date
-                  ? new Date(cardToLearn.last_review_date).toLocaleTimeString()
+                  ? new Date(cardToLearn.last_review_date + "Z").toLocaleTimeString()
                   : "—"}
               </Typography>
 
               <Typography variant="body2">
                 <strong>Next review:</strong>{" "}
-                {new Date(cardToLearn.next_review_date).toLocaleTimeString()}
+                {new Date(cardToLearn.next_review_date + "Z").toLocaleTimeString()}
               </Typography>
 
               <Typography variant="body2">
@@ -137,9 +138,9 @@ export default function Learn() {
           sx={{ mt: 3 }}
         >
           {[1, 2, 3, 4, 5].map((value) => (
-            <Button key={value} variant="outlined" onClick={async (e) => {
+            <Button key={value} variant="outlined" onClick={async (_) => {
               if (await postReview(value, cardToLearn.id) === 200) {
-                getNextCardToLearn(deck_id, setLoading, setCardToLearn);
+                getNextCardToLearn(deck_id, setLoading, setCardToLearn, setNextDate);
               }
             }}>
               +{value}
@@ -147,7 +148,7 @@ export default function Learn() {
           ))}
         </Stack>
       </Box> :
-      <>No cards to learn, next planned review is ...</>
+      <>No cards to learn, next planned review is {nextDate?.toLocaleString()}</>
     }
     </>
   );

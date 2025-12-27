@@ -1,12 +1,12 @@
 "use client";
-import { useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useEffect, useState } from "react";
 import {
-  Grid,
-  Paper,
-  Typography
+    Grid,
+    Paper,
+    Typography
 } from '@mui/material'
-import Media from '../components/media';
+import Media from '../../components/media';
 
 type FlashcardSide = {
     id: number,
@@ -23,27 +23,26 @@ type Flashcard = {
     back_side: FlashcardSide
 }
 
-export default function Flashky()
-{
-    const searchParams = useSearchParams();
-    const id = searchParams.get("id");
-    const [data, setData] = useState<Flashcard>({id:0, name:'', owner_id:0, creation_date:Date(), front_side:{id:0, content:'', media_id:[]}, back_side:{id:0, content:'', media_id:[]}});
+export default function Flashky() {
+    const params = useParams();
+    const id = params.id;
+    const [data, setData] = useState<Flashcard>({ id: 0, name: '', owner_id: 0, creation_date: Date(), front_side: { id: 0, content: '', media_id: [] }, back_side: { id: 0, content: '', media_id: [] } });
     useEffect(() => {
         const fetchData = async () => {
-        const myHeaders = new Headers();
-        myHeaders.append("Content-Type", "application/json");
+            const myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
 
-        const requestOptions = {
-            method: "GET",
-            headers: myHeaders
-        };
-        try {
-            const result = await fetch("http://127.0.0.1:8000/flashcards/" + id, requestOptions);
-            const jsonResult = await result.json();
-            setData(jsonResult);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
+            const requestOptions = {
+                method: "GET",
+                headers: myHeaders
+            };
+            try {
+                const result = await fetch("http://127.0.0.1:8000/flashcards/" + id, requestOptions);
+                const jsonResult = await result.json();
+                setData(jsonResult);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
         };
 
         fetchData();
@@ -60,18 +59,18 @@ export default function Flashky()
                     <Typography variant="body1" gutterBottom>
                         {data.front_side.content}
                     </Typography>
-                    <Media flashcard_side_id={data.front_side.id}/>
+                    <Media flashcard_side_id={data.front_side.id} />
                 </Paper>
                 <Typography variant="caption">front</Typography>
             </Grid>
 
             { /* Back */}
             <Grid size={4}>
-            <Paper variant="outlined" sx={{ p: 2, height: 600, display: "flex", flexDirection: "column" }}>
+                <Paper variant="outlined" sx={{ p: 2, height: 600, display: "flex", flexDirection: "column" }}>
                     <Typography variant="body1" gutterBottom>
                         {data.back_side.content}
                     </Typography>
-                    <Media flashcard_side_id={data.back_side.id}/>
+                    <Media flashcard_side_id={data.back_side.id} />
                 </Paper>
                 <Typography variant="caption">back</Typography>
             </Grid>

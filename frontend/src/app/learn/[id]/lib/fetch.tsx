@@ -25,7 +25,7 @@ export const initLearning = async (
         );
 
         if (response.status !== 200) {
-            
+
         }
         setInitializing(false);
 

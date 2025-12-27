@@ -14,44 +14,43 @@ export type ListElement = {
     name: string
 }
 
-export default function CrudList({data, showUpdateDeleteBtns, path} : {data: ListElement[], showUpdateDeleteBtns: boolean, path: string})
-{
+export default function CrudList({ data, showUpdateDeleteBtns, path }: { data: ListElement[], showUpdateDeleteBtns: boolean, path: string }) {
     const router = useRouter();
     const viewOnClick = (id: number) => {
-        router.push("/" + path + "?id=" + id);
+        router.push("/" + path + "/" + id);
     }
     const editOnClick = (id: number) => {
-        console.log("edit " + path + " "  + id);
+        console.log("edit " + path + " " + id);
     }
     const deleteOnClick = (id: number) => {
-        console.log("delete " + path + " "  + id);
+        console.log("delete " + path + " " + id);
     }
     return <Box sx={{ width: '50%', bgcolor: 'background.card', border: 1, borderColor: 'primary.main', borderRadius: 2 }}>
         <List>
-            {data.map((el, index) => 
-            <ListItem key={el.id} secondaryAction={
-                <div>
-                    <Tooltip title="View details" placement="bottom" disableInteractive>
-                        <IconButton edge="end" aria-label="view" onClick={() => {viewOnClick(el.id);}}>
-                            <VisibilityIcon />
-                        </IconButton>
-                    </Tooltip>
-                    {showUpdateDeleteBtns && <span>
-                        <Tooltip title="Edit" placement="bottom" disableInteractive>
-                            <IconButton edge="end" aria-label="edit" onClick={() => {editOnClick(el.id);}}>
-                                <EditIcon />
+            {data.map((el, index) =>
+                <ListItem key={el.id} secondaryAction={
+                    <div>
+                        <Tooltip title="View details" placement="bottom" disableInteractive>
+                            <IconButton edge="end" aria-label="view" onClick={() => { viewOnClick(el.id); }}>
+                                <VisibilityIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title="Delete" placement="bottom" disableInteractive>
-                            <IconButton edge="end" aria-label="delete" onClick={() => {deleteOnClick(el.id);}}>
-                                <DeleteIcon />
-                            </IconButton>
-                        </Tooltip>
-                    </span>}
-                </div>
-                    } sx={[index % 2 == 0 ? {bgcolor:'rgba(127, 127, 127, 0.2)'} : {bgcolor:null}]}>
-                <ListItemText>{el.name}</ListItemText>
-            </ListItem>)}
+                        {showUpdateDeleteBtns && <span>
+                            <Tooltip title="Edit" placement="bottom" disableInteractive>
+                                <IconButton edge="end" aria-label="edit" onClick={() => { editOnClick(el.id); }}>
+                                    <EditIcon />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Delete" placement="bottom" disableInteractive>
+                                <IconButton edge="end" aria-label="delete" onClick={() => { deleteOnClick(el.id); }}>
+                                    <DeleteIcon />
+                                </IconButton>
+                            </Tooltip>
+                        </span>}
+                    </div>
+                } sx={[index % 2 == 0 ? { bgcolor: 'rgba(127, 127, 127, 0.2)' } : { bgcolor: null }]}>
+                    <ListItemText>{el.name}</ListItemText>
+                </ListItem>)}
         </List>
-        </Box>
+    </Box>
 }

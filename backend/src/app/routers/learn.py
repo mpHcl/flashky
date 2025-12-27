@@ -67,7 +67,7 @@ def get_next_learning_card(
 
 
 @router.get("/{deck_id}/next-date")
-def get_next_learning_card(
+def get_next_learning_date(
     deck_id: int, user_id=Depends(authenticate()), db: Session = Depends(get_session)
 ):
     now = datetime.utcnow()

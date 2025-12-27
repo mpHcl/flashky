@@ -511,7 +511,7 @@ class Progress(SQLModel, table=True):
     last_review_date: Optional[datetime] = None
     next_review_date: Optional[datetime] = None
     interval: Optional[int] = None  # in minutes
-    efactor: float = Field(default=1)  # ease factor
+    efactor: float = Field(default=2.5)  # ease factor
     repetition: int = Field(default=0)
     correct_answers: int = Field(default=0)
     incorrect_answers: int = Field(default=0)

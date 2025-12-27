@@ -14,13 +14,53 @@ import VideocamIcon from "@mui/icons-material/Videocam";
 import AudiotrackIcon from "@mui/icons-material/Audiotrack";
 
 import { useEffect, useState } from 'react';
-import { getMediaInfos } from '../lib/fetch';
-import { MediaInfo } from '../lib/types';
+import { Dispatch, SetStateAction } from "react";
 
+
+type MediaInfo = {
+    id: number;
+    type: string;
+    autoplay: boolean;
+}
 
 type MediaProps = {
   flashcard_side_id: number
 }
+
+const getMediaInfos = async (
+    flashcard_side_id: number,
+    setLoading: Dispatch<SetStateAction<boolean>>,
+    setMediaInfos: Dispatch<SetStateAction<MediaInfo[] | undefined>>
+) => {
+    const myHeaders = new Headers();
+    const token = localStorage.getItem("token");
+    myHeaders.append("Content-Type", "application/json");
+    myHeaders.append("Authorization", `Bearer ${token}`);
+
+    const requestOptions = {
+        method: "GET",
+        headers: myHeaders,
+    };
+
+    try {
+      if (flashcard_side_id != 0)
+      {
+        const response = await fetch(
+            `http://127.0.0.1:8000/media/side/${flashcard_side_id}`,
+            requestOptions
+        );
+        if (response.status === 200) {
+            const result = await response.json();
+            setMediaInfos(result);
+        }
+        setLoading(false);
+      }
+        
+    }
+    catch (error) {
+        console.error(error);
+    }
+};
 
 export default function Media({ flashcard_side_id }: MediaProps) {
   const [loading, setLoading] = useState(true);

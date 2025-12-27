@@ -1,21 +1,16 @@
 "use client";
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState } from "react";
 import {
-  Box,
-  Button,
-  Chip,
-  Divider,
   Grid,
   Paper,
-  Stack,
-  TextField,
   Typography
 } from '@mui/material'
+import Media from '../components/media';
 
 type FlashcardSide = {
     id: number,
-    content: string
+    content: string,
     media_id: number[]
 }
 
@@ -32,15 +27,11 @@ export default function Flashky()
 {
     const searchParams = useSearchParams();
     const id = searchParams.get("id");
-    // let flashcard: Flashcard;
-    // const [data, setData] = useState<Flashcard>({});
     const [data, setData] = useState<Flashcard>({id:0, name:'', owner_id:0, creation_date:Date(), front_side:{id:0, content:'', media_id:[]}, back_side:{id:0, content:'', media_id:[]}});
     useEffect(() => {
         const fetchData = async () => {
         const myHeaders = new Headers();
-        // const token = localStorage.getItem("token")
         myHeaders.append("Content-Type", "application/json");
-        // myHeaders.append("Authorization", `Bearer ${token}`);
 
         const requestOptions = {
             method: "GET",
@@ -48,11 +39,7 @@ export default function Flashky()
         };
         try {
             const result = await fetch("http://127.0.0.1:8000/flashcards/" + id, requestOptions);
-            // console.log(result);
             const jsonResult = await result.json();
-            // console.log(jsonResult);
-            // const flashcard: Flashcard = {id: jsonResult.id, name: jsonResult.name, owner_id: jsonResult.owner_id, creation_date: jsonResult.creation_date, front_side: {id: jsonResult.front_side.id, content: jsonResult.front_side.content}, back_side: {id: jsonResult.back_side.id, content: jsonResult.back_side.content}};
-            // console.log(flashcard);
             setData(jsonResult);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -73,6 +60,7 @@ export default function Flashky()
                     <Typography variant="body1" gutterBottom>
                         {data.front_side.content}
                     </Typography>
+                    <Media flashcard_side_id={data.front_side.id}/>
                 </Paper>
                 <Typography variant="caption">front</Typography>
             </Grid>
@@ -83,6 +71,7 @@ export default function Flashky()
                     <Typography variant="body1" gutterBottom>
                         {data.back_side.content}
                     </Typography>
+                    <Media flashcard_side_id={data.back_side.id}/>
                 </Paper>
                 <Typography variant="caption">back</Typography>
             </Grid>

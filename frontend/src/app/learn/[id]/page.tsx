@@ -13,7 +13,7 @@ import {
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react';
 
-import Media from './component/media';
+import Media from '../../components/media';
 
 import { getNextCardToLearn, initLearning, postReview } from './lib/fetch';
 import { CardToLearnResult } from './lib/types';

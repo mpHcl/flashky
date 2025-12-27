@@ -1,6 +1,6 @@
 import { ParamValue } from "next/dist/server/request/params";
 import { Dispatch, SetStateAction } from "react";
-import { MediaInfo, CardToLearnResult } from "../lib/types";
+import { CardToLearnResult } from "../lib/types";
 
 
 export const initLearning = async (
@@ -95,38 +95,6 @@ export const getNextLearnDate = async (
             requestOptions
         );
         setNextDate(new Date(await response.json() + "Z"));
-    }
-    catch (error) {
-        console.error(error);
-    }
-};
-
-
-export const getMediaInfos = async (
-    flashcard_side_id: number,
-    setLoading: Dispatch<SetStateAction<boolean>>,
-    setMediaInfos: Dispatch<SetStateAction<MediaInfo[] | undefined>>
-) => {
-    const myHeaders = new Headers();
-    let token = localStorage.getItem("token");
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("Authorization", `Bearer ${token}`);
-
-    const requestOptions = {
-        method: "GET",
-        headers: myHeaders,
-    };
-
-    try {
-        const response = await fetch(
-            `http://127.0.0.1:8000/media/side/${flashcard_side_id}`,
-            requestOptions
-        );
-        if (response.status === 200) {
-            const result = await response.json();
-            setMediaInfos(result);
-        }
-        setLoading(false);
     }
     catch (error) {
         console.error(error);

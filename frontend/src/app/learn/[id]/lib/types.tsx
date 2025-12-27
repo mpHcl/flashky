@@ -1,9 +1,3 @@
-export type MediaInfo = {
-    id: number;
-    type: string;
-    autoplay: boolean;
-}
-
 export type CardToLearnResult = {
     id: number;
     last_review_date: Date | undefined;
@@ -16,4 +10,5 @@ export type CardToLearnResult = {
 type CardSide = {
     id: number;
     content: string;
+    media_id: number[];
 }

@@ -171,16 +171,16 @@ def getMyDecks(
     if not user_id:
         raise HTTPException(status_code=404, detail="User not found")
     user_id = int(user_id)
-    
+
     query = db.query(Deck).filter(Deck.owner_id == user_id)
     total_number = query.count()
-    
-    if (page_size > 0):
+
+    if page_size > 0:
         offset = (page - 1) * page_size
         decks = query.offset(offset).limit(page_size).all()
     else:
         decks = query.all()
-        
+
     return {"total_number": total_number, "decks": decks}
 
 
@@ -252,10 +252,12 @@ def updateDeck(
     for flashcard_to_add in flashcards_to_add:
         if flashcard_to_add not in deck.flashcards:
             deck.flashcards.append(flashcard_to_add)
-    
+
     deck.flashcards = [fc for fc in deck.flashcards if fc not in flashcards_to_remove]
 
-    existing_tags_to_add = db.query(Tag).filter(Tag.name.in_(deck_data.tags_to_add)).all()
+    existing_tags_to_add = (
+        db.query(Tag).filter(Tag.name.in_(deck_data.tags_to_add)).all()
+    )
     existing_tag_to_add_as_dict = {tag.name: tag for tag in existing_tags_to_add}
 
     for tag_name in deck_data.tags_to_add:
@@ -268,7 +270,7 @@ def updateDeck(
         if tag not in deck.tags:
             deck.tags.append(tag)
 
-    for tag in deck.tags:
+    for tag in list(deck.tags):
         if tag.name in deck_data.tags_to_remove:
             deck.tags.remove(tag)
 

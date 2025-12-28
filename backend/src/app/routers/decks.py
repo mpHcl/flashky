@@ -141,7 +141,6 @@ def get_decks(
     if owner:
         query = query.join(Deck.owner).filter(User.username == owner)
 
-    # TODO not working yet
     if tags:
         tag_list = [t.strip() for t in tags.split(",") if t.strip()]
         if tag_list:

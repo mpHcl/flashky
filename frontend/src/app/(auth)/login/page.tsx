@@ -16,6 +16,7 @@ import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import { useRouter } from "next/navigation";
 import { isUndefined } from 'util';
+import { BASE_URL } from '@/app/constants';
 
 export default function Login() {
   const [showPassword, setShowPassword] = React.useState(false);
@@ -51,7 +52,7 @@ export default function Login() {
       redirect: "follow"
     };
 
-    fetch("http://127.0.0.1:8000/login", requestOptions)
+    fetch(BASE_URL + "login", requestOptions)
       .then((response) => {
         console.log(response)
         return response.json()

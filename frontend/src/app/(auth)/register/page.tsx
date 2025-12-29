@@ -18,6 +18,7 @@ import InputLabel from '@mui/material/InputLabel';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import { useRouter } from "next/navigation";
+import { BASE_URL } from '@/app/constants';
 
 function CustomHelperText() {
   const { error } = useFormControl() || {};
@@ -67,7 +68,7 @@ export default function Register() {
       redirect: "follow"
     };
 
-    fetch("http://127.0.0.1:8000/register", requestOptions)
+    fetch(BASE_URL + "register", requestOptions)
       .then((response) => {
         return response.json()
       })

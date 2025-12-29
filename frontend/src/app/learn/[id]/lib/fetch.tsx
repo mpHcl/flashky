@@ -1,6 +1,7 @@
 import { ParamValue } from "next/dist/server/request/params";
 import { Dispatch, SetStateAction } from "react";
-import { MediaInfo, CardToLearnResult } from "../lib/types";
+import { CardToLearnResult } from "../lib/types";
+import { BASE_URL } from "@/app/constants";
 
 
 export const initLearning = async (
@@ -20,12 +21,12 @@ export const initLearning = async (
 
     try {
         const response = await fetch(
-            `http://127.0.0.1:8000/learn/${deck_id}/init`,
+            `${BASE_URL}learn/${deck_id}/init`,
             requestOptions
         );
 
         if (response.status !== 200) {
-            
+
         }
         setInitializing(false);
 
@@ -55,7 +56,7 @@ export const getNextCardToLearn = async (
 
     try {
         const response = await fetch(
-            `http://127.0.0.1:8000/learn/${deck_id}/next`,
+            `${BASE_URL}learn/${deck_id}/next`,
             requestOptions
         );
 
@@ -91,42 +92,10 @@ export const getNextLearnDate = async (
 
     try {
         const response = await fetch(
-            `http://127.0.0.1:8000/learn/${deck_id}/next-date`,
+            `${BASE_URL}learn/${deck_id}/next-date`,
             requestOptions
         );
         setNextDate(new Date(await response.json() + "Z"));
-    }
-    catch (error) {
-        console.error(error);
-    }
-};
-
-
-export const getMediaInfos = async (
-    flashcard_side_id: number,
-    setLoading: Dispatch<SetStateAction<boolean>>,
-    setMediaInfos: Dispatch<SetStateAction<MediaInfo[] | undefined>>
-) => {
-    const myHeaders = new Headers();
-    let token = localStorage.getItem("token");
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("Authorization", `Bearer ${token}`);
-
-    const requestOptions = {
-        method: "GET",
-        headers: myHeaders,
-    };
-
-    try {
-        const response = await fetch(
-            `http://127.0.0.1:8000/media/side/${flashcard_side_id}`,
-            requestOptions
-        );
-        if (response.status === 200) {
-            const result = await response.json();
-            setMediaInfos(result);
-        }
-        setLoading(false);
     }
     catch (error) {
         console.error(error);
@@ -152,7 +121,7 @@ export const postReview = async (quality: number, flashcard_id: number) => {
 
     try {
         const response = await fetch(
-            `http://127.0.0.1:8000/learn/${flashcard_id}/review`,
+            `${BASE_URL}learn/${flashcard_id}/review`,
             requestOptions
         );
         return response.status;

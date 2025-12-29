@@ -1,4 +1,5 @@
 "use client";
+import { BASE_URL } from "@/app/constants";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -17,7 +18,7 @@ export default function Logout() {
                 redirect: "follow"
             };
 
-            fetch("http://127.0.0.1:8000/logout", requestOptions)
+            fetch(BASE_URL + "logout", requestOptions)
                 .then((response) => {
                     return response.json()
                 })

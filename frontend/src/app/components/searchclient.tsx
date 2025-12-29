@@ -13,7 +13,24 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 
 import { useState, useEffect } from 'react';
+import CrudList from "./crudlist";
 
+
+type Flashcard = {
+  id: number,
+  name: string,
+  creation_date: Date
+}
+
+type Deck = {
+  id: number,
+  name: string,
+  description: string,
+  public: boolean,
+  has_media: boolean,
+  tags: string[],
+  flashcards: Flashcard[]
+}
 
 export default function SearchClient({ query }: { query: string }) {
   const [owner, setOwner] = useState("");
@@ -23,7 +40,7 @@ export default function SearchClient({ query }: { query: string }) {
   const [pageSize] = useState(20);
   const [sort, setSort] = useState(0);
 
-  const [decks, setDecks] = useState([]);
+  const [decks, setDecks] = useState<Deck[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
 
@@ -153,9 +170,13 @@ export default function SearchClient({ query }: { query: string }) {
     {loading ? (
       <Typography>Loading…</Typography>
     ) : (
-      <><Box component="pre">{buildUrl()}</Box>
-        {decks?.map((e, i) => (<p>{e.name}</p>))}
-      </>
+
+      <CrudList
+        data={decks?.map((el) => { return { id: el.id, name: el.name } })}
+        showUpdateDeleteBtns={true}
+        path="deck"
+      />
+
     )
     }
 

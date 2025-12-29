@@ -14,13 +14,53 @@ import VideocamIcon from "@mui/icons-material/Videocam";
 import AudiotrackIcon from "@mui/icons-material/Audiotrack";
 
 import { useEffect, useState } from 'react';
-import { getMediaInfos } from '../lib/fetch';
-import { MediaInfo } from '../lib/types';
+import { Dispatch, SetStateAction } from "react";
+import { BASE_URL } from '../constants';
 
+
+type MediaInfo = {
+  id: number;
+  type: string;
+  autoplay: boolean;
+}
 
 type MediaProps = {
   flashcard_side_id: number
 }
+
+const getMediaInfos = async (
+  flashcard_side_id: number,
+  setLoading: Dispatch<SetStateAction<boolean>>,
+  setMediaInfos: Dispatch<SetStateAction<MediaInfo[] | undefined>>
+) => {
+  const myHeaders = new Headers();
+  const token = localStorage.getItem("token");
+  myHeaders.append("Content-Type", "application/json");
+  myHeaders.append("Authorization", `Bearer ${token}`);
+
+  const requestOptions = {
+    method: "GET",
+    headers: myHeaders,
+  };
+
+  try {
+    if (flashcard_side_id != 0) {
+      const response = await fetch(
+        `${BASE_URL}media/side/${flashcard_side_id}`,
+        requestOptions
+      );
+      if (response.status === 200) {
+        const result = await response.json();
+        setMediaInfos(result);
+      }
+      setLoading(false);
+    }
+
+  }
+  catch (error) {
+    console.error(error);
+  }
+};
 
 export default function Media({ flashcard_side_id }: MediaProps) {
   const [loading, setLoading] = useState(true);
@@ -85,7 +125,7 @@ export default function Media({ flashcard_side_id }: MediaProps) {
         <>Loading</> :
         <Grid container spacing={2}>
           {mediaInfos?.map((media) => {
-            const src = `http://127.0.0.1:8000/media/file/${media.id}`;
+            const src = `${BASE_URL}media/file/${media.id}`;
 
             return (
               <Grid key={media.id} size={12}>

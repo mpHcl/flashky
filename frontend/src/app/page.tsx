@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Link from '@mui/material/Link';
+import { BASE_URL } from "./constants";
 
 export default function Home() {
   const [hasToken, setHasToken] = useState(false);
@@ -18,7 +19,7 @@ export default function Home() {
       }
 
       try {
-        const response = await fetch('http://127.0.0.1:8000/check_token', {
+        const response = await fetch(BASE_URL + 'check_token', {
           headers: {
             'Authorization': `Bearer ${token}`
           }

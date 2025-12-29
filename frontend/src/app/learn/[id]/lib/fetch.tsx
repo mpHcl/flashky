@@ -1,6 +1,7 @@
 import { ParamValue } from "next/dist/server/request/params";
 import { Dispatch, SetStateAction } from "react";
 import { CardToLearnResult } from "../lib/types";
+import { BASE_URL } from "@/app/constants";
 
 
 export const initLearning = async (
@@ -20,7 +21,7 @@ export const initLearning = async (
 
     try {
         const response = await fetch(
-            `http://127.0.0.1:8000/learn/${deck_id}/init`,
+            `${BASE_URL}learn/${deck_id}/init`,
             requestOptions
         );
 
@@ -55,7 +56,7 @@ export const getNextCardToLearn = async (
 
     try {
         const response = await fetch(
-            `http://127.0.0.1:8000/learn/${deck_id}/next`,
+            `${BASE_URL}learn/${deck_id}/next`,
             requestOptions
         );
 
@@ -91,7 +92,7 @@ export const getNextLearnDate = async (
 
     try {
         const response = await fetch(
-            `http://127.0.0.1:8000/learn/${deck_id}/next-date`,
+            `${BASE_URL}learn/${deck_id}/next-date`,
             requestOptions
         );
         setNextDate(new Date(await response.json() + "Z"));
@@ -120,7 +121,7 @@ export const postReview = async (quality: number, flashcard_id: number) => {
 
     try {
         const response = await fetch(
-            `http://127.0.0.1:8000/learn/${flashcard_id}/review`,
+            `${BASE_URL}learn/${flashcard_id}/review`,
             requestOptions
         );
         return response.status;

@@ -7,6 +7,7 @@ import {
     Typography
 } from '@mui/material'
 import Media from '../../components/media';
+import { BASE_URL } from '@/app/constants';
 
 type FlashcardSide = {
     id: number,
@@ -37,7 +38,7 @@ export default function Flashky() {
                 headers: myHeaders
             };
             try {
-                const result = await fetch("http://127.0.0.1:8000/flashcards/" + id, requestOptions);
+                const result = await fetch(BASE_URL + "flashcards/" + id, requestOptions);
                 const jsonResult = await result.json();
                 setData(jsonResult);
             } catch (error) {

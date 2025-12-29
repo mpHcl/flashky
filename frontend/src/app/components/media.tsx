@@ -15,6 +15,7 @@ import AudiotrackIcon from "@mui/icons-material/Audiotrack";
 
 import { useEffect, useState } from 'react';
 import { Dispatch, SetStateAction } from "react";
+import { BASE_URL } from '../constants';
 
 
 type MediaInfo = {
@@ -45,7 +46,7 @@ const getMediaInfos = async (
   try {
     if (flashcard_side_id != 0) {
       const response = await fetch(
-        `http://127.0.0.1:8000/media/side/${flashcard_side_id}`,
+        `${BASE_URL}media/side/${flashcard_side_id}`,
         requestOptions
       );
       if (response.status === 200) {
@@ -124,7 +125,7 @@ export default function Media({ flashcard_side_id }: MediaProps) {
         <>Loading</> :
         <Grid container spacing={2}>
           {mediaInfos?.map((media) => {
-            const src = `http://127.0.0.1:8000/media/file/${media.id}`;
+            const src = `${BASE_URL}media/file/${media.id}`;
 
             return (
               <Grid key={media.id} size={12}>

@@ -15,6 +15,7 @@ import {
 import ImageIcon from "@mui/icons-material/Image";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import MovieIcon from "@mui/icons-material/Movie";
+import { BASE_URL } from '@/app/constants';
 
 type MediaProps = {
   name: string;
@@ -239,7 +240,7 @@ export default function NewFlashky() {
     };
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/media/${sideId}`, requestOptions);
+      const response = await fetch(`${BASE_URL}media/${sideId}`, requestOptions);
       const result = await response.json();
       console.log(result);
       return result;
@@ -273,7 +274,7 @@ export default function NewFlashky() {
     };
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/flashcards/", requestOptions);
+      const response = await fetch(BASE_URL + "flashcards/", requestOptions);
       const result = await response.json();
 
       await Promise.all(frontMediaFiles.map(file => uploadMedia(result.front_side.id, file)));

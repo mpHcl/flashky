@@ -2,6 +2,7 @@
 import { useEffect, useState, Suspense } from "react";
 import Box from '@mui/material/Box';
 import CrudList from "../components/crudlist";
+import { BASE_URL } from "../constants";
 
 
 export default function MyFlashky() {
@@ -18,7 +19,7 @@ export default function MyFlashky() {
                 headers: myHeaders
             };
             try {
-                const result = await fetch("http://127.0.0.1:8000/flashcards/myflashcards", requestOptions);
+                const result = await fetch(BASE_URL + "flashcards/myflashcards", requestOptions);
                 const jsonResult = await result.json();
                 setData(jsonResult);
             } catch (error) {

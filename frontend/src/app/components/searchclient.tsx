@@ -1,6 +1,5 @@
 'use client';
 import {
-  Box,
   Stack,
   TextField,
   Button,
@@ -8,12 +7,12 @@ import {
   Checkbox,
   FormControlLabel,
   Typography,
-  IconButton,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
 import { useState, useEffect } from 'react';
 import CrudList from "./crudlist";
+import { BASE_URL } from "../constants";
 
 
 type Flashcard = {
@@ -50,7 +49,7 @@ export default function SearchClient({ query }: { query: string }) {
     const fetchData = async () => {
       setLoading(true);
       const myHeaders = new Headers();
-      let token = localStorage.getItem("token")
+      const token = localStorage.getItem("token")
       myHeaders.append("Content-Type", "application/json");
       myHeaders.append("Authorization", `Bearer ${token}`);
 
@@ -60,12 +59,11 @@ export default function SearchClient({ query }: { query: string }) {
       };
 
       try {
-        const response = await fetch("http://127.0.0.1:8000" + buildUrl(), requestOptions);
+        const response = await fetch(BASE_URL + buildUrl(), requestOptions);
         const result = await response.json();
 
         setDecks(result.decks);
         setTotal(result.total_number);
-        console.log(total)
       }
       catch (error) {
         console.error(error);

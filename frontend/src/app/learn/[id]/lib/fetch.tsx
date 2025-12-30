@@ -1,39 +1,17 @@
 import { ParamValue } from "next/dist/server/request/params";
 import { Dispatch, SetStateAction } from "react";
 import { CardToLearnResult } from "../lib/types";
-import { BASE_URL } from "@/app/constants";
+import { fetchAuthGET, fetchAuthPOST, PostBodyType } from "@/app/lib/fetch";
 
+const OK = 200;
 
 export const initLearning = async (
-    deck_id: ParamValue, setInitializing:
-        Dispatch<SetStateAction<boolean>>
+    deck_id: ParamValue,
+    setInitializing: Dispatch<SetStateAction<boolean>>
 ) => {
     setInitializing(true);
-    const myHeaders = new Headers();
-    let token = localStorage.getItem("token");
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("Authorization", `Bearer ${token}`);
-
-    const requestOptions = {
-        method: "POST",
-        headers: myHeaders,
-    };
-
-    try {
-        const response = await fetch(
-            `${BASE_URL}learn/${deck_id}/init`,
-            requestOptions
-        );
-
-        if (response.status !== 200) {
-
-        }
-        setInitializing(false);
-
-    }
-    catch (error) {
-        console.error(error);
-    }
+    fetchAuthPOST(`learn/${deck_id}/init`, OK, PostBodyType.EMPTY);
+    setInitializing(false);
 };
 
 
@@ -44,35 +22,17 @@ export const getNextCardToLearn = async (
     setNextDate: Dispatch<SetStateAction<Date | undefined>>,
 ) => {
     setLoading(true);
-    const myHeaders = new Headers();
-    let token = localStorage.getItem("token");
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("Authorization", `Bearer ${token}`);
 
-    const requestOptions = {
-        method: "GET",
-        headers: myHeaders,
-    };
-
-    try {
-        const response = await fetch(
-            `${BASE_URL}learn/${deck_id}/next`,
-            requestOptions
-        );
-
-        if (response.status === 200) {
-            const result = await response.json();
-            setCardToLearn(result);
-            if (result === null) {
-                getNextLearnDate(deck_id, setNextDate);
-            }
+    const onSuccess = async (response: Response) => {
+        const result = await response.json();
+        setCardToLearn(result);
+        if (result === null) {
+            getNextLearnDate(deck_id, setNextDate);
         }
-        setLoading(false);
+    }
 
-    }
-    catch (error) {
-        console.error(error);
-    }
+    fetchAuthGET(`learn/${deck_id}/next`, OK, onSuccess);
+    setLoading(false);
 };
 
 
@@ -80,53 +40,16 @@ export const getNextLearnDate = async (
     deck_id: ParamValue,
     setNextDate: Dispatch<SetStateAction<Date | undefined>>
 ) => {
-    const myHeaders = new Headers();
-    let token = localStorage.getItem("token");
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("Authorization", `Bearer ${token}`);
-
-    const requestOptions = {
-        method: "GET",
-        headers: myHeaders,
-    };
-
-    try {
-        const response = await fetch(
-            `${BASE_URL}learn/${deck_id}/next-date`,
-            requestOptions
-        );
+    const onSuccess = async (response: Response) => {
         setNextDate(new Date(await response.json() + "Z"));
     }
-    catch (error) {
-        console.error(error);
-    }
+    fetchAuthGET(`learn/${deck_id}/next-date`, OK, onSuccess);
 };
 
 
 export const postReview = async (quality: number, flashcard_id: number) => {
-    const myHeaders = new Headers();
-    let token = localStorage.getItem("token");
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("Authorization", `Bearer ${token}`);
-
-    const raw = JSON.stringify({
+    const body = {
         "quality": quality
-    });
-
-    const requestOptions = {
-        method: "POST",
-        headers: myHeaders,
-        body: raw,
-    };
-
-    try {
-        const response = await fetch(
-            `${BASE_URL}learn/${flashcard_id}/review`,
-            requestOptions
-        );
-        return response.status;
     }
-    catch (error) {
-        console.error(error);
-    }
+    return await fetchAuthPOST(`learn/${flashcard_id}/review`, OK, PostBodyType.JSON, body);
 }

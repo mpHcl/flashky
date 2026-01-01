@@ -32,14 +32,14 @@ export const fetchLib = async (
 
 const authHeaders = () => {
     const headers = new Headers();
-    let token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
     headers.append("Authorization", `Bearer ${token}`);
 
     return headers;
 }
 
 const authHeadersJSON = () => {
-    let headers = authHeaders();
+    const headers = authHeaders();
     headers.append("Content-Type", "application/json");
     return headers
 }

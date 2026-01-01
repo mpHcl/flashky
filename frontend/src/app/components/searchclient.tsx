@@ -12,7 +12,7 @@ import CloseIcon from "@mui/icons-material/Close";
 
 import { useState, useEffect } from 'react';
 import CrudList from "./crudlist";
-import { BASE_URL } from "../constants";
+import { fetchAuthGET } from "../lib/fetch";
 
 
 type Flashcard = {
@@ -46,33 +46,16 @@ export default function SearchClient({ query }: { query: string }) {
   useEffect(() => {
     if (!query) return;
 
-    const fetchData = async () => {
-      setLoading(true);
-      const myHeaders = new Headers();
-      const token = localStorage.getItem("token")
-      myHeaders.append("Content-Type", "application/json");
-      myHeaders.append("Authorization", `Bearer ${token}`);
+    setLoading(true);
+    const onSuccess = async (response: Response) => {
+      const result = await response.json();
 
-      const requestOptions = {
-        method: "GET",
-        headers: myHeaders,
-      };
+      setDecks(result.decks);
+      setTotal(result.total_number);
+    }
 
-      try {
-        const response = await fetch(BASE_URL + buildUrl(), requestOptions);
-        const result = await response.json();
-
-        setDecks(result.decks);
-        setTotal(result.total_number);
-      }
-      catch (error) {
-        console.error(error);
-      }
-
-      setLoading(false);
-    };
-
-    fetchData();
+    fetchAuthGET(buildUrl(), 200, onSuccess);
+    setLoading(false);
   }, [query, owner, tags, page, sort]);
 
   useEffect(() => {

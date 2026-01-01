@@ -18,7 +18,7 @@ import InputLabel from '@mui/material/InputLabel';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import { useRouter } from "next/navigation";
-import { BASE_URL } from '@/app/constants';
+import { registerFetch } from '../lib/fetch';
 
 function CustomHelperText() {
   const { error } = useFormControl() || {};
@@ -52,49 +52,7 @@ export default function Register() {
   const router = useRouter();
 
   const onRegisterButtonClick = async () => {
-    const myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-
-    const raw = JSON.stringify({
-      "username": username,
-      "email": email,
-      "password": password
-    });
-
-    const requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: raw,
-      redirect: "follow"
-    };
-
-    fetch(BASE_URL + "register", requestOptions)
-      .then((response) => {
-        return response.json()
-      })
-      .then((result) => {
-        if (result['token']) {
-          localStorage.setItem("token", result['token']);
-          router.push("/");
-        }
-        else {
-          if (result.detail) {
-            if (Array.isArray(result.detail)) {
-              const errorMessages = result.detail.map(err => err.ctx.reason).join('\n');
-              alert(errorMessages);
-            }
-            else if (result.detail.errors && Array.isArray(result.detail.errors)) {
-              const errorMessages = result.detail.errors.join('\n');
-              alert(errorMessages);
-            }
-            else {
-              alert('Registration failed. Please try again.');
-            }
-
-          }
-        }
-  })
-      .catch((error) => console.log(error));
+    registerFetch(username, email, password, router);
   }
 
   return (

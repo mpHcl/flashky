@@ -15,7 +15,7 @@ import {
 import ImageIcon from "@mui/icons-material/Image";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import MovieIcon from "@mui/icons-material/Movie";
-import { BASE_URL } from '@/app/constants';
+import { createFlashcard } from '../lib/fetch';
 
 type MediaProps = {
   name: string;
@@ -225,67 +225,6 @@ export default function NewFlashky() {
     };
   }, []);
 
-  const uploadMedia = async (sideId: number, file: File) => {
-    const myHeaders = new Headers();
-    let token = localStorage.getItem("token")
-    myHeaders.append("Authorization", `Bearer ${token}`);
-
-    const formdata = new FormData();
-    formdata.append("file", file);
-
-    const requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: formdata,
-    };
-
-    try {
-      const response = await fetch(`${BASE_URL}media/${sideId}`, requestOptions);
-      const result = await response.json();
-      console.log(result);
-      return result;
-    }
-    catch (error) {
-      console.error(error);
-      throw error;
-    }
-  }
-
-  const createFlashcard = async () => {
-    const myHeaders = new Headers();
-    let token = localStorage.getItem("token")
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("Authorization", `Bearer ${token}`);
-
-    const raw = JSON.stringify({
-      "name": name,
-      "front": {
-        "content": frontTextContent
-      },
-      "back": {
-        "content": backTextContent
-      }
-    });
-
-    const requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: raw,
-    };
-
-    try {
-      const response = await fetch(BASE_URL + "flashcards/", requestOptions);
-      const result = await response.json();
-
-      await Promise.all(frontMediaFiles.map(file => uploadMedia(result.front_side.id, file)));
-      await Promise.all(backMediaFiles.map(file => uploadMedia(result.back_side.id, file)));
-
-    }
-    catch (error) {
-      console.error(error);
-    }
-  }
-
   return (
     <Paper sx={{ p: 3, mx: "auto" }}>
       {/* Hidden file inputs */}
@@ -354,8 +293,22 @@ export default function NewFlashky() {
       <Box display="flex" justifyContent="space-between" mt={3}>
         <Button color="inherit">CANCEL</Button>
         <Stack direction="row" spacing={1}>
-          <Button variant="outlined" onClick={() => createFlashcard()}>Add next</Button>
-          <Button variant="contained" onClick={() => createFlashcard()}>Add & finish</Button>
+          <Button variant="outlined" onClick={() =>
+            createFlashcard(
+              name,
+              frontTextContent,
+              backTextContent,
+              frontMediaFiles,
+              backMediaFiles
+            )}>Add next</Button>
+          <Button variant="contained"  onClick={() =>
+            createFlashcard(
+              name,
+              frontTextContent,
+              backTextContent,
+              frontMediaFiles,
+              backMediaFiles
+            )}>Add & finish</Button>
         </Stack>
       </Box>
     </Paper>

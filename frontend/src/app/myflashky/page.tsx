@@ -21,7 +21,7 @@ export default function MyFlashky() {
             try {
                 const result = await fetch(BASE_URL + "flashcards/myflashcards", requestOptions);
                 const jsonResult = await result.json();
-                setData(jsonResult);
+                setData(jsonResult.flashcards);
             } catch (error) {
                 console.error('Error fetching data:', error);
             }

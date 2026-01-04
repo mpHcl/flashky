@@ -20,3 +20,19 @@ export type DeckPostDTO = {
     flashcards_ids: number[],
     tags: string[]
 }
+
+export type FlashcardInDeck = {
+  id: number,
+  name: string,
+  creation_date: Date
+}
+
+export type Deck = {
+  id: number,
+  name: string,
+  description: string,
+  public: boolean,
+  has_media: boolean,
+  tags: string[],
+  flashcards: FlashcardInDeck[]
+}

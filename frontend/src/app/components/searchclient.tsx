@@ -13,23 +13,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useState, useEffect } from 'react';
 import CrudList from "./crudlist";
 import { BASE_URL } from "../constants";
-
-
-type Flashcard = {
-  id: number,
-  name: string,
-  creation_date: Date
-}
-
-type Deck = {
-  id: number,
-  name: string,
-  description: string,
-  public: boolean,
-  has_media: boolean,
-  tags: string[],
-  flashcards: Flashcard[]
-}
+import { Deck } from "../lib/types";
 
 export default function SearchClient({ query }: { query: string }) {
   const [owner, setOwner] = useState("");
@@ -101,7 +85,7 @@ export default function SearchClient({ query }: { query: string }) {
   };
 
   const buildUrl = () => {
-    return `/decks?q=${encodeURIComponent(query)}` +
+    return `decks?q=${encodeURIComponent(query)}` +
       `${(owner !== '' ? "&owner=" + encodeURIComponent(owner) : "")}` +
       `${(tags.length > 0 ? "&tags=" + encodeURIComponent(tags.join(",")) : "")}` +
       `&page=${encodeURIComponent(page + 1)}` +
@@ -170,7 +154,7 @@ export default function SearchClient({ query }: { query: string }) {
     ) : (
 
       <CrudList
-        data={decks?.map((el) => { return { id: el.id, name: el.name } })}
+        data={decks?.map((el) => { return { id: el.id, name: el.name, preview: el.description } })}
         showUpdateDeleteBtns={true}
         path="deck"
       />

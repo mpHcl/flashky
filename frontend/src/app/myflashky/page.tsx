@@ -32,7 +32,7 @@ export default function MyFlashky() {
 
     return (<Box>
         <Suspense fallback={<div>Loading...</div>}>
-            <CrudList data={data.map((el) => ({ id: el.id, name: el.name }))} showUpdateDeleteBtns={true} path="flashky"></CrudList>
+            <CrudList data={data.map((el) => ({ id: el.id, name: el.name, preview: el.front_side.content == null ? "" : el.front_side.content }))} showUpdateDeleteBtns={true} path="flashky"></CrudList>
         </Suspense>
 
     </Box>);

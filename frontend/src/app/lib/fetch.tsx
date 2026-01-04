@@ -1,13 +1,15 @@
 import { BASE_URL } from "../constants";
 
-export type requestOptions = {
+export const OK = 200;
+
+export type RequestOptions = {
     method: string,
     headers: Headers,
     body?: string | FormData
 }
 
 export const fetchLib = async (
-    options: requestOptions,
+    options: RequestOptions,
     url: string,
     expectedStatusCode: number,
     onSuccess?: (response: Response) => Promise<void>,
@@ -30,19 +32,19 @@ export const fetchLib = async (
 
 const authHeaders = () => {
     const headers = new Headers();
-    let token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
     headers.append("Authorization", `Bearer ${token}`);
 
     return headers;
 }
 
 const authHeadersJSON = () => {
-    let headers = authHeaders();
+    const headers = authHeaders();
     headers.append("Content-Type", "application/json");
     return headers
 }
 
-const getRequestOptionsAuthorized = (): requestOptions => {
+const getRequestOptionsAuthorized = (): RequestOptions => {
     return {
         method: "GET",
         headers: authHeadersJSON(),
@@ -68,7 +70,7 @@ export enum PostBodyType {
 const postRequestOptionsAuthorized = (
     type: PostBodyType,
     payload?: object | FormData,
-): requestOptions => {
+): RequestOptions => {
     switch (type) {
         case PostBodyType.JSON:
             return postJSONRequestOptionsAuthorized(payload as object);
@@ -84,7 +86,7 @@ const postRequestOptionsAuthorized = (
     }
 };
 
-const postJSONRequestOptionsAuthorized = (body: object): requestOptions => {
+const postJSONRequestOptionsAuthorized = (body: object): RequestOptions => {
     const stringifiedBody = JSON.stringify(body);
     return {
         method: "POST",
@@ -93,14 +95,14 @@ const postJSONRequestOptionsAuthorized = (body: object): requestOptions => {
     }
 }
 
-const postEmptyRequestOptionsAuthorized = (): requestOptions => {
+const postEmptyRequestOptionsAuthorized = (): RequestOptions => {
     return {
         method: "POST",
         headers: authHeadersJSON(),
     }
 }
 
-const postFormDataRequestOptionsAuthorized = (data: FormData): requestOptions => {
+const postFormDataRequestOptionsAuthorized = (data: FormData): RequestOptions => {
     return {
         method: "POST",
         headers: authHeaders(),
@@ -117,5 +119,26 @@ export const fetchAuthPOST = async (
     onFail?: (response: Response) => Promise<void>,
 ) => {
     const options = postRequestOptionsAuthorized(type, body);
+    return fetchLib(options, url, expectedStatusCode, onSuccess, onFail);
+}
+
+export const fetchWithoutAuthPOST = async (
+    url: string,
+    expectedStatusCode: number,
+    type: PostBodyType,
+    body: object,
+    onSuccess?: (response: Response) => Promise<void>,
+    onFail?: (response: Response) => Promise<void>,
+) => {
+    if (type !== PostBodyType.JSON) {
+        throw new Error("Not implemented yet.");
+    }
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+    const options = {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(body)
+    }
     return fetchLib(options, url, expectedStatusCode, onSuccess, onFail);
 }

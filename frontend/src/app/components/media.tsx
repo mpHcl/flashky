@@ -16,6 +16,7 @@ import AudiotrackIcon from "@mui/icons-material/Audiotrack";
 import { useEffect, useState } from 'react';
 import { Dispatch, SetStateAction } from "react";
 import { BASE_URL } from '../constants';
+import { fetchAuthGET, OK } from '../lib/fetch';
 
 
 type MediaInfo = {
@@ -33,33 +34,13 @@ const getMediaInfos = async (
   setLoading: Dispatch<SetStateAction<boolean>>,
   setMediaInfos: Dispatch<SetStateAction<MediaInfo[] | undefined>>
 ) => {
-  const myHeaders = new Headers();
-  const token = localStorage.getItem("token");
-  myHeaders.append("Content-Type", "application/json");
-  myHeaders.append("Authorization", `Bearer ${token}`);
-
-  const requestOptions = {
-    method: "GET",
-    headers: myHeaders,
-  };
-
-  try {
-    if (flashcard_side_id != 0) {
-      const response = await fetch(
-        `${BASE_URL}media/side/${flashcard_side_id}`,
-        requestOptions
-      );
-      if (response.status === 200) {
-        const result = await response.json();
-        setMediaInfos(result);
-      }
-      setLoading(false);
-    }
-
+  setLoading(true);
+  const onSuccess = async (response: Response) => {
+    const result = await response.json();
+    setMediaInfos(result);
   }
-  catch (error) {
-    console.error(error);
-  }
+  fetchAuthGET(`media/side/${flashcard_side_id}`, OK, onSuccess);
+  setLoading(false);
 };
 
 export default function Media({ flashcard_side_id }: MediaProps) {

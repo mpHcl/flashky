@@ -15,8 +15,7 @@ import InputLabel from '@mui/material/InputLabel';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import { useRouter } from "next/navigation";
-import { isUndefined } from 'util';
-import { BASE_URL } from '@/app/constants';
+import { loginFetch } from '../lib/fetch';
 
 export default function Login() {
   const [showPassword, setShowPassword] = React.useState(false);
@@ -31,44 +30,13 @@ export default function Login() {
     event.preventDefault();
   };
 
-
   const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
   const router = useRouter();
 
   const onLoginButtonClick = async () => {
-    const myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-
-    const raw = JSON.stringify({
-      "login": username,
-      "password": password
-    });
-
-    const requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: raw,
-      redirect: "follow"
-    };
-
-    fetch(BASE_URL + "login", requestOptions)
-      .then((response) => {
-        console.log(response)
-        return response.json()
-      })
-      .then((result) => {
-        if (result['token']) {
-          localStorage.setItem("token", result['token']);
-          router.push("/");
-        }
-        else {
-          alert("Wrong credentials")
-        }
-      })
-      .catch((error) => console.log(error));
+    loginFetch(username, password, router);
   }
-
 
   return (
     <Box display="flex" justifyContent="center" alignItems="center">

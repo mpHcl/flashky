@@ -197,7 +197,7 @@ def create_comment_dto(
     max_depth: int = -1,
     current_depth: int = 0,
 ):
-    children = None
+    children = []
     if not only_root and (max_depth < 0 or current_depth < max_depth):
         children = [
             create_comment_dto(child, only_root, max_depth, current_depth + 1)

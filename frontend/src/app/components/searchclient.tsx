@@ -84,7 +84,7 @@ export default function SearchClient({ query }: { query: string }) {
   };
 
   const buildUrl = () => {
-    return `/decks?q=${encodeURIComponent(query)}` +
+    return `decks?q=${encodeURIComponent(query)}` +
       `${(owner !== '' ? "&owner=" + encodeURIComponent(owner) : "")}` +
       `${(tags.length > 0 ? "&tags=" + encodeURIComponent(tags.join(",")) : "")}` +
       `&page=${encodeURIComponent(page + 1)}` +

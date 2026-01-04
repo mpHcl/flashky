@@ -9,7 +9,7 @@ import CrudList from '@/app/components/crudlist';
 export default function ViewDeck() {
     const params = useParams();
     const id = params.id;
-    const [deck, setDeck] = useState<Deck>({ id: 0, name: "", description: "", public: false, has_media: false, tags: [], flashcards: [] });
+    const [deck, setDeck] = useState<Deck>();
 
     useEffect(() => {
         const onSuccess = async (response: Response) => {
@@ -20,7 +20,7 @@ export default function ViewDeck() {
         fetchAuthGET("decks/" + id, 200, onSuccess);
     }, []);
 
-    return (<Paper sx={{ p: 3, mx: "auto" }}>
+    return (deck && <Paper sx={{ p: 3, mx: "auto" }}>
         <Typography variant="h4" gutterBottom>
             {deck.name}
             <Chip label={deck.public ? "Public" : "Private"} variant='outlined' sx={{ mx: 1 }} />

@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
-from sqlmodel import Session
+from sqlmodel import Session, and_
 
 from app.database import get_session
 from app.tools.auth.authenticate import authenticate
@@ -24,8 +26,10 @@ class CommentGetDTO(BaseModel):
     creation_date: datetime
     deck_id: int
     author_id: int
+    author_name: str
     parent_id: Optional[int]
     children_ids: Optional[list[int]] = None
+    children: Optional[list[CommentGetDTO]] = None
 
     class Config:
         from_attributes = True
@@ -43,6 +47,7 @@ class CommentGetAllDTO(BaseModel):
 def create_comment(
     comment_data: CommentPostDTO,
     user_id: str = Depends(authenticate()),
+    max_depth: int = Query(-1, description="How many replies in tree"),
     db: Session = Depends(get_session),
 ):
     user_id = int(user_id)
@@ -75,7 +80,7 @@ def create_comment(
     db.commit()
     db.refresh(new_comment)
 
-    return create_comment_dto(new_comment)
+    return create_comment_dto(new_comment, False, max_depth)
 
 
 @router.get("/", response_model=CommentGetAllDTO)
@@ -84,6 +89,8 @@ def get_comments(
     user_id: str = Depends(authenticate()),
     # query params
     deck_id: int = Query(None, ge=1, description="Commented deck."),
+    only_root_comments: bool = Query(False, description="Return only root comments"),
+    max_depth: int = Query(-1, description="How many replies in tree"),
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
     sort: Optional[str] = Query("desc", pattern="^(asc|desc)$"),
@@ -95,7 +102,9 @@ def get_comments(
     if deck_id is None:
         raise HTTPException(status_code=404, detail="Deck not found")
 
-    comments = db.query(Comment).filter(Comment.deck_id == deck_id)
+    comments = db.query(Comment).filter(
+        and_(Comment.deck_id == deck_id, Comment.parent_id == None)
+    )
 
     total_number = comments.count()
 
@@ -107,7 +116,7 @@ def get_comments(
     offset = (page - 1) * page_size
     comments = comments.offset(offset).limit(page_size).all()
 
-    comments_dtos = [create_comment_dto(c) for c in comments]
+    comments_dtos = [create_comment_dto(c, only_root_comments, max_depth) for c in comments]
 
     return {"total_number": total_number, "comments": comments_dtos}
 
@@ -120,6 +129,8 @@ def get_my_comments(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
     sort: Optional[str] = Query("desc", pattern="^(asc|desc)$"),
+    only_root_comments: bool = Query(False, description="Return only root comments"),
+    max_depth: int = Query(-1, description="How many replies in tree"),
     # db
     db: Session = Depends(get_session),
 ):
@@ -137,7 +148,7 @@ def get_my_comments(
     offset = (page - 1) * page_size
     comments = comments.offset(offset).limit(page_size).all()
 
-    comments_dtos = [create_comment_dto(c) for c in comments]
+    comments_dtos = [create_comment_dto(c, only_root_comments, max_depth) for c in comments]
 
     return {"total_number": total_number, "comments": comments_dtos}
 
@@ -146,13 +157,14 @@ def get_my_comments(
 def get_comment(
     comment_id: int,
     _: str = Depends(authenticate()),
+    include_children: bool = Query(True, description="Return only root comments"),
     db: Session = Depends(get_session),
 ):
     comment = db.query(Comment).filter(Comment.id == comment_id).first()
     if not comment:
         raise HTTPException(status_code=404, detail="Comment not found")
 
-    return create_comment_dto(comment)
+    return create_comment_dto(comment, not include_children)
 
 
 @router.delete("/{comment_id}")
@@ -173,18 +185,45 @@ def delete_comment(
             status_code=403, detail="Not authorized to delete this comment"
         )
 
-    db.delete(comment)
+    comment.is_deleted = True
     db.commit()
     return {"message": "Comment deleted successfully"}
 
 
-def create_comment_dto(comment: Comment):
-    return CommentGetDTO(
-        id=comment.id,
-        content=comment.content,
-        creation_date=comment.creation_date,
-        deck_id=comment.deck_id,
-        author_id=comment.author_id,
-        parent_id=comment.parent_id,
-        children_ids=[c.id for c in comment.children],
-    )
+def create_comment_dto(
+    comment: Comment,
+    only_root: bool,
+    max_depth: int = -1,
+    current_depth: int = 0,
+):
+    children = None
+    if not only_root and (max_depth < 0 or current_depth < max_depth):
+        children = [
+            create_comment_dto(child, only_root, max_depth, current_depth + 1)
+            for child in comment.children
+        ]
+
+    if not comment.is_deleted:
+        return CommentGetDTO(
+            id=comment.id,
+            content=comment.content,
+            creation_date=comment.creation_date,
+            deck_id=comment.deck_id,
+            author_id=comment.author_id,
+            author_name=comment.author.username,
+            parent_id=comment.parent_id,
+            children_ids=[c.id for c in comment.children],
+            children=children,
+        )
+    else:
+        return CommentGetDTO(
+            id=comment.id,
+            content="[deleted]",
+            creation_date=comment.creation_date,
+            deck_id=comment.deck_id,
+            author_id=0,
+            author_name="",
+            parent_id=comment.parent_id,
+            children_ids=[c.id for c in comment.children],
+            children=children,
+        )

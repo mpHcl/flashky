@@ -537,6 +537,7 @@ class Comment(SQLModel, table=True):
         deck_id (int): Foreign key referencing decks.id for the deck this comment belongs to.
         author_id (int): Foreign key referencing users.id for the comment author.
         parent_id (Optional[int]): Foreign key referencing comments.id for parent comment (if this is a reply).
+        is_deleted (bool): Indicates if comment is deleted (soft delete) 
 
     Relationships:
         deck (Deck): The deck this comment is associated with (back_populates="comments").
@@ -553,6 +554,8 @@ class Comment(SQLModel, table=True):
     deck_id: int = Field(foreign_key="decks.id")
     author_id: int = Field(foreign_key="users.id")
     parent_id: Optional[int] = Field(foreign_key="comments.id", default=None)
+
+    is_deleted: bool = Field(default=False)
 
     # Relationships
     deck: Mapped["Deck"] = Relationship(back_populates="comments")

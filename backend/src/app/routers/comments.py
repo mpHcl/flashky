@@ -52,17 +52,18 @@ def create_comment(
 ):
     user_id = int(user_id)
 
-    parent_comment = (
-        db.query(Comment).filter(Comment.id == comment_data.parent_id).first()
-    )
-    if comment_data.parent_id is not None and parent_comment is None:
-        raise HTTPException(status_code=404, detail="Parent comment not found")
-
-    if parent_comment and parent_comment.deck_id != comment_data.deck_id:
-        raise HTTPException(
-            status_code=400,
-            detail="Parent comments deck_id do not match provided deck_id",
+    if comment_data.parent_id is not None:
+        parent_comment = (
+            db.query(Comment).filter(Comment.id == comment_data.parent_id).first()
         )
+        if parent_comment is None:
+            raise HTTPException(status_code=404, detail="Parent comment not found")
+
+        if parent_comment.deck_id != comment_data.deck_id:
+            raise HTTPException(
+                status_code=400,
+                detail="Parent comments deck_id do not match provided deck_id",
+            )
 
     # Maybe only for public decks?
     if db.query(Deck).filter(Deck.id == comment_data.deck_id).first() is None:
@@ -116,7 +117,9 @@ def get_comments(
     offset = (page - 1) * page_size
     comments = comments.offset(offset).limit(page_size).all()
 
-    comments_dtos = [create_comment_dto(c, only_root_comments, max_depth) for c in comments]
+    comments_dtos = [
+        create_comment_dto(c, only_root_comments, max_depth) for c in comments
+    ]
 
     return {"total_number": total_number, "comments": comments_dtos}
 
@@ -148,7 +151,9 @@ def get_my_comments(
     offset = (page - 1) * page_size
     comments = comments.offset(offset).limit(page_size).all()
 
-    comments_dtos = [create_comment_dto(c, only_root_comments, max_depth) for c in comments]
+    comments_dtos = [
+        create_comment_dto(c, only_root_comments, max_depth) for c in comments
+    ]
 
     return {"total_number": total_number, "comments": comments_dtos}
 

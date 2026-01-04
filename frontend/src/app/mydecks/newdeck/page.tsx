@@ -11,12 +11,15 @@ import {
     InputAdornment,
     List,
     ListItemButton,
+    ListItemIcon,
     ListItemText,
     Paper,
     Stack,
     TextField,
+    Tooltip,
     Typography
 } from '@mui/material'
+import MoreIcon from '@mui/icons-material/More';
 import SearchIcon from '@mui/icons-material/Search';
 import { fetchAuthGET, fetchAuthPOST, PostBodyType } from '@/app/lib/fetch';
 import { DeckPostDTO, Flashcard } from '@/app/lib/types';
@@ -34,6 +37,7 @@ type AddTagsProps = {
 const FlashcardSelection = React.memo(({ selectedFlashcards, setSelectedFlashcards }: FlashcardSelectionProps) => {
     const [queryString, setQueryString] = React.useState("");
     const [searchFlashcards, setSearchFlashcards] = React.useState<Flashcard[]>([]);
+    const TOOLTIP_LENGTH = 20;
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter' && queryString.trim()) {
@@ -83,7 +87,16 @@ const FlashcardSelection = React.memo(({ selectedFlashcards, setSelectedFlashcar
         <List>
             {searchFlashcards.map((el, index) =>
                 <ListItemButton key={el.id} onClick={(e) => handleSelectFlashcard(index)}>
-                    <ListItemText primary={el.name} />
+                        <ListItemText primary={el.name} />
+                    <Tooltip title={
+                        <React.Fragment>
+                            <b>{'Front content: '}</b> {el.front_side.content == null ? "" : (el.front_side.content.length > TOOLTIP_LENGTH ? el.front_side.content.substring(0, TOOLTIP_LENGTH) + "..." : el.front_side.content)} <br />
+                            <b>{'Back content: '}</b> {el.back_side.content == null ? "" : (el.back_side.content.length > TOOLTIP_LENGTH ? el.back_side.content.substring(0, TOOLTIP_LENGTH) + "..." : el.back_side.content)} <br />
+                            <b>{el.front_side.media.length + el.back_side.media.length} media</b>
+                        </React.Fragment>
+                    } placement="bottom" enterDelay={500}>
+                        <ListItemIcon><MoreIcon/></ListItemIcon>
+                    </Tooltip>
                 </ListItemButton>)}
         </List>
     </Stack>

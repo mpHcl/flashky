@@ -1,7 +1,7 @@
 type FlashcardSide = {
     id: number,
-    content: string,
-    media_id: number[]
+    content: string | null,
+    media: number[]
 }
 
 export type Flashcard = {

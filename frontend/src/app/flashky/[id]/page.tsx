@@ -13,7 +13,7 @@ import { Flashcard } from '@/app/lib/types';
 export default function Flashky() {
     const params = useParams();
     const id = params.id;
-    const [data, setData] = useState<Flashcard>({ id: 0, name: '', owner_id: 0, creation_date: Date(), front_side: { id: 0, content: '', media_id: [] }, back_side: { id: 0, content: '', media_id: [] } });
+    const [data, setData] = useState<Flashcard>({ id: 0, name: '', owner_id: 0, creation_date: Date(), front_side: { id: 0, content: '', media: [] }, back_side: { id: 0, content: '', media: [] } });
     useEffect(() => {
         const fetchData = async () => {
             const myHeaders = new Headers();

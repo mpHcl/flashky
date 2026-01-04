@@ -1,6 +1,6 @@
 import { fetchAuthGET, fetchAuthPOST, OK, PostBodyType } from "@/app/lib/fetch";
 import { Dispatch, SetStateAction } from "react";
-import { Flashcard } from "./types";
+import { Flashcard } from "@/app/lib/types";
 
 export const getFlashcard = async (id: number, setData: Dispatch<SetStateAction<Flashcard | undefined>>) => {
     const onSuccess = async (response: Response) => {

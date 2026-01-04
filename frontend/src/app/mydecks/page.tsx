@@ -1,4 +1,28 @@
-export default function MyDecks()
-{
-    return (<h1>My Decks</h1>);
+'use client';
+import AddIcon from '@mui/icons-material/Add';
+import { Suspense, useEffect, useState } from 'react';
+import { Box, Button, Link, Typography } from '@mui/material';
+import CrudList from '../components/crudlist';
+import { fetchAuthGET } from '../lib/fetch';
+
+export default function MyDecks() {
+    const [data, setData] = useState([]);
+    useEffect(() => {
+        const onSuccess = async (response: Response) => {
+            const result = await response.json();
+            setData(result.decks);
+        }
+
+        fetchAuthGET("decks/mydecks", 200, onSuccess);
+    }, []);
+    return (<>
+        <Typography variant="h2" gutterBottom>My Decks</Typography>
+        <Link href="/mydecks/add"><Button color="secondary" size="large" variant="outlined"><AddIcon /> Create a new deck</Button></Link>
+        <Box>
+            <Suspense fallback={<div>Loading...</div>}>
+                <CrudList data={data.map((el) => ({ id: el.id, name: el.name, preview: el.description }))} showUpdateDeleteBtns={true} path="deck"></CrudList>
+            </Suspense>
+
+        </Box>
+    </>);
 }

@@ -8,7 +8,7 @@ import {
 } from '@mui/material'
 import Media from '../../components/media';
 import { getFlashcard } from '../lib/fetch';
-import { Flashcard } from '../lib/types';
+import { Flashcard } from '@/app/lib/types';
 
 export default function Flashky() {
   const params = useParams();

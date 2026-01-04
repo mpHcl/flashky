@@ -11,11 +11,13 @@ import Box from '@mui/material/Box';
 
 export type ListElement = {
     id: number,
-    name: string
+    name: string,
+    preview: string
 }
 
 export default function CrudList({ data, showUpdateDeleteBtns, path }: { data: ListElement[], showUpdateDeleteBtns: boolean, path: string }) {
     const router = useRouter();
+    const MAX_PREVIEW = 50;
     const viewOnClick = (id: number) => {
         router.push("/" + path + "/" + id);
     }
@@ -49,7 +51,7 @@ export default function CrudList({ data, showUpdateDeleteBtns, path }: { data: L
                         </span>}
                     </div>
                 } sx={[index % 2 == 0 ? { bgcolor: 'rgba(127, 127, 127, 0.2)' } : { bgcolor: null }]}>
-                    <ListItemText>{el.name}</ListItemText>
+                    <ListItemText primary={el.name} secondary={el.preview.length > MAX_PREVIEW ? el.preview.substring(0, MAX_PREVIEW) + "..." : el.preview} />
                 </ListItem>)}
         </List>
     </Box>

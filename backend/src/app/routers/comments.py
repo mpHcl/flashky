@@ -158,13 +158,14 @@ def get_comment(
     comment_id: int,
     _: str = Depends(authenticate()),
     include_children: bool = Query(True, description="Return only root comments"),
+    max_depth: int = Query(-1, description="How many replies in tree"),
     db: Session = Depends(get_session),
 ):
     comment = db.query(Comment).filter(Comment.id == comment_id).first()
     if not comment:
         raise HTTPException(status_code=404, detail="Comment not found")
 
-    return create_comment_dto(comment, not include_children)
+    return create_comment_dto(comment, not include_children, max_depth)
 
 
 @router.delete("/{comment_id}")

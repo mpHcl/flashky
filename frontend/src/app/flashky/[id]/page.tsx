@@ -8,21 +8,7 @@ import {
 } from '@mui/material'
 import Media from '../../components/media';
 import { BASE_URL } from '@/app/constants';
-
-type FlashcardSide = {
-    id: number,
-    content: string,
-    media_id: number[]
-}
-
-type Flashcard = {
-    id: number,
-    name: string,
-    owner_id: number,
-    creation_date: string,
-    front_side: FlashcardSide,
-    back_side: FlashcardSide
-}
+import { Flashcard } from '@/app/lib/types';
 
 export default function Flashky() {
     const params = useParams();

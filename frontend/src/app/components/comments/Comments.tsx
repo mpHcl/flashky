@@ -7,6 +7,7 @@ import { Box } from "@mui/material";
 import { Comment } from "./lib/types";
 import { getComments } from "./lib/fetch";
 import { CommentItem } from "./CommentItem";
+import { CommentInput } from "./CommentInput";
 
 
 type CommentsProps = {
@@ -22,6 +23,10 @@ export default function Comments({ deck_id }: CommentsProps) {
 
   return comments && (
     <Box>
+      <CommentInput
+        deck_id={deck_id}
+        setComments={setComments}
+      />
       {comments.map((comment) => (
         <CommentItem
           key={comment.id}

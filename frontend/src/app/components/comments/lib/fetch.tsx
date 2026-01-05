@@ -26,6 +26,26 @@ export const getCommentChildren = async (
 }
 
 
+export const uploadNewComment = async (
+  deck_id: number,
+  setComments: React.Dispatch<React.SetStateAction<Comment[] | undefined>>,
+  reply: string
+) => {
+  const body = {
+    "deck_id": deck_id,
+    "parent_id": null,
+    "content": reply
+  }
+
+  const onSuccess = async (response: Response) => {
+    const result = await response.json();
+    setComments(prev => prev && [result, ...prev]);
+  }
+
+  return await fetchAuthPOST(`comments`, 200, PostBodyType.JSON, body, onSuccess);
+}
+
+
 export const uploadReply = async (
   parentComment: Comment,
   setParentComment: React.Dispatch<React.SetStateAction<Comment>>,

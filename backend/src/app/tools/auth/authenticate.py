@@ -3,7 +3,7 @@ from sqlmodel import Session
 from typing import Optional, List
 
 from app.database import get_session
-from ...models import ExpireTokens
+from ...models import ExpireTokens, User
 from .jwt_handler import get_id_from_token, get_token_handler
 
 
@@ -19,7 +19,7 @@ def authenticate(roles: Optional[List[str]] = None):
 
     Raises:
         HTTPException: (401) If the token is found in the expired tokens table (invalid token).
-        HTTPException: (404) If role-based authorization is requested (not implemented yet).
+        HTTPException: (403) If user does not have requested role.
     """
 
     def dependency(
@@ -34,8 +34,9 @@ def authenticate(roles: Optional[List[str]] = None):
 
         Raises:
             HTTPException:
-                - 401 if the token is found in the expired tokens table (invalid token).
-                - 404 if role-based authorization is requested (not implemented yet).
+                - 401 if the token is found in the expired tokens table (invalid token) 
+                    or user does not exist in the database.
+                - 403 if user does not have requested role.
 
         Returns:
             int: The user ID extracted from the token if roles are not specified.
@@ -52,12 +53,28 @@ def authenticate(roles: Optional[List[str]] = None):
 
         user_id = get_id_from_token(token=token)
 
+        if type(user_id) is str:
+            user_id = int(user_id)
+
         if roles == None:
             return user_id
         else:
-            raise HTTPException(status_code=404, detail="Not implemented yet")
-        # TODO: Roles
-        # get_users_roles()
-        # if any for role in roles not in user_roles -> not auth
+            user = db.query(User).filter(User.id == user_id).first()
+
+            if user is None:
+                raise HTTPException(status_code=401, detail="Unauthorized")
+
+            if user.roles is None:
+                raise HTTPException(status_code=403, detail="Insufficient permissions")
+
+            roles_str = [role.name for role in user.roles]
+
+            for role in roles:
+                if role not in roles_str:
+                    raise HTTPException(
+                        status_code=403, detail="Insufficient permissions"
+                    )
+
+            return user_id
 
     return dependency

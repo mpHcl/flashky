@@ -14,7 +14,7 @@ from app.tools.auth.jwt_handler import (
 )
 from app.tools.auth.validation import check_password
 from app.tools.auth.hash import hash_password, verify_password
-from app.models import ExpireTokens
+from app.models import ExpireTokens, User
 
 from argon2 import PasswordHasher
 
@@ -173,15 +173,13 @@ def test_authenticate_valid_token(mocker):
     mock_db = mocker.MagicMock()
     mock_db.query().filter().first.return_value = None
 
-    mocker.patch(
-        "app.tools.auth.jwt_handler.decode_token", return_value={"sub": "user123"}
-    )
+    mocker.patch("app.tools.auth.jwt_handler.decode_token", return_value={"sub": "1"})
 
     # Act
     user_id = dependency(token="valid_token", db=mock_db)
 
     # Assert
-    assert user_id == "user123"
+    assert user_id == 1
     mock_db.query().filter().first.assert_called_once()
 
 
@@ -201,46 +199,100 @@ def test_authenticate_invalid_token_in_db(mocker):
     assert "Invalid token" in exc.value.detail
 
 
-def test_authenticate_with_roles_not_implemented(mocker):
+def test_authenticate_with_roles_sufficient(mocker):
     # Arrange
     dependency = authenticate(roles=["admin"])
     mock_db = mocker.MagicMock()
-    mock_db.query().filter().first.return_value = None
+    mock_db.query(ExpireTokens).filter().first.return_value = None
 
-    mocker.patch(
-        "app.tools.auth.jwt_handler.decode_token", return_value={"sub": "user123"}
-    )
+    mock_role = mocker.MagicMock()
+    mock_role.name = "admin"
+    mock_user = mocker.MagicMock()
+    mock_user.roles = [mock_role]
+    mock_db.query(User).filter().first.return_value = mock_user
+
+    mock_db.query.side_effect = [
+        mocker.MagicMock(
+            filter=mocker.MagicMock(
+                return_value=mocker.MagicMock(first=mocker.MagicMock(return_value=None))
+            )
+        ),
+        mocker.MagicMock(
+            filter=mocker.MagicMock(
+                return_value=mocker.MagicMock(
+                    first=mocker.MagicMock(return_value=mock_user)
+                )
+            )
+        ),
+    ]
+
+    mocker.patch("app.tools.auth.jwt_handler.decode_token", return_value={"sub": "1"})
+
+    # Act & Assert
+    user_id = dependency(token="valid_token", db=mock_db)
+
+    assert user_id == 1
+
+
+def test_authenticate_with_roles_insufficient(mocker):
+    # Arrange
+    dependency = authenticate(roles=["moderator"])
+    mock_db = mocker.MagicMock()
+    mock_db.query(ExpireTokens).filter().first.return_value = None
+
+    mock_role = mocker.MagicMock()
+    mock_role.name = "admin"
+    mock_user = mocker.MagicMock()
+    mock_user.roles = [mock_role]
+    mock_db.query(User).filter().first.return_value = mock_user
+
+    mock_db.query.side_effect = [
+        mocker.MagicMock(
+            filter=mocker.MagicMock(
+                return_value=mocker.MagicMock(first=mocker.MagicMock(return_value=None))
+            )
+        ),
+        mocker.MagicMock(
+            filter=mocker.MagicMock(
+                return_value=mocker.MagicMock(
+                    first=mocker.MagicMock(return_value=mock_user)
+                )
+            )
+        ),
+    ]
+
+    mocker.patch("app.tools.auth.jwt_handler.decode_token", return_value={"sub": "1"})
 
     # Act & Assert
     with pytest.raises(HTTPException) as exc:
-        dependency(token="valid_token", db=mock_db)
+        dependency(token="expired", db=mock_db)
 
-    assert exc.value.status_code == 404
-    assert "Not implemented yet" in exc.value.detail
+    assert exc.value.status_code == 403
+    assert "Insufficient permissions" in exc.value.detail
 
 
 # ---------- Tests for validation----------
 
 password_data = [
     # (password_str, num_of_errors)
-    ("a", 4), 
-    ("A", 4), 
-    ("3", 4), 
-    ("!", 4), 
-    ("aA", 3), 
+    ("a", 4),
+    ("A", 4),
+    ("3", 4),
+    ("!", 4),
+    ("aA", 3),
     ("aA!", 2),
-    ("Aa123!", 1), 
-    ("Aaaaaaaaaaaa123", 1), 
-    ("Aaaa123#", 0), 
-     
+    ("Aa123!", 1),
+    ("Aaaaaaaaaaaa123", 1),
+    ("Aaaa123#", 0),
 ]
+
 
 @pytest.mark.parametrize("password_str,num_of_errors", password_data)
 def test_check_password(password_str, num_of_errors):
-    # Arrange 
-    
-    # Act 
+    # Arrange
+
+    # Act
     result = check_password(password=password_str)
-    
-    # Assert 
+
+    # Assert
     assert len(result) == num_of_errors

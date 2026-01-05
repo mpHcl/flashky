@@ -2,7 +2,7 @@ from typing import Union
 
 from fastapi import FastAPI, Depends
 
-from app.routers import authentication, decks, flashcards, media, learn, comments
+from app.routers import authentication, decks, flashcards, media, learn, comments, reports
 from app.database import init_db
 from app.tools.auth.authenticate import authenticate
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,6 +17,7 @@ app.include_router(flashcards.router)
 app.include_router(media.router)
 app.include_router(learn.router)
 app.include_router(comments.router)
+app.include_router(reports.router)
 
 app.add_middleware(
     CORSMiddleware,

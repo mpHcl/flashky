@@ -11,12 +11,16 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 
 import { useState, useEffect } from 'react';
-import CrudList from "./crudlist";
-import { BASE_URL } from "../constants";
+import { RawCrudList } from "./crudlist";
 import { Deck } from "../lib/types";
-import { fetchAuthGET } from "../lib/fetch";
+import { fetchAuthGET, fetchAuthPOST, PostBodyType } from "../lib/fetch";
+
+import { useRouter } from 'next/navigation';
+import Pagination from "./Pagination";
+
 
 export default function SearchClient({ query }: { query: string }) {
+  const router = useRouter()
   const [owner, setOwner] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [tagsInput, setTagsInput] = useState("");
@@ -46,6 +50,17 @@ export default function SearchClient({ query }: { query: string }) {
   useEffect(() => {
     setPage(0);
   }, [query, owner, tags, sort]);
+
+  const saveDeck = (id: number) => {
+    const onSuccess = async () => {
+      alert("Deck saved successfully");
+    }
+    const onFail = async (response: Response) => {
+      const result = await response.json();
+      alert(result.detail);
+    }
+    fetchAuthPOST(`decks/${id}/save`, 200, PostBodyType.EMPTY, {}, onSuccess, onFail);
+  }
 
   const addTag = () => {
     const tag = tagsInput.trim();
@@ -137,33 +152,26 @@ export default function SearchClient({ query }: { query: string }) {
       <Typography>Loading…</Typography>
     ) : (
 
-      <CrudList
+      <RawCrudList
         data={decks?.map((el) => { return { id: el.id, name: el.name, preview: el.description } })}
-        showUpdateDeleteBtns={true}
-        path="deck"
+        showDeleteBtn={false}
+        showSaveBtn={true}
+        showUpdateBtn={false}
+        viewOnClick={(id: number) => { router.push(`decks/${id}`) }}
+        saveOnClick={(id: number) => { saveDeck(id) }}
+        editOnClick={() => { }}
+        deleteOnClick={() => { }}
       />
 
     )
     }
 
-    {/* Pagination */}
-    <Stack direction="row" justifyContent="space-between" alignItems="center">
-      <Button
-        disabled={page === 0}
-        onClick={() => setPage(p => p - 1)}
-      >
-        Previous
-      </Button>
-
-      <Typography>Page {page + 1}</Typography>
-
-      <Button
-        disabled={(page + 1) * pageSize >= total}
-        onClick={() => setPage(p => p + 1)}
-      >
-        Next
-      </Button>
-    </Stack>
+    <Pagination
+      page={page}
+      pageSize={pageSize}
+      total={total}
+      setPage={setPage}
+    />
   </Stack>
   );
 }

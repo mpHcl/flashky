@@ -17,11 +17,12 @@ export const fetchLib = async (
 ) => {
     try {
         const response = await fetch(`${BASE_URL}${url}`, options);
-        if (response.status !== expectedStatusCode) {
+        if (response.status === expectedStatusCode) {
+            await onSuccess?.(response);
+        }
+        else {
             await onFail?.(response);
         }
-
-        await onSuccess?.(response);
 
         return response.status;
     }
@@ -140,5 +141,19 @@ export const fetchWithoutAuthPOST = async (
         headers: headers,
         body: JSON.stringify(body)
     }
+    return fetchLib(options, url, expectedStatusCode, onSuccess, onFail);
+}
+
+export const fetchAuthDelete = async (
+    url: string,
+    expectedStatusCode: number,
+    onSuccess?: (response: Response) => Promise<void>,
+    onFail?: (response: Response) => Promise<void>,
+) => {
+    const options = {
+        method: "DELETE",
+        headers: authHeaders()
+    };
+
     return fetchLib(options, url, expectedStatusCode, onSuccess, onFail);
 }

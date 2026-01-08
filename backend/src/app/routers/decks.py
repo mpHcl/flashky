@@ -67,7 +67,7 @@ class DeckGetAllDTO(BaseModel):
 
 
 @router.post("/")
-def createDeck(
+def create_deck(
     deck_data: DeckPostDTO,
     user_id: int = Depends(authenticate()),
     db: Session = Depends(get_session),
@@ -76,7 +76,7 @@ def createDeck(
     if not user_id:
         raise HTTPException(status_code=404, detail="User not found")
 
-    flashcards = getFlashcardsByIds(deck_data.flashcards_ids, db)
+    flashcards = get_flashcards_by_ids(deck_data.flashcards_ids, db)
 
     has_media = any(
         flashcard.front_side.media or flashcard.back_side.media
@@ -162,7 +162,7 @@ def get_decks(
 
 
 @router.get("/mydecks", response_model=DeckGetAllDTO)
-def getMyDecks(
+def get_my_decks(
     user_id=Depends(authenticate()),
     db: Session = Depends(get_session),
     page: int = Query(1, ge=1),
@@ -183,9 +183,32 @@ def getMyDecks(
 
     return {"total_number": total_number, "decks": decks}
 
+@router.get("/saved", response_model=DeckGetAllDTO)
+def get_saved_deck(
+    user_id: int = Depends(authenticate()),
+    db: Session = Depends(get_session),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=0, le=100),
+):
+    query = (
+        db.query(Deck)
+        .join(User.saved_decks)
+        .filter(User.id == user_id)
+    )
+    
+    total_number = query.count()
+
+    if page_size > 0:
+        offset = (page - 1) * page_size
+        decks = query.offset(offset).limit(page_size).all()
+    else:
+        decks = query.all()
+
+    return {"total_number": total_number, "decks": decks}
+
 
 @router.get("/{deck_id}", response_model=DeckGetDTO)
-def getDeck(
+def get_deck(
     deck_id: int,
     user_id: int = Depends(authenticate()),
     db: Session = Depends(get_session),
@@ -202,7 +225,7 @@ def getDeck(
 
 
 @router.delete("/{deck_id}")
-def deleteDeck(
+def delete_deck(
     deck_id: int,
     user_id: int = Depends(authenticate()),
     db: Session = Depends(get_session),
@@ -227,7 +250,7 @@ def deleteDeck(
 
 
 @router.put("/{deck_id}", response_model=DeckGetDTO)
-def updateDeck(
+def update_deck(
     deck_id: int,
     deck_data: DeckUpdateDTO,
     user_id: int = Depends(authenticate()),
@@ -246,8 +269,8 @@ def updateDeck(
             status_code=403, detail="Not authorized to update this deck"
         )
 
-    flashcards_to_add = getFlashcardsByIds(deck_data.flashcards_to_add, db)
-    flashcards_to_remove = getFlashcardsByIds(deck_data.flashcards_to_remove, db)
+    flashcards_to_add = get_flashcards_by_ids(deck_data.flashcards_to_add, db)
+    flashcards_to_remove = get_flashcards_by_ids(deck_data.flashcards_to_remove, db)
 
     for flashcard_to_add in flashcards_to_add:
         if flashcard_to_add not in deck.flashcards:
@@ -283,7 +306,7 @@ def updateDeck(
     return deck
 
 
-def getFlashcardsByIds(flashcards_ids: Optional[list[int]], db: Session):
+def get_flashcards_by_ids(flashcards_ids: Optional[list[int]], db: Session):
     flashcards = []
     if flashcards_ids:
         flashcards = db.query(Flashcard).filter(Flashcard.id.in_(flashcards_ids)).all()
@@ -292,3 +315,48 @@ def getFlashcardsByIds(flashcards_ids: Optional[list[int]], db: Session):
                 status_code=404, detail="One or more flashcards not found"
             )
     return flashcards
+
+
+@router.post("/{deck_id}/save")
+def save_deck(
+    deck_id: int,
+    user_id: int = Depends(authenticate()),
+    db: Session = Depends(get_session),
+):
+    deck = db.query(Deck).filter(Deck.id == deck_id).first()
+    if not deck:
+        raise HTTPException(status_code=404, detail="Deck not found")
+
+    if deck.owner_id == user_id:
+        raise HTTPException(status_code=400, detail="Cannot save own decks")
+
+    if not deck.public:
+        raise HTTPException(
+            status_code=403, detail="Cannot save this deck - deck is not public"
+        )
+
+    user = db.query(User).filter(User.id == user_id).first()
+    
+    if deck in user.saved_decks:
+        return {"message": "Deck already saved"}
+
+    user.saved_decks.append(deck)
+        
+    db.commit()
+
+    return {"message": "Deck saved successfully"}
+
+
+@router.delete("/{deck_id}/save")
+def remove_saved_deck(
+    deck_id: int,
+    user_id: int = Depends(authenticate()),
+    db: Session = Depends(get_session),
+):
+    user = db.query(User).filter(User.id == user_id).first()
+
+    user.saved_decks = [deck for deck in user.saved_decks if deck.id != deck_id]
+
+    db.commit()
+
+    return {"message": "Deck removed from saved successfully"}

@@ -8,4 +8,9 @@ ENV ENV=dev
 ENV PYTHONPATH=/src
 ENV DATABASE_URL=postgresql+psycopg2://flashky_user:flashky_pass@db:5432/flashky
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80", "--reload"]
+# Copy and set executable permission for entrypoint
+COPY backend/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Use entrypoint instead of direct CMD
+CMD ["/entrypoint.sh"]

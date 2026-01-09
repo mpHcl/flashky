@@ -27,6 +27,16 @@ export type FlashcardInDeck = {
   creation_date: Date
 }
 
+export type DeckUpdateDTO = {
+  name: string,
+  description: string,
+  public: boolean,
+  flashcards_to_add: number[],
+  flashcards_to_remove: number[],
+  tags_to_add: string[],
+  tags_to_remove: string[]
+}
+
 export type Deck = {
   id: number,
   name: string,

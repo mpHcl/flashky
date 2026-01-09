@@ -62,50 +62,51 @@ export const fetchAuthGET = async (
     return fetchLib(options, url, expectedStatusCode, onSuccess, onFail);
 }
 
-export enum PostBodyType {
+export enum RequestBodyType {
     JSON,
     EMPTY,
     FORM_DATA,
 }
 
-const postRequestOptionsAuthorized = (
-    type: PostBodyType,
+const requestWithBodyOptionsAuthorized = (
+    type: RequestBodyType,
+    method: string,
     payload?: object | FormData,
 ): RequestOptions => {
     switch (type) {
-        case PostBodyType.JSON:
-            return postJSONRequestOptionsAuthorized(payload as object);
+        case RequestBodyType.JSON:
+            return requestWithBodyJSONRequestOptionsAuthorized(method, payload as object);
 
-        case PostBodyType.EMPTY:
-            return postEmptyRequestOptionsAuthorized();
+        case RequestBodyType.EMPTY:
+            return requestWithBodyEmptyRequestOptionsAuthorized(method);
 
-        case PostBodyType.FORM_DATA:
-            return postFormDataRequestOptionsAuthorized(payload as FormData);
+        case RequestBodyType.FORM_DATA:
+            return requestWithBodyFormDataRequestOptionsAuthorized(method, payload as FormData);
 
         default:
-            throw new Error("Unsupported POST body type");
+            throw new Error(`Unsupported ${method} body type`);
     }
 };
 
-const postJSONRequestOptionsAuthorized = (body: object): RequestOptions => {
+const requestWithBodyJSONRequestOptionsAuthorized = (method: string, body: object): RequestOptions => {
     const stringifiedBody = JSON.stringify(body);
     return {
-        method: "POST",
+        method: method,
         headers: authHeadersJSON(),
         body: stringifiedBody
     }
 }
 
-const postEmptyRequestOptionsAuthorized = (): RequestOptions => {
+const requestWithBodyEmptyRequestOptionsAuthorized = (method: string): RequestOptions => {
     return {
-        method: "POST",
+        method: method,
         headers: authHeadersJSON(),
     }
 }
 
-const postFormDataRequestOptionsAuthorized = (data: FormData): RequestOptions => {
+const requestWithBodyFormDataRequestOptionsAuthorized = (method: string, data: FormData): RequestOptions => {
     return {
-        method: "POST",
+        method: method,
         headers: authHeaders(),
         body: data
     }
@@ -114,24 +115,24 @@ const postFormDataRequestOptionsAuthorized = (data: FormData): RequestOptions =>
 export const fetchAuthPOST = async (
     url: string,
     expectedStatusCode: number,
-    type: PostBodyType,
+    type: RequestBodyType,
     body?: object,
     onSuccess?: (response: Response) => Promise<void>,
     onFail?: (response: Response) => Promise<void>,
 ) => {
-    const options = postRequestOptionsAuthorized(type, body);
+    const options = requestWithBodyOptionsAuthorized(type, "POST", body);
     return fetchLib(options, url, expectedStatusCode, onSuccess, onFail);
 }
 
 export const fetchWithoutAuthPOST = async (
     url: string,
     expectedStatusCode: number,
-    type: PostBodyType,
+    type: RequestBodyType,
     body: object,
     onSuccess?: (response: Response) => Promise<void>,
     onFail?: (response: Response) => Promise<void>,
 ) => {
-    if (type !== PostBodyType.JSON) {
+    if (type !== RequestBodyType.JSON) {
         throw new Error("Not implemented yet.");
     }
     const headers = new Headers();
@@ -144,6 +145,18 @@ export const fetchWithoutAuthPOST = async (
     return fetchLib(options, url, expectedStatusCode, onSuccess, onFail);
 }
 
+export const fetchAuthPUT = async (
+    url: string,
+    expectedStatusCode: number,
+    type: RequestBodyType,
+    body?: object,
+    onSuccess?: (response: Response) => Promise<void>,
+    onFail?: (response: Response) => Promise<void>,
+) => {
+    const options = requestWithBodyOptionsAuthorized(type, "PUT", body);
+    return fetchLib(options, url, expectedStatusCode, onSuccess, onFail);
+}
+  
 export const fetchAuthDelete = async (
     url: string,
     expectedStatusCode: number,

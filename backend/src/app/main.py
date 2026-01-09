@@ -3,7 +3,6 @@ from typing import Union
 from fastapi import FastAPI, Depends
 
 from app.routers import authentication, decks, flashcards, media, learn, comments, reports, users
-from app.database import init_db
 from app.tools.auth.authenticate import authenticate
 from fastapi.middleware.cors import CORSMiddleware
 

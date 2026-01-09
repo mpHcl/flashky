@@ -7,7 +7,6 @@ import ChangePasswordDialog from "./changePasswordDialog";
 import { fetchAuthDELETE, fetchAuthGET, fetchAuthPUT, OK } from "../lib/fetch";
 import { logoutFetch } from "../(auth)/lib/fetch";
 import { useRouter } from "next/navigation";
-import { error } from "console";
 
 export default function Profile() {
   const router = useRouter();

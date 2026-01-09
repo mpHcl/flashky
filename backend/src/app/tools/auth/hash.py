@@ -4,7 +4,6 @@ from argon2.exceptions import VerifyMismatchError
 
 ph = PasswordHasher()
 
-
 def hash_password(password):
     """
     Hashes the given password using the SHA-512 algorithm.

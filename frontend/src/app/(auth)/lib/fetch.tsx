@@ -1,4 +1,5 @@
-import { fetchAuthPOST, fetchWithoutAuthPOST, OK, RequestBodyType } from "@/app/lib/fetch";
+import { fetchAuthPOST, fetchWithoutAuthPOST, OK } from "@/app/lib/fetch";
+import { RequestBodyType } from "@/app/lib/fetchOptions";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 export const loginFetch = async (

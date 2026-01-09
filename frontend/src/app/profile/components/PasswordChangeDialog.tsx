@@ -1,13 +1,13 @@
 import * as React from "react";
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Stack } from "@mui/material";
 
-interface ChangePasswordDialogProps {
+interface PasswordChangeDialogProps {
   open: boolean;
   onConfirm: (data: { oldPassword: string; newPassword: string }) => void;
   onCancel: () => void;
 }
 
-export default function ChangePasswordDialog({ open, onConfirm, onCancel } : ChangePasswordDialogProps) {
+export default function PasswordChangeDialog({ open, onConfirm, onCancel } : PasswordChangeDialogProps) {
   const [form, setForm] = React.useState({
     oldPassword: "",
     newPassword: "",

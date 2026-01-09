@@ -1,12 +1,7 @@
 import { BASE_URL } from "../constants";
+import { authHeadersJSON, deleteRequestOptionsAuthorized, getRequestOptionsAuthorized, RequestBodyType, RequestOptions, requestWithBodyOptionsAuthorized } from "./fetchOptions";
 
 export const OK = 200;
-
-export type RequestOptions = {
-    method: string,
-    headers: Headers,
-    body?: string | FormData
-}
 
 export const fetchLib = async (
     options: RequestOptions,
@@ -31,27 +26,6 @@ export const fetchLib = async (
     }
 }
 
-const authHeaders = () => {
-    const headers = new Headers();
-    const token = localStorage.getItem("token");
-    headers.append("Authorization", `Bearer ${token}`);
-
-    return headers;
-}
-
-const authHeadersJSON = () => {
-    const headers = authHeaders();
-    headers.append("Content-Type", "application/json");
-    return headers
-}
-
-const getRequestOptionsAuthorized = (): RequestOptions => {
-    return {
-        method: "GET",
-        headers: authHeadersJSON(),
-    }
-}
-
 export const fetchAuthGET = async (
     url: string,
     expectedStatusCode: number,
@@ -60,56 +34,6 @@ export const fetchAuthGET = async (
 ) => {
     const options = getRequestOptionsAuthorized()
     return fetchLib(options, url, expectedStatusCode, onSuccess, onFail);
-}
-
-export enum RequestBodyType {
-    JSON,
-    EMPTY,
-    FORM_DATA,
-}
-
-const requestWithBodyOptionsAuthorized = (
-    type: RequestBodyType,
-    method: string,
-    payload?: object | FormData,
-): RequestOptions => {
-    switch (type) {
-        case RequestBodyType.JSON:
-            return requestWithBodyJSONRequestOptionsAuthorized(method, payload as object);
-
-        case RequestBodyType.EMPTY:
-            return requestWithBodyEmptyRequestOptionsAuthorized(method);
-
-        case RequestBodyType.FORM_DATA:
-            return requestWithBodyFormDataRequestOptionsAuthorized(method, payload as FormData);
-
-        default:
-            throw new Error(`Unsupported ${method} body type`);
-    }
-};
-
-const requestWithBodyJSONRequestOptionsAuthorized = (method: string, body: object): RequestOptions => {
-    const stringifiedBody = JSON.stringify(body);
-    return {
-        method: method,
-        headers: authHeadersJSON(),
-        body: stringifiedBody
-    }
-}
-
-const requestWithBodyEmptyRequestOptionsAuthorized = (method: string): RequestOptions => {
-    return {
-        method: method,
-        headers: authHeadersJSON(),
-    }
-}
-
-const requestWithBodyFormDataRequestOptionsAuthorized = (method: string, data: FormData): RequestOptions => {
-    return {
-        method: method,
-        headers: authHeaders(),
-        body: data
-    }
 }
 
 export const fetchAuthPOST = async (
@@ -155,24 +79,6 @@ export const fetchAuthPUT = async (
 ) => {
     const options = requestWithBodyOptionsAuthorized(type, "PUT", body);
     return fetchLib(options, url, expectedStatusCode, onSuccess, onFail);
-}
-  
-export const fetchAuthDelete = async (
-    url: string,
-    expectedStatusCode: number,
-    body: object,
-    onSuccess?: (response: Response) => Promise<void>,
-    onFail?: (response: Response) => Promise<void>,
-) => {
-    const options = putRequestOptionsAuthorized(body);
-    return fetchLib(options, url, expectedStatusCode, onSuccess, onFail);
-}
-
-const deleteRequestOptionsAuthorized = (): RequestOptions => {
-    return {
-        method: "DELETE",
-        headers: authHeadersJSON(),
-    }
 }
 
 export const fetchAuthDELETE = async (

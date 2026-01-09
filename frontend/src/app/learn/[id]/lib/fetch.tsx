@@ -1,7 +1,8 @@
 import { ParamValue } from "next/dist/server/request/params";
 import { Dispatch, SetStateAction } from "react";
 import { CardToLearnResult } from "../lib/types";
-import { fetchAuthGET, fetchAuthPOST, OK, RequestBodyType } from "@/app/lib/fetch";
+import { RequestBodyType } from "@/app/lib/fetchOptions";
+import { fetchAuthGET, fetchAuthPOST, OK } from "@/app/lib/fetch";
 
 export const initLearning = async (
     deck_id: ParamValue,

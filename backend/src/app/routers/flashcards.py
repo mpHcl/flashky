@@ -72,7 +72,7 @@ class FlashcardAddMediaDTO(BaseModel):
 
 
 @router.post("/", response_model=FlashcardGetDTO)
-def createFlashcard(
+def create_flashcard(
     flashcardDTO: FlashcardCreateDTO,
     user_id=Depends(authenticate()),
     db: Session = Depends(get_session),
@@ -115,7 +115,7 @@ def createFlashcard(
 
 
 @router.post("/{id}/media")
-def addMediaToFlashcardSide(
+def add_media_to_flashcard_side(
     id: int,
     flashcardAddMediaDTO: FlashcardAddMediaDTO,
     user_id=Depends(authenticate()),
@@ -162,7 +162,7 @@ def addMediaToFlashcardSide(
 
 
 @router.get("/", response_model=FlashcardGetAllDTO)
-def getFlashcards(
+def get_flashcards(
     # auth
     user_id: int = Depends(authenticate()),
     # query params
@@ -210,7 +210,7 @@ def getFlashcards(
 
 
 @router.get("/myflashcards", response_model=FlashcardGetAllDTO)
-def getMyFlashcards(
+def get_my_flashcards(
     user_id=Depends(authenticate()),
     db: Session = Depends(get_session),
     q: Optional[str] = Query(None, description="Search query"),
@@ -236,7 +236,7 @@ def getMyFlashcards(
 
 
 @router.get("/{id}", response_model=FlashcardGetDTO)
-def getFlashcardById(id: int, db: Session = Depends(get_session)):
+def get_flashcard_by_id(id: int, db: Session = Depends(get_session)):
     flashcard = db.query(Flashcard).filter(Flashcard.id == id).first()
     if not flashcard:
         raise HTTPException(status_code=404, detail="Flashcard not found")
@@ -245,7 +245,7 @@ def getFlashcardById(id: int, db: Session = Depends(get_session)):
 
 
 @router.put("/{id}", response_model=FlashcardGetDTO)
-def updateFlashcard(
+def update_flashcard(
     id: int,
     flashcardDTO: FlashcardEditDTO,
     user_id=Depends(authenticate()),
@@ -297,7 +297,7 @@ def updateFlashcard(
 
 
 @router.delete("/{id}")
-def deleteFlashcard(
+def delete_flashcard(
     id: int, user_id=Depends(authenticate()), db: Session = Depends(get_session)
 ):
     if not user_id:

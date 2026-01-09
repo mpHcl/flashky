@@ -1,4 +1,4 @@
-import { fetchAuthDelete, fetchAuthGET } from "@/app/lib/fetch";
+import { fetchAuthDELETE, fetchAuthGET } from "@/app/lib/fetch";
 import { Deck } from "@/app/lib/types";
 import { Dispatch, SetStateAction } from "react";
 
@@ -21,5 +21,5 @@ export const removeSavedDeck = (id: number, setData: Dispatch<SetStateAction<Dec
     setData(prev => prev ? prev.filter(deck => deck.id !== id) : prev)
   }
 
-  return fetchAuthDelete(`decks/${id}/save`, 200, onSuccess);
+  return fetchAuthDELETE(`decks/${id}/save`, 200, onSuccess);
 }

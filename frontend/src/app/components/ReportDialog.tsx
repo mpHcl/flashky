@@ -1,7 +1,8 @@
 'use client'
 import React, { Dispatch, SetStateAction, useState } from "react";
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from "@mui/material";
-import { fetchAuthPOST, RequestBodyType } from "../lib/fetch";
+import { fetchAuthPOST } from "../lib/fetch";
+import { RequestBodyType } from "../lib/fetchOptions";
 
 
 type ReportInputPopupProps = {

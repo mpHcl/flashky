@@ -55,7 +55,7 @@ export default function CrudList({ data, showUpdateDeleteBtns, path }: { data: L
 
 export function RawCrudList({ data, showUpdateBtn, showDeleteBtn, showSaveBtn, viewOnClick, editOnClick, deleteOnClick, saveOnClick }: RawCrudListProps) {
   const MAX_PREVIEW = 50;
-  return <Box sx={{ width: '90%', bgcolor: 'background.card', border: 1, borderColor: 'primary.main', borderRadius: 2, margin: "auto" }}>
+  return <Box sx={{ width: '90%', bgcolor: 'background.card', margin: "auto" }}>
     <List>
       {data.map((el, index) =>
         <ListItem key={el.id} secondaryAction={

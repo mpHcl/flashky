@@ -1,4 +1,4 @@
-import { fetchAuthGET, fetchAuthPOST, PostBodyType } from "@/app/lib/fetch";
+import { fetchAuthGET, fetchAuthPOST, RequestBodyType } from "@/app/lib/fetch";
 import { Comment } from "./types";
 
 
@@ -42,7 +42,7 @@ export const uploadNewComment = async (
     setComments(prev => prev && [result, ...prev]);
   }
 
-  return await fetchAuthPOST(`comments`, 200, PostBodyType.JSON, body, onSuccess);
+  return await fetchAuthPOST(`comments`, 200, RequestBodyType.JSON, body, onSuccess);
 }
 
 
@@ -66,5 +66,5 @@ export const uploadReply = async (
     }));
   }
 
-  return await fetchAuthPOST(`comments`, 200, PostBodyType.JSON, body, onSuccess);
+  return await fetchAuthPOST(`comments`, 200, RequestBodyType.JSON, body, onSuccess);
 }

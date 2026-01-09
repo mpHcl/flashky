@@ -1,6 +1,6 @@
 "use client";
 import * as React from 'react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import {
     Box,
     Button,
@@ -21,20 +21,28 @@ import {
 } from '@mui/material'
 import MoreIcon from '@mui/icons-material/More';
 import SearchIcon from '@mui/icons-material/Search';
-import { fetchAuthGET, fetchAuthPOST, RequestBodyType } from '@/app/lib/fetch';
-import { DeckPostDTO, Flashcard } from '@/app/lib/types';
+import { fetchAuthGET, fetchAuthPUT, RequestBodyType } from '@/app/lib/fetch';
+import { Deck, DeckUpdateDTO, Flashcard, FlashcardInDeck } from '@/app/lib/types';
 
 type FlashcardSelectionProps = {
-    selectedFlashcards: Flashcard[];
-    setSelectedFlashcards: (list: Flashcard[]) => void;
+    selectedFlashcards: FlashcardInDeck[];
+    setSelectedFlashcards: (list: FlashcardInDeck[]) => void;
+    flashcardsToAdd: number[];
+    setFlashcardsToAdd: (list: number[]) => void;
+    flashcardsToRemove: number[];
+    setFlashcardsToRemove: (list: number[]) => void;
 }
 
 type AddTagsProps = {
     tags: string[];
     setTags: (list: string[]) => void;
+    tagsToAdd: string[];
+    setTagsToAdd: (list: string[]) => void;
+    tagsToRemove: string[];
+    setTagsToRemove: (list: string[]) => void;
 }
 
-const FlashcardSelection = React.memo(({ selectedFlashcards, setSelectedFlashcards }: FlashcardSelectionProps) => {
+const FlashcardSelection = React.memo(({ selectedFlashcards, setSelectedFlashcards, flashcardsToAdd, setFlashcardsToAdd, flashcardsToRemove, setFlashcardsToRemove }: FlashcardSelectionProps) => {
     const [queryString, setQueryString] = React.useState("");
     const [searchFlashcards, setSearchFlashcards] = React.useState<Flashcard[]>([]);
     const TOOLTIP_LENGTH = 20;
@@ -51,13 +59,30 @@ const FlashcardSelection = React.memo(({ selectedFlashcards, setSelectedFlashcar
     }
 
     const handleSelectFlashcard = (index: number) => {
-        if (!selectedFlashcards.some(f => f.id === searchFlashcards[index].id)) {
-            setSelectedFlashcards([...selectedFlashcards, searchFlashcards[index]]);
+        const id = searchFlashcards[index].id;
+        if (!selectedFlashcards.some(f => f.id === id)) { // check if the flashcard is not already selected
+            setSelectedFlashcards([...selectedFlashcards, { id: id, name: searchFlashcards[index].name, creation_date: new Date(searchFlashcards[index].creation_date) }]);
+            if (flashcardsToRemove.includes(id)) // if true, the flashcard is being added back in the same edit
+            {
+                setFlashcardsToRemove(flashcardsToRemove.filter(f => f !== id));
+            }
+            else // this is a new flashcard
+            {
+                setFlashcardsToAdd([...flashcardsToAdd, id]);
+            }
         }
     }
 
     const deleteSelectedFlashcard = (id: number) => {
         setSelectedFlashcards(selectedFlashcards.filter(f => f.id !== id));
+        if (flashcardsToAdd.includes(id)) // if true, this flashcard is not being added after all
+        {
+            setFlashcardsToAdd(flashcardsToAdd.filter(f => f !== id));
+        }
+        else // remove this flashcard
+        {
+            setFlashcardsToRemove([...flashcardsToRemove, id]);
+        }
     }
 
     return <Stack spacing={2}>
@@ -87,7 +112,7 @@ const FlashcardSelection = React.memo(({ selectedFlashcards, setSelectedFlashcar
         <List>
             {searchFlashcards.map((el, index) =>
                 <ListItemButton key={el.id} onClick={(e) => handleSelectFlashcard(index)}>
-                        <ListItemText primary={el.name} />
+                    <ListItemText primary={el.name} />
                     <Tooltip title={
                         <React.Fragment>
                             <b>{'Front content: '}</b> {el.front_side.content == null ? "" : (el.front_side.content.length > TOOLTIP_LENGTH ? el.front_side.content.substring(0, TOOLTIP_LENGTH) + "..." : el.front_side.content)} <br />
@@ -95,20 +120,28 @@ const FlashcardSelection = React.memo(({ selectedFlashcards, setSelectedFlashcar
                             <b>{el.front_side.media.length + el.back_side.media.length} media</b>
                         </React.Fragment>
                     } placement="bottom" enterDelay={500}>
-                        <ListItemIcon><MoreIcon/></ListItemIcon>
+                        <ListItemIcon><MoreIcon /></ListItemIcon>
                     </Tooltip>
                 </ListItemButton>)}
         </List>
     </Stack>
 });
 
-const AddTags = React.memo(({ tags, setTags }: AddTagsProps) => {
+const AddTags = React.memo(({ tags, setTags, tagsToAdd, setTagsToAdd, tagsToRemove, setTagsToRemove }: AddTagsProps) => {
     const [newTag, setNewTag] = React.useState("");
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter' && newTag.trim()) {
             if (!tags.includes(newTag)) {
                 setTags([...tags, newTag]);
+                if (tagsToRemove.includes(newTag)) // if true, the tag is being added back in the same edit
+                {
+                    setTagsToRemove(tagsToRemove.filter(t => t !== newTag));
+                }
+                else // this is a new tag
+                {
+                    setTagsToAdd([...tagsToAdd, newTag]);
+                }
             }
             setNewTag("");
         }
@@ -116,6 +149,14 @@ const AddTags = React.memo(({ tags, setTags }: AddTagsProps) => {
 
     const deleteTag = (tag: string) => {
         setTags(tags.filter(t => t !== tag));
+        if (tagsToAdd.includes(tag)) // if true, this tag is not being added after all
+        {
+            setTagsToAdd(tagsToAdd.filter(t => t !== tag));
+        }
+        else // remove this tag
+        {
+            setTagsToRemove([...tagsToRemove, tag]);
+        }
     }
 
     return <>
@@ -139,23 +180,44 @@ const AddTags = React.memo(({ tags, setTags }: AddTagsProps) => {
 FlashcardSelection.displayName = "FlashcardSelection";
 AddTags.displayName = "AddTags";
 
-export default function NewDeck() {
+export default function EditDeck() {
+    const params = useParams();
+    const id = params.id;
     const router = useRouter();
     const [name, setName] = React.useState<string>("");
     const [description, setDescription] = React.useState<string>("");
     const [isPublic, setIsPublic] = React.useState<boolean>(false);
-    const [selectedFlashcards, setSelectedFlashcards] = React.useState<Flashcard[]>([]);
+    const [selectedFlashcards, setSelectedFlashcards] = React.useState<FlashcardInDeck[]>([]);
+    const [flashcardsToAdd, setFlashcardsToAdd] = React.useState<number[]>([]);
+    const [flashcardsToRemove, setFlashcardsToRemove] = React.useState<number[]>([]);
     const [tags, setTags] = React.useState<string[]>([]);
+    const [tagsToAdd, setTagsToAdd] = React.useState<string[]>([]);
+    const [tagsToRemove, setTagsToRemove] = React.useState<string[]>([]);
+    const [deck, setDeck] = React.useState<Deck>();
 
-    const createDeck = async () => {
-        const newDeck: DeckPostDTO = { name: name, description: description, isPublic: isPublic, flashcards_ids: selectedFlashcards.map(f => f.id), tags: tags };
-        fetchAuthPOST("decks", 200, RequestBodyType.JSON, newDeck);
-        router.push("/mydecks");
+    React.useEffect(() => {
+        const onSuccess = async (response: Response) => {
+            const result = await response.json();
+            setDeck(result);
+            setName(result.name);
+            setDescription(result.description);
+            setIsPublic(result.public);
+            setTags(result.tags);
+            setSelectedFlashcards(result.flashcards);
+        }
+
+        fetchAuthGET("decks/" + id, 200, onSuccess);
+    }, []);
+
+    const editDeck = async () => {
+        const updatedDeck: DeckUpdateDTO = { name: name, description: description, public: isPublic, flashcards_to_add: flashcardsToAdd, flashcards_to_remove: flashcardsToRemove, tags_to_add: tagsToAdd, tags_to_remove: tagsToRemove };
+        fetchAuthPUT("decks/" + id, 200, RequestBodyType.JSON, updatedDeck);
+        router.push("/deck/" + id);
     }
 
-    return (<Paper sx={{ p: 3, mx: "auto" }}>
+    return (deck && <Paper sx={{ p: 3, mx: "auto" }}>
         <Typography variant="h4" mb={2}>
-            Create a new Deck
+            Edit Deck
         </Typography>
         <Paper variant="outlined" sx={{ p: 2, minHeight: 600, display: "flex", flexDirection: "column" }}>
             <Grid container spacing={2}>
@@ -179,15 +241,21 @@ export default function NewDeck() {
                             sx={{ flexGrow: 1, maxHeight: 300 }}
                         />
                         <FormControlLabel control={<Checkbox checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />} label="Public" />
-                        <AddTags tags={tags} setTags={setTags} />
+                        <AddTags tags={tags} setTags={setTags} tagsToAdd={tagsToAdd} setTagsToAdd={setTagsToAdd} tagsToRemove={tagsToRemove} setTagsToRemove={setTagsToRemove} />
                     </Stack>
                 </Grid>
                 <Grid size={6}>
-                    <FlashcardSelection selectedFlashcards={selectedFlashcards} setSelectedFlashcards={setSelectedFlashcards} />
+                    <FlashcardSelection
+                        selectedFlashcards={selectedFlashcards}
+                        setSelectedFlashcards={setSelectedFlashcards}
+                        flashcardsToAdd={flashcardsToAdd}
+                        setFlashcardsToAdd={setFlashcardsToAdd}
+                        flashcardsToRemove={flashcardsToRemove}
+                        setFlashcardsToRemove={setFlashcardsToRemove} />
                 </Grid>
             </Grid>
             <Box display="flex" justifyContent="center" mt={3}>
-                <Button variant='contained' onClick={createDeck}>CREATE</Button>
+                <Button variant='contained' onClick={editDeck}>EDIT</Button>
             </Box>
         </Paper>
     </ Paper>);

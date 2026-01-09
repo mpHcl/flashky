@@ -1,4 +1,4 @@
-import { fetchAuthPOST, fetchWithoutAuthPOST, OK, PostBodyType } from "@/app/lib/fetch";
+import { fetchAuthPOST, fetchWithoutAuthPOST, OK, RequestBodyType } from "@/app/lib/fetch";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 export const loginFetch = async (
@@ -21,7 +21,7 @@ export const loginFetch = async (
         }
     }
 
-    fetchWithoutAuthPOST("login", OK, PostBodyType.JSON, body, onSuccess);
+    fetchWithoutAuthPOST("login", OK, RequestBodyType.JSON, body, onSuccess);
 }
 
 export const registerFetch = async (
@@ -61,7 +61,7 @@ export const registerFetch = async (
         }
     }
 
-    fetchWithoutAuthPOST("register", OK, PostBodyType.JSON, body, onSuccess);
+    fetchWithoutAuthPOST("register", OK, RequestBodyType.JSON, body, onSuccess);
 }
 
 export const logoutFetch =  async (router: AppRouterInstance) => {
@@ -69,5 +69,5 @@ export const logoutFetch =  async (router: AppRouterInstance) => {
         localStorage.removeItem("token");
         router.push("/");
     }
-    fetchAuthPOST("logout", OK, PostBodyType.EMPTY, undefined, onSuccess);
+    fetchAuthPOST("logout", OK, RequestBodyType.EMPTY, undefined, onSuccess);
 }

@@ -1,4 +1,4 @@
-import { fetchAuthGET, fetchAuthPOST, OK, PostBodyType } from "@/app/lib/fetch";
+import { fetchAuthGET, fetchAuthPOST, OK, RequestBodyType } from "@/app/lib/fetch";
 import { Dispatch, SetStateAction } from "react";
 import { Flashcard } from "@/app/lib/types";
 
@@ -14,7 +14,7 @@ export const uploadMedia = async (sideId: number, file: File) => {
     const formdata = new FormData();
     formdata.append("file", file);
 
-    fetchAuthPOST(`media/${sideId}`, OK, PostBodyType.FORM_DATA, formdata);
+    fetchAuthPOST(`media/${sideId}`, OK, RequestBodyType.FORM_DATA, formdata);
 }
 
 export const createFlashcard = async (
@@ -42,5 +42,5 @@ export const createFlashcard = async (
         await Promise.all(backMediaFiles.map(file => uploadMedia(result.back_side.id, file)));
     }
 
-    fetchAuthPOST("flashcards", OK, PostBodyType.JSON, content, onSuccess)
+    fetchAuthPOST("flashcards", OK, RequestBodyType.JSON, content, onSuccess)
 }

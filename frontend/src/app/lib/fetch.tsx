@@ -160,13 +160,27 @@ export const fetchAuthPUT = async (
 export const fetchAuthDelete = async (
     url: string,
     expectedStatusCode: number,
+    body: object,
     onSuccess?: (response: Response) => Promise<void>,
     onFail?: (response: Response) => Promise<void>,
 ) => {
-    const options = {
-        method: "DELETE",
-        headers: authHeaders()
-    };
+    const options = putRequestOptionsAuthorized(body);
+    return fetchLib(options, url, expectedStatusCode, onSuccess, onFail);
+}
 
+const deleteRequestOptionsAuthorized = (): RequestOptions => {
+    return {
+        method: "DELETE",
+        headers: authHeadersJSON(),
+    }
+}
+
+export const fetchAuthDELETE = async (
+    url: string,
+    expectedStatusCode: number,
+    onSuccess?: (response: Response) => Promise<void>,
+    onFail?: (response: Response) => Promise<void>,
+) => {
+    const options = deleteRequestOptionsAuthorized();
     return fetchLib(options, url, expectedStatusCode, onSuccess, onFail);
 }

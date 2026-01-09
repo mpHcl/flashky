@@ -5,7 +5,7 @@ interface ProfileData {
   username: string;
   email: string;
   avatar?: string;
-  bio?: string;
+  description?: string;
   creation_date: string;
   verified: boolean;
   active: boolean;
@@ -40,9 +40,9 @@ export default function ProfileTile({ profileData, handleChange, editable }: Pro
           
           <TextField
             fullWidth
-            label="Bio"
-            name="bio"
-            value={profileData.bio}
+            label="Description"
+            name="description"
+            value={profileData.description}
             onChange={handleChange}
             slotProps={{
               input: {
@@ -85,7 +85,7 @@ export default function ProfileTile({ profileData, handleChange, editable }: Pro
             onChange={handleChange}
             slotProps={{
               input: {
-                readOnly: !editable
+                readOnly: true
               }
             }}
           />

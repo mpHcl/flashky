@@ -142,3 +142,39 @@ export const fetchWithoutAuthPOST = async (
     }
     return fetchLib(options, url, expectedStatusCode, onSuccess, onFail);
 }
+
+const putRequestOptionsAuthorized = (body: object): RequestOptions => {
+    return {
+        method: "PUT",
+        headers: authHeadersJSON(),
+        body: JSON.stringify(body)
+    }
+}
+
+export const fetchAuthPUT = async (
+    url: string,
+    expectedStatusCode: number,
+    body: object,
+    onSuccess?: (response: Response) => Promise<void>,
+    onFail?: (response: Response) => Promise<void>,
+) => {
+    const options = putRequestOptionsAuthorized(body);
+    return fetchLib(options, url, expectedStatusCode, onSuccess, onFail);
+}
+
+const deleteRequestOptionsAuthorized = (): RequestOptions => {
+    return {
+        method: "DELETE",
+        headers: authHeadersJSON(),
+    }
+}
+
+export const fetchAuthDELETE = async (
+    url: string,
+    expectedStatusCode: number,
+    onSuccess?: (response: Response) => Promise<void>,
+    onFail?: (response: Response) => Promise<void>,
+) => {
+    const options = deleteRequestOptionsAuthorized();
+    return fetchLib(options, url, expectedStatusCode, onSuccess, onFail);
+}

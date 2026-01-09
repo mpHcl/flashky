@@ -21,7 +21,8 @@ import {
 } from '@mui/material'
 import MoreIcon from '@mui/icons-material/More';
 import SearchIcon from '@mui/icons-material/Search';
-import { fetchAuthGET, fetchAuthPUT, RequestBodyType } from '@/app/lib/fetch';
+import { RequestBodyType } from '@/app/lib/fetchOptions';
+import { fetchAuthGET, fetchAuthPUT } from '@/app/lib/fetch';
 import { Deck, DeckUpdateDTO, Flashcard, FlashcardInDeck } from '@/app/lib/types';
 
 type FlashcardSelectionProps = {

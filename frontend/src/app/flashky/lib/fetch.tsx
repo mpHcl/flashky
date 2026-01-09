@@ -1,4 +1,5 @@
-import { fetchAuthGET, fetchAuthPOST, OK, RequestBodyType } from "@/app/lib/fetch";
+import { RequestBodyType } from "@/app/lib/fetchOptions";
+import { fetchAuthGET, fetchAuthPOST, OK } from "@/app/lib/fetch";
 import { Dispatch, SetStateAction } from "react";
 import { Flashcard } from "@/app/lib/types";
 

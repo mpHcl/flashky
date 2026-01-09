@@ -25,7 +25,7 @@ export default function MyDecks() {
       >
         {/* LEFT COLUMN */}
         <Box flex={1}>
-          <Box display="flex" alignItems="center">
+          <Box display="flex" alignItems="center" height="100px">
             <Typography variant="h2" gutterBottom>
               My Decks
             </Typography>
@@ -45,7 +45,7 @@ export default function MyDecks() {
           </Box>
 
 
-          <Box mt={2}>
+          <Box>
             <Suspense fallback={<div>Loading...</div>}>
               <CrudList
                 data={data.map(el => ({
@@ -62,9 +62,11 @@ export default function MyDecks() {
 
         {/* RIGHT COLUMN */}
         <Box flex={1}>
-          <Typography variant="h2" gutterBottom>
-            Saved
-          </Typography>
+          <Box height="100px">
+            <Typography variant="h2" gutterBottom>
+              Saved
+            </Typography>
+          </Box>
 
           <SavedDecks />
         </Box>

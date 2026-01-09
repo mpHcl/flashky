@@ -1,4 +1,5 @@
-import { fetchAuthGET, fetchAuthPOST, RequestBodyType } from "@/app/lib/fetch";
+import { fetchAuthGET, fetchAuthPOST } from "@/app/lib/fetch";
+import { RequestBodyType } from "@/app/lib/fetchOptions";
 import { Comment } from "./types";
 
 

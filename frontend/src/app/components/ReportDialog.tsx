@@ -1,7 +1,7 @@
 'use client'
 import React, { Dispatch, SetStateAction, useState } from "react";
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from "@mui/material";
-import { fetchAuthPOST, PostBodyType } from "../lib/fetch";
+import { fetchAuthPOST, RequestBodyType } from "../lib/fetch";
 
 
 type ReportInputPopupProps = {
@@ -24,7 +24,7 @@ export default function ReportInputPopup({ open, setOpen, object_id, object_type
     const onSuccess = async () => {
       setOpen(false);
     }
-    fetchAuthPOST("reports", 200, PostBodyType.JSON, body, onSuccess)
+    fetchAuthPOST("reports", 200, RequestBodyType.JSON, body, onSuccess)
   }
 
   const handleSend = () => {

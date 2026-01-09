@@ -21,7 +21,7 @@ import {
 } from '@mui/material'
 import MoreIcon from '@mui/icons-material/More';
 import SearchIcon from '@mui/icons-material/Search';
-import { fetchAuthGET, fetchAuthPOST, PostBodyType } from '@/app/lib/fetch';
+import { fetchAuthGET, fetchAuthPOST, RequestBodyType } from '@/app/lib/fetch';
 import { DeckPostDTO, Flashcard } from '@/app/lib/types';
 
 type FlashcardSelectionProps = {
@@ -149,7 +149,7 @@ export default function NewDeck() {
 
     const createDeck = async () => {
         const newDeck: DeckPostDTO = { name: name, description: description, isPublic: isPublic, flashcards_ids: selectedFlashcards.map(f => f.id), tags: tags };
-        fetchAuthPOST("decks", 200, PostBodyType.JSON, newDeck);
+        fetchAuthPOST("decks", 200, RequestBodyType.JSON, newDeck);
         router.push("/mydecks");
     }
 

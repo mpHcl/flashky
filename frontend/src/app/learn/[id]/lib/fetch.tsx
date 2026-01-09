@@ -1,14 +1,14 @@
 import { ParamValue } from "next/dist/server/request/params";
 import { Dispatch, SetStateAction } from "react";
 import { CardToLearnResult } from "../lib/types";
-import { fetchAuthGET, fetchAuthPOST, OK, PostBodyType } from "@/app/lib/fetch";
+import { fetchAuthGET, fetchAuthPOST, OK, RequestBodyType } from "@/app/lib/fetch";
 
 export const initLearning = async (
     deck_id: ParamValue,
     setInitializing: Dispatch<SetStateAction<boolean>>
 ) => {
     setInitializing(true);
-    fetchAuthPOST(`learn/${deck_id}/init`, OK, PostBodyType.EMPTY);
+    fetchAuthPOST(`learn/${deck_id}/init`, OK, RequestBodyType.EMPTY);
     setInitializing(false);
 };
 
@@ -49,5 +49,5 @@ export const postReview = async (quality: number, flashcard_id: number) => {
     const body = {
         "quality": quality
     }
-    return await fetchAuthPOST(`learn/${flashcard_id}/review`, OK, PostBodyType.JSON, body);
+    return await fetchAuthPOST(`learn/${flashcard_id}/review`, OK, RequestBodyType.JSON, body);
 }

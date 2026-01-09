@@ -6,3 +6,4 @@ PyJWT
 argon2-cffi==25.1.0
 pytest
 pytest-mock
+alembic==1.17.2

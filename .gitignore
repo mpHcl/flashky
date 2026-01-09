@@ -5,7 +5,8 @@ cspell.json
 __pycache__
 .pytest_cache
 .venv
-/backend/src/files
+/backend/src/files/*
+!/backend/src/files/samples/
 
 ############################# Frontend ############################
 # dependencies

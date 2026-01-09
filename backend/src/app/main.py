@@ -3,7 +3,6 @@ from typing import Union
 from fastapi import FastAPI, Depends
 
 from app.routers import authentication, decks, flashcards, media, learn, comments, reports
-from app.database import init_db
 from app.tools.auth.authenticate import authenticate
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -26,18 +25,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-@app.on_event("startup")
-def startup():
-    """
-    Perform application startup initialization.
-    This function performs one-time initialization steps required before the application
-    can handle requests. Currently it delegates to `init_db()` to ensure the database is
-    ready, but it may be extended to include other startup tasks.
-    """
-
-    init_db()
-
 
 @app.get("/")
 def read_root(user_id=Depends(authenticate())):

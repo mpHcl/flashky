@@ -154,6 +154,8 @@ export const fetchAuthPUT = async (
     onFail?: (response: Response) => Promise<void>,
 ) => {
     const options = requestWithBodyOptionsAuthorized(type, "PUT", body);
+    return fetchLib(options, url, expectedStatusCode, onSuccess, onFail);
+}
   
 export const fetchAuthDelete = async (
     url: string,

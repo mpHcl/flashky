@@ -212,7 +212,7 @@ export default function EditDeck() {
     const editDeck = async () => {
         const updatedDeck: DeckUpdateDTO = { name: name, description: description, public: isPublic, flashcards_to_add: flashcardsToAdd, flashcards_to_remove: flashcardsToRemove, tags_to_add: tagsToAdd, tags_to_remove: tagsToRemove };
         fetchAuthPUT("decks/" + id, 200, RequestBodyType.JSON, updatedDeck);
-        router.push("/deck/" + id);
+        router.push("/decks/" + id);
     }
 
     return (deck && <Paper sx={{ p: 3, mx: "auto" }}>

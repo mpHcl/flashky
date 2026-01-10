@@ -19,6 +19,7 @@ import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import { useRouter } from "next/navigation";
 import { registerFetch } from '../lib/fetch';
+import { useAuth } from '../context/AuthContext';
 
 function CustomHelperText() {
   const { error } = useFormControl() || {};
@@ -51,8 +52,10 @@ export default function Register() {
   const [password, setPassword] = React.useState('');
   const router = useRouter();
 
+  const {login} = useAuth();
+
   const onRegisterButtonClick = async () => {
-    registerFetch(username, email, password, router);
+    registerFetch(username, email, password, router, login);
   }
 
   return (

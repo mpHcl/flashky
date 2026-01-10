@@ -5,17 +5,27 @@ import { Box, Button, Link, Typography } from '@mui/material';
 import CrudList from '../components/crudlist';
 import { fetchAuthGET } from '../lib/fetch';
 import SavedDecks from '../decks/components/SavedDecks';
+import { checkAuthenticated, useAuth } from '../(auth)/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function MyDecks() {
   const [data, setData] = useState([]);
-  useEffect(() => {
-    const onSuccess = async (response: Response) => {
-      const result = await response.json();
-      setData(result.decks);
-    }
+  const {isAuthenticated} = useAuth();
+  const router = useRouter();
 
-    fetchAuthGET("decks/mydecks", 200, onSuccess);
-  }, []);
+  useEffect(() => {
+      if (!checkAuthenticated(router, isAuthenticated)) {
+        return;
+      }
+
+      const onSuccess = async (response: Response) => {
+        const result = await response.json();
+        setData(result.decks);
+      }
+
+      fetchAuthGET("decks/mydecks", 200, onSuccess);  
+  }, [isAuthenticated]);
+  
   return (
     <>
       <Box

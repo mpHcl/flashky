@@ -1,11 +1,13 @@
-import { fetchAuthPOST, fetchWithoutAuthPOST, OK } from "@/app/lib/fetch";
+import { fetchAuthGET, fetchAuthPOST, fetchWithoutAuthPOST, OK } from "@/app/lib/fetch";
 import { RequestBodyType } from "@/app/lib/fetchOptions";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { Dispatch, SetStateAction } from "react";
 
 export const loginFetch = async (
-    username: string, 
-    password: string, 
-    router: AppRouterInstance
+    username: string,
+    password: string,
+    router: AppRouterInstance, 
+    updateContext: (token: string) => void
 ) => {
     const body = {
         "login": username,
@@ -14,7 +16,7 @@ export const loginFetch = async (
     const onSuccess = async (response: Response) => {
         const result = await response.json()
         if (result['token']) {
-            localStorage.setItem("token", result['token']);
+            updateContext(result['token'])
             router.push("/");
         }
         else {
@@ -26,10 +28,11 @@ export const loginFetch = async (
 }
 
 export const registerFetch = async (
-    username: string, 
-    email: string, 
-    password: string, 
-    router: AppRouterInstance
+    username: string,
+    email: string,
+    password: string,
+    router: AppRouterInstance, 
+    updateContext: (token: string) => void
 ) => {
     const body = {
         "username": username,
@@ -39,7 +42,7 @@ export const registerFetch = async (
     const onSuccess = async (response: Response) => {
         const result = await response.json()
         if (result['token']) {
-            localStorage.setItem("token", result['token']);
+            updateContext(result['token'])
             router.push("/");
         }
         else {
@@ -65,10 +68,30 @@ export const registerFetch = async (
     fetchWithoutAuthPOST("register", OK, RequestBodyType.JSON, body, onSuccess);
 }
 
-export const logoutFetch =  async (router: AppRouterInstance) => {
-    const onSuccess = async (_response: Response) => {
-        localStorage.removeItem("token");
+export const logoutFetch = async (
+    router: AppRouterInstance,     
+    updateContext: () => void
+) => {
+    const onSuccess = async () => {
+        updateContext()
         router.push("/");
     }
     fetchAuthPOST("logout", OK, RequestBodyType.EMPTY, undefined, onSuccess);
+}
+
+export const checkToken = (setIsAuthenticated: Dispatch<SetStateAction<boolean | null>>) => {
+    if (!localStorage.getItem("token")) {
+        setIsAuthenticated(false);
+        return;
+    }
+
+    fetchAuthGET(
+        "check_token",
+        200,
+        async () => { setIsAuthenticated(true) },
+        async () => {
+            localStorage.removeItem("token");
+            setIsAuthenticated(false);
+        }
+    )
 }

@@ -35,10 +35,12 @@ export const fetchSaveProfile = (
 }
 
 export const fetchDeleteProfile = (
-    router: AppRouterInstance
+    router: AppRouterInstance,
+    updateContext: () => void
+
 ) => {
     const onSuccess = async (response: Response) => {
-        logoutFetch(router);
+        logoutFetch(router, updateContext);
     }
 
     const onFail = async (response: Response) => {

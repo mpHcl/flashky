@@ -15,18 +15,13 @@ router = APIRouter(prefix="/flashcards", tags=["flashcards"])
 class FlashcardSideCreateDTO(BaseModel):
     content: Optional[str] = None
 
+
 class FlashcardSideGetDTO(BaseModel):
     id: int
     content: Optional[str] = None
-    media: Optional[list[Media]] = None
-    
-    @field_serializer("media")
-    def serialize_tags(self, media):
-        if media is None:
-            return None
-        return [m.id for m in media]
-    
-    
+    media: Optional[list[int]] = None
+
+
 class FlashcardCreateDTO(BaseModel):
     name: str
     front: FlashcardSideCreateDTO
@@ -49,13 +44,7 @@ class FlashcardGetDTO(BaseModel):
     owner_id: int
     front_side: FlashcardSideGetDTO
     back_side: FlashcardSideGetDTO
-    tags: Optional[list[Tag]] = None
-
-    @field_serializer("tags")
-    def serialize_tags(self, tags):
-        if tags is None:
-            return None
-        return [tag.name for tag in tags]
+    tags: Optional[list[str]] = None
 
 
 class FlashcardGetAllDTO(BaseModel):
@@ -111,7 +100,7 @@ def create_flashcard(
     db.commit()
     db.refresh(flashcard)
 
-    return flashcard
+    return create_flashcard_dto(flashcard)
 
 
 @router.post("/{id}/media")
@@ -206,7 +195,10 @@ def get_flashcards(
     offset = (page - 1) * page_size
     flashcards = query.offset(offset).limit(page_size).all()
 
-    return {"total_number": total_number, "flashcards": flashcards}
+    return {
+        "total_number": total_number,
+        "flashcards": [create_flashcard_dto(flashcard) for flashcard in flashcards],
+    }
 
 
 @router.get("/myflashcards", response_model=FlashcardGetAllDTO)
@@ -232,7 +224,10 @@ def get_my_flashcards(
     else:
         flashcards = query.all()
 
-    return {"total_number": total_number, "flashcards": flashcards}
+    return {
+        "total_number": total_number,
+        "flashcards": [create_flashcard_dto(flashcard) for flashcard in flashcards],
+    }
 
 
 @router.get("/{id}", response_model=FlashcardGetDTO)
@@ -241,7 +236,7 @@ def get_flashcard_by_id(id: int, db: Session = Depends(get_session)):
     if not flashcard:
         raise HTTPException(status_code=404, detail="Flashcard not found")
 
-    return flashcard
+    return create_flashcard_dto(flashcard)
 
 
 @router.put("/{id}", response_model=FlashcardGetDTO)
@@ -293,7 +288,7 @@ def update_flashcard(
     db.commit()
     db.refresh(flashcard)
 
-    return flashcard
+    return create_flashcard_dto(flashcard)
 
 
 @router.delete("/{id}")
@@ -314,3 +309,31 @@ def delete_flashcard(
     db.delete(flashcard)
     db.commit()
     return "Flashcard deleted successfully"
+
+
+def create_flashcard_dto(flashcard: Flashcard):
+    return FlashcardGetDTO(
+        id=flashcard.id,
+        name=flashcard.name,
+        creation_date=flashcard.creation_date,
+        owner_id=flashcard.owner_id,
+        front_side=FlashcardSideGetDTO(
+            id=flashcard.front_side.id,
+            content=flashcard.front_side.content,
+            media=(
+                [m.id for m in flashcard.front_side.media]
+                if flashcard.front_side.media is not None
+                else []
+            ),
+        ),
+        back_side=FlashcardSideGetDTO(
+            id=flashcard.back_side.id,
+            content=flashcard.back_side.content,
+            media=(
+                [m.id for m in flashcard.back_side.media]
+                if flashcard.back_side.media is not None
+                else []
+            ),
+        ),
+        tags=[tag.name for tag in flashcard.tags] if flashcard.tags is not None else [],
+    )

@@ -16,8 +16,12 @@ import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import { useRouter } from "next/navigation";
 import { loginFetch } from '../lib/fetch';
+import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
+  const { login } = useAuth();
+
+
   const [showPassword, setShowPassword] = React.useState(false);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -35,7 +39,7 @@ export default function Login() {
   const router = useRouter();
 
   const onLoginButtonClick = async () => {
-    loginFetch(username, password, router);
+    loginFetch(username, password, router, login);
   }
 
   return (

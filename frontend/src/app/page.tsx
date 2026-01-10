@@ -5,47 +5,22 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Link from '@mui/material/Link';
 import { BASE_URL } from "./constants";
+import { useAuth } from "./(auth)/context/AuthContext";
 
 export default function Home() {
-  const [hasToken, setHasToken] = useState(false);
+  const {isAuthenticated} = useAuth();
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const checkToken = async () => {
-      const token = localStorage.getItem("token");
-      
-      if (!token) {
-        setHasToken(false);
-        return;
-      }
-
-      try {
-        const response = await fetch(BASE_URL + 'check_token', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        if (response.status === 401) {
-          localStorage.removeItem("token");
-          setHasToken(false);
-        } else {
-          setHasToken(true);
-        }
-      } catch (error) {
-        console.error('Token check failed:', error);
-        localStorage.removeItem("token");
-        setHasToken(false);
-      }
-    };
-    
-    checkToken();
-  }, []);
+  useEffect(()=>{
+    setLoading(isAuthenticated === null);
+  }, [isAuthenticated])
 
   return (
+    !loading && 
     <div>
       <Typography variant="h2" gutterBottom>Welcome to FLASHKY!</Typography>
       {
-        hasToken ?
+        isAuthenticated ?
           <>
             <Link href="/logout"><Button color="secondary" size="large" variant="outlined">Log out</Button></Link>
           </>

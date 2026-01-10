@@ -46,13 +46,7 @@ class DeckGetDTO(BaseModel):
     public: bool
     has_media: bool
     flashcards: list[FlashcardDTO]
-    tags: Optional[list[Tag]] = None
-
-    @field_serializer("tags")
-    def serialize_tags(self, tags):
-        if tags is None:
-            return None
-        return [tag.name for tag in tags]
+    tags: Optional[list[str]] = None
 
     class Config:
         from_attributes = True
@@ -111,7 +105,7 @@ def create_deck(
 
     db.commit()
     db.refresh(deck)
-    return deck
+    return create_deck_dto(deck)
 
 
 @router.get("/", response_model=DeckGetAllDTO)
@@ -158,7 +152,10 @@ def get_decks(
     offset = (page - 1) * page_size
     decks = query.offset(offset).limit(page_size).all()
 
-    return {"total_number": total_number, "decks": decks}
+    return {
+        "total_number": total_number,
+        "decks": [create_deck_dto(deck) for deck in decks],
+    }
 
 
 @router.get("/mydecks", response_model=DeckGetAllDTO)
@@ -181,7 +178,11 @@ def get_my_decks(
     else:
         decks = query.all()
 
-    return {"total_number": total_number, "decks": decks}
+    return {
+        "total_number": total_number,
+        "decks": [create_deck_dto(deck) for deck in decks],
+    }
+
 
 @router.get("/saved", response_model=DeckGetAllDTO)
 def get_saved_deck(
@@ -190,12 +191,8 @@ def get_saved_deck(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=0, le=100),
 ):
-    query = (
-        db.query(Deck)
-        .join(User.saved_decks)
-        .filter(User.id == user_id)
-    )
-    
+    query = db.query(Deck).join(User.saved_decks).filter(User.id == user_id)
+
     total_number = query.count()
 
     if page_size > 0:
@@ -204,7 +201,10 @@ def get_saved_deck(
     else:
         decks = query.all()
 
-    return {"total_number": total_number, "decks": decks}
+    return {
+        "total_number": total_number,
+        "decks": [create_deck_dto(deck) for deck in decks],
+    }
 
 
 @router.get("/{deck_id}", response_model=DeckGetDTO)
@@ -221,7 +221,7 @@ def get_deck(
     if not deck:
         raise HTTPException(status_code=404, detail="Deck not found")
 
-    return deck
+    return create_deck_dto(deck)
 
 
 @router.delete("/{deck_id}")
@@ -303,7 +303,7 @@ def update_deck(
     deck.last_edit_date = datetime.now()
     db.commit()
     db.refresh(deck)
-    return deck
+    return create_deck_dto(deck)
 
 
 def get_flashcards_by_ids(flashcards_ids: Optional[list[int]], db: Session):
@@ -336,12 +336,12 @@ def save_deck(
         )
 
     user = db.query(User).filter(User.id == user_id).first()
-    
+
     if deck in user.saved_decks:
         return {"message": "Deck already saved"}
 
     user.saved_decks.append(deck)
-        
+
     db.commit()
 
     return {"message": "Deck saved successfully"}
@@ -360,3 +360,22 @@ def remove_saved_deck(
     db.commit()
 
     return {"message": "Deck removed from saved successfully"}
+
+
+def create_deck_dto(deck: Deck):
+    return DeckGetDTO(
+        id=deck.id,
+        name=deck.name,
+        description=deck.description,
+        public=deck.public,
+        has_media=deck.has_media,
+        flashcards=[
+            FlashcardDTO(
+                id=flashcard.id,
+                name=flashcard.name,
+                creation_date=flashcard.creation_date,
+            )
+            for flashcard in deck.flashcards
+        ],
+        tags=[tag.name for tag in deck.tags] if deck.tags is not None else [],
+    )

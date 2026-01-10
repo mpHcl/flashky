@@ -13,10 +13,11 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useState, useEffect } from 'react';
 import { RawCrudList } from "./crudlist";
 import { Deck } from "../lib/types";
-import { fetchAuthGET, fetchAuthPOST, PostBodyType } from "../lib/fetch";
+import { fetchAuthGET, fetchAuthPOST } from "../lib/fetch";
 
 import { useRouter } from 'next/navigation';
 import Pagination from "./Pagination";
+import { RequestBodyType } from "../lib/fetchOptions";
 
 
 export default function SearchClient({ query }: { query: string }) {
@@ -59,7 +60,7 @@ export default function SearchClient({ query }: { query: string }) {
       const result = await response.json();
       alert(result.detail);
     }
-    fetchAuthPOST(`decks/${id}/save`, 200, PostBodyType.EMPTY, {}, onSuccess, onFail);
+    fetchAuthPOST(`decks/${id}/save`, 200, RequestBodyType.EMPTY, {}, onSuccess, onFail);
   }
 
   const addTag = () => {

@@ -6,6 +6,7 @@ import ProfileTile from "../components/ProfileTile";
 import ConfirmDialog from "../components/ConfirmDialog";
 import ChangePasswordDialog from "./components/PasswordChangeDialog";
 import { fetchChangePassword, fetchDeleteProfile, fetchProfile, fetchSaveProfile } from "./lib/fetch";
+import { useAuth } from "../(auth)/context/AuthContext";
 
 export default function Profile() {
   const router = useRouter();
@@ -15,6 +16,8 @@ export default function Profile() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const [profile, setProfile] = useState<Profile>();
+
+  const {logout} = useAuth();
 
   const loadProfile = () => {
     fetchProfile(setProfile);
@@ -49,7 +52,7 @@ export default function Profile() {
   };
 
   const deleteProfile = () => {
-    fetchDeleteProfile(router);
+    fetchDeleteProfile(router, logout);
     setDeleteConfirmOpen(false);
   };
 

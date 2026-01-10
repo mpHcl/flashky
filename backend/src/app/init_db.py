@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlmodel import Session
 from .tools.auth.hash import hash_password
 from .database import engine
@@ -12,6 +13,7 @@ from .models import (
     FlashcardSide,
     Tag,
     SavedDeck,
+    Comment
 )
 
 
@@ -175,6 +177,102 @@ def init_data():
         )
         session.add_all([deck1, deck2, deck3])
         session.commit()
+
+        comment1 = Comment(
+            content="Amazing deck!",
+            creation_date=datetime.utcnow(),
+            deck=deck1,
+            author=user2,
+        )
+
+        comment2 = Comment(
+            content="I AGREE!",
+            creation_date=datetime.utcnow(),
+            deck=deck1,
+            author=user3,
+            parent=comment1
+        )
+
+        comment3 = Comment(
+            content="Valid opinion",
+            creation_date=datetime.utcnow(),
+            deck=deck1,
+            author=user4,
+            parent=comment1
+        )
+
+        comment4 = Comment(
+            content="I like this. :)",
+            creation_date=datetime.utcnow(),
+            deck=deck1,
+            author=user4,
+        )
+
+        comment5 = Comment(
+            content="Amazing deck!",
+            creation_date=datetime.utcnow(),
+            deck=deck2,
+            author=user2,
+        )
+
+        comment6 = Comment(
+            content="I AGREE!",
+            creation_date=datetime.utcnow(),
+            deck=deck2,
+            author=user3,
+            parent=comment5
+        )
+
+        comment7 = Comment(
+            content="Valid opinion",
+            creation_date=datetime.utcnow(),
+            deck=deck2,
+            author=user4,
+            parent=comment5
+        )
+
+        comment8 = Comment(
+            content="I like this. :)",
+            creation_date=datetime.utcnow(),
+            deck=deck2,
+            author=user4,
+        )
+
+        comment9 = Comment(
+            content="Awful deck!",
+            creation_date=datetime.utcnow(),
+            deck=deck3,
+            author=user2,
+            is_deleted=True
+        )
+
+        comment10 = Comment(
+            content="I AGREE!",
+            creation_date=datetime.utcnow(),
+            deck=deck2,
+            author=user3,
+            parent=comment9
+        )
+
+        comment11 = Comment(
+            content="Valid opinion",
+            creation_date=datetime.utcnow(),
+            deck=deck3,
+            author=user4,
+            parent=comment9
+        )
+
+        comment12 = Comment(
+            content="I don't like this. :)",
+            creation_date=datetime.utcnow(),
+            deck=deck3,
+            author=user4,
+        )
+        session.add_all([
+            comment1, comment2, comment3, comment4, 
+            comment5, comment6, comment7, comment8, 
+            comment9, comment10, comment11, comment12
+        ])
 
         # Link decks to flashcards
         deck1.flashcards.append(flashcard1)

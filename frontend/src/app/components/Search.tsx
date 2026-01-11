@@ -19,8 +19,11 @@ import { useRouter } from 'next/navigation';
 import Pagination from "./Pagination";
 import { RequestBodyType } from "../lib/fetchOptions";
 
+import { DialogType, useDialog } from "./dialogs/AppDialog";
+import AlertDialog from "./dialogs/AppDialog";
 
-export default function SearchClient({ query }: { query: string }) {
+
+export default function Search({ query }: { query: string }) {
   const router = useRouter()
   const [owner, setOwner] = useState("");
   const [tags, setTags] = useState<string[]>([]);
@@ -32,6 +35,8 @@ export default function SearchClient({ query }: { query: string }) {
   const [decks, setDecks] = useState<Deck[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+
+  const { dialog, show, close } = useDialog();
 
   useEffect(() => {
     if (!query) return;
@@ -53,12 +58,13 @@ export default function SearchClient({ query }: { query: string }) {
   }, [query, owner, tags, sort]);
 
   const saveDeck = (id: number) => {
-    const onSuccess = async () => {
-      alert("Deck saved successfully");
+    const onSuccess = async (response: Response) => {
+      const result = await response.json();
+      show(result.message, DialogType.INFO);
     }
     const onFail = async (response: Response) => {
       const result = await response.json();
-      alert(result.detail);
+      show(result.detail, DialogType.ERROR);
     }
     fetchAuthPOST(`decks/${id}/save`, 200, RequestBodyType.EMPTY, {}, onSuccess, onFail);
   }
@@ -94,85 +100,88 @@ export default function SearchClient({ query }: { query: string }) {
   }
 
 
-  return (<Stack spacing={2}>
-    {/* Filters */}
-    <Stack direction="row" spacing={2}>
-      <TextField
-        label="Owner"
-        size="small"
-        value={owner}
-        onChange={e => {
-          setOwner(e.target.value);
-          setPage(0);
-        }}
-      />
+  return (
+    <Stack spacing={2}>
+      <AlertDialog {...dialog} onClose={close} />
 
-      <TextField
-        label="Add tag"
-        size="small"
-        value={tagsInput}
-        onChange={e => setTagsInput(e.target.value)}
-        onKeyDown={onTagKeyDown}
-      />
-
-      <Button variant="contained" onClick={addTag}>
-        Add
-      </Button>
-    </Stack>
-
-    {/* Tag list */}
-    {tags.length > 0 && (
-      <Stack direction="row" spacing={1} flexWrap="wrap">
-        {tags.map(tag => (
-          <Chip
-            key={tag}
-            label={tag}
-            onDelete={() => removeTag(tag)}
-            deleteIcon={<CloseIcon />}
-          />
-        ))}
-      </Stack>
-    )}
-
-    {/* Sort */}
-    <FormControlLabel
-      control={
-        <Checkbox
-          checked={sort === 1}
+      {/* Filters */}
+      <Stack direction="row" spacing={2}>
+        <TextField
+          label="Owner"
+          size="small"
+          value={owner}
           onChange={e => {
-            setSort(e.target.checked ? 1 : 0);
+            setOwner(e.target.value);
             setPage(0);
           }}
         />
-      }
-      label="Sort by date"
-    />
 
-    {/* Results */}
-    {loading ? (
-      <Typography>Loading…</Typography>
-    ) : (
+        <TextField
+          label="Add tag"
+          size="small"
+          value={tagsInput}
+          onChange={e => setTagsInput(e.target.value)}
+          onKeyDown={onTagKeyDown}
+        />
 
-      <RawCrudList
-        data={decks?.map((el) => { return { id: el.id, name: el.name, preview: el.description } })}
-        showDeleteBtn={false}
-        showSaveBtn={true}
-        showUpdateBtn={false}
-        viewOnClick={(id: number) => { router.push(`decks/${id}`) }}
-        saveOnClick={(id: number) => { saveDeck(id) }}
-        editOnClick={() => { }}
-        deleteOnClick={() => { }}
+        <Button variant="contained" onClick={addTag}>
+          Add
+        </Button>
+      </Stack>
+
+      {/* Tag list */}
+      {tags.length > 0 && (
+        <Stack direction="row" spacing={1} flexWrap="wrap">
+          {tags.map(tag => (
+            <Chip
+              key={tag}
+              label={tag}
+              onDelete={() => removeTag(tag)}
+              deleteIcon={<CloseIcon />}
+            />
+          ))}
+        </Stack>
+      )}
+
+      {/* Sort */}
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={sort === 1}
+            onChange={e => {
+              setSort(e.target.checked ? 1 : 0);
+              setPage(0);
+            }}
+          />
+        }
+        label="Sort by date"
       />
 
-    )
-    }
+      {/* Results */}
+      {loading ? (
+        <Typography>Loading…</Typography>
+      ) : (
 
-    <Pagination
-      page={page}
-      pageSize={pageSize}
-      total={total}
-      setPage={setPage}
-    />
-  </Stack>
+        <RawCrudList
+          data={decks?.map((el) => { return { id: el.id, name: el.name, preview: el.description } })}
+          showDeleteBtn={false}
+          showSaveBtn={true}
+          showUpdateBtn={false}
+          viewOnClick={(id: number) => { router.push(`decks/${id}`) }}
+          saveOnClick={(id: number) => { saveDeck(id) }}
+          editOnClick={() => { }}
+          deleteOnClick={() => { }}
+        />
+
+      )
+      }
+
+      <Pagination
+        page={page}
+        pageSize={pageSize}
+        total={total}
+        setPage={setPage}
+      />
+    </Stack>
   );
 }

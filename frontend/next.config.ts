@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
     }
     return config;
   },
+  devIndicators: {
+    position: "bottom-right"
+  }
 };
 
 export default nextConfig;

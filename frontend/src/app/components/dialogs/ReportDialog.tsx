@@ -1,8 +1,15 @@
 'use client'
 import React, { Dispatch, SetStateAction, useState } from "react";
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from "@mui/material";
-import { fetchAuthPOST } from "../lib/fetch";
-import { RequestBodyType } from "../lib/fetchOptions";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button
+} from "@mui/material";
+import { fetchAuthPOST } from "../../lib/fetch";
+import { RequestBodyType } from "../../lib/fetchOptions";
 
 
 type ReportInputPopupProps = {
@@ -13,13 +20,13 @@ type ReportInputPopupProps = {
 }
 
 
-export default function ReportInputPopup({ open, setOpen, object_id, object_type}: ReportInputPopupProps) {
+export default function ReportInputPopup({ open, setOpen, object_id, object_type }: ReportInputPopupProps) {
   const [text, setText] = useState("");
 
   const sendReport = async () => {
     const body = {
-      "type": object_type, 
-      "description": text, 
+      "type": object_type,
+      "description": text,
       "item_id": object_id
     }
     const onSuccess = async () => {

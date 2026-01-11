@@ -9,6 +9,8 @@ import Sidebar from "./components/sidebar"
 import SearchBox from "./components/searchbox";
 import { AuthProvider } from "./(auth)/context/AuthContext";
 
+import { Roboto } from 'next/font/google'
+
 export const metadata: Metadata = {
   title: "Flashky",
   description: "Learn with Flashky",
@@ -27,9 +29,14 @@ const routes = [
   },
 ];
 
+const roboto = Roboto({
+  subsets: ['latin'],
+  weight: ['400', '500', '700']
+})
+
 export default function RootLayout({ children, }: Readonly<{ children: React.ReactNode; }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={roboto.className}>
       <body>
         <AuthProvider>
           <AppRouterCacheProvider>

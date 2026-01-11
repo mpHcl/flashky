@@ -1,12 +1,14 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Box, Stack, Button} from "@mui/material";
+import { Box, Stack, Button } from "@mui/material";
 import { useRouter } from "next/navigation";
 import ProfileTile from "../components/ProfileTile";
-import ConfirmDialog from "../components/ConfirmDialog";
+import ConfirmDialog from "../components/dialogs/ConfirmDialog";
 import ChangePasswordDialog from "./components/PasswordChangeDialog";
 import { fetchChangePassword, fetchDeleteProfile, fetchProfile, fetchSaveProfile } from "./lib/fetch";
 import { useAuth } from "../(auth)/context/AuthContext";
+import AlertDialog, { useDialog } from "../components/dialogs/AppDialog";
+
 
 export default function Profile() {
   const router = useRouter();
@@ -17,7 +19,8 @@ export default function Profile() {
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const [profile, setProfile] = useState<Profile>();
 
-  const {logout} = useAuth();
+  const { dialog, show, close } = useDialog();
+  const { logout } = useAuth();
 
   const loadProfile = () => {
     fetchProfile(setProfile);
@@ -31,11 +34,11 @@ export default function Profile() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
 
-    if (profile){
-      if (value !== profile[name as keyof typeof profile]) 
+    if (profile) {
+      if (value !== profile[name as keyof typeof profile])
         setWasChange(true);
-  
-      setProfile((prev) => prev && ({...prev, [name]: value}));
+
+      setProfile((prev) => prev && ({ ...prev, [name]: value }));
     }
   };
 
@@ -52,21 +55,39 @@ export default function Profile() {
   };
 
   const deleteProfile = () => {
-    fetchDeleteProfile(router, logout);
+    fetchDeleteProfile(router, logout, show);
     setDeleteConfirmOpen(false);
   };
 
   const changePassword = (oldPassword: string, newPassword: string) => {
-    fetchChangePassword(oldPassword, newPassword);
+    fetchChangePassword(oldPassword, newPassword, show);
     setChangePasswordOpen(false);
   };
 
   return (
     profile &&
     <>
-      <ConfirmDialog open={saveConfirmOpen} action="Are you sure you want to save your changes?" onYes={() => { saveChanges() }} onNo={() => {loadProfile(); setSaveConfirmOpen(false)}} />
-      <ConfirmDialog open={deleteConfirmOpen} action="Are you sure you want to delete your account?" onYes={() => { deleteProfile() }} onNo={() => setDeleteConfirmOpen(false)} />
-      <ChangePasswordDialog open={changePasswordOpen} onConfirm={(data) => { changePassword(data.oldPassword, data.newPassword) }} onCancel={() => setChangePasswordOpen(false)} />
+      <AlertDialog {...dialog} onClose={close} />
+      <ConfirmDialog
+        open={saveConfirmOpen}
+        action="Are you sure you want to save your changes?"
+        onYes={() => { saveChanges() }}
+        onNo={() => {
+          loadProfile();
+          setSaveConfirmOpen(false)
+        }}
+      />
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        action="Are you sure you want to delete your account?"
+        onYes={() => { deleteProfile() }}
+        onNo={() => setDeleteConfirmOpen(false)}
+      />
+      <ChangePasswordDialog
+        open={changePasswordOpen}
+        onConfirm={(data) => { changePassword(data.oldPassword, data.newPassword) }}
+        onCancel={() => setChangePasswordOpen(false)}
+      />
       <Box minHeight={"80vh"} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <Stack spacing={5} justifyContent="center" alignItems="center">
           <ProfileTile profileData={profile} handleChange={handleChange} editable={editable} />

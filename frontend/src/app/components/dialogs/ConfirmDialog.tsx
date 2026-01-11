@@ -1,5 +1,12 @@
 import * as React from "react";
-import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from "@mui/material";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button
+} from "@mui/material";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -8,7 +15,7 @@ interface ConfirmDialogProps {
   onNo: () => void;
 }
 
-export default function ConfirmDialog({ open, action, onYes, onNo } : ConfirmDialogProps) {
+export default function ConfirmDialog({ open, action, onYes, onNo }: ConfirmDialogProps) {
   return (
     <Dialog
       open={open}

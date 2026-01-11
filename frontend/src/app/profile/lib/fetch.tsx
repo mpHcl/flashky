@@ -2,6 +2,7 @@ import { logoutFetch } from "@/app/(auth)/lib/fetch";
 import { RequestBodyType } from "@/app/lib/fetchOptions";
 import { fetchAuthDELETE, fetchAuthGET, fetchAuthPUT, OK } from "@/app/lib/fetch";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { DialogType, ShowDialog } from "@/app/components/dialogs/AppDialog";
 
 export const fetchProfile = (
     setProfile: React.Dispatch<React.SetStateAction<Profile | undefined>>
@@ -34,33 +35,36 @@ export const fetchSaveProfile = (
     fetchAuthPUT("users/me", OK, RequestBodyType.JSON, data, onSuccess);
 }
 
+
 export const fetchDeleteProfile = (
     router: AppRouterInstance,
-    updateContext: () => void
-
+    updateContext: () => void,
+    showDialog: ShowDialog
 ) => {
-    const onSuccess = async (response: Response) => {
+    const onSuccess = async () => {
         logoutFetch(router, updateContext);
     }
 
-    const onFail = async (response: Response) => {
-        alert("Failed to delete profile");
+    const onFail = async () => {
+        showDialog("Failed to delete profile", DialogType.ERROR);
     }
 
     fetchAuthDELETE("users/me", OK, onSuccess, onFail);
 }
 
+
 export const fetchChangePassword = (
     oldPassword: string,
-    newPassword: string
+    newPassword: string,
+    showDialog: ShowDialog
 ) => {
-    const onSuccess = async (response: Response) => {
-        alert("Password changed successfully");
+    const onSuccess = async () => {
+        showDialog("Password changed successfully", DialogType.INFO);
     }
 
     const onFail = async (response: Response) => {
         await response.json().then(results => {
-            var errorsString = "";
+            let errorsString = "";
             if (results.detail.errors !== undefined) {
                 results.detail.errors.forEach((error: string) => {
                     errorsString += error + "\n";
@@ -70,7 +74,10 @@ export const fetchChangePassword = (
                 errorsString = results.detail;
             }
 
-            alert("Failed to change password\nDetails:\n" + errorsString);
+            showDialog(
+                "Failed to change password\nDetails:\n" + errorsString,
+                DialogType.ERROR,
+            );
         });
     }
 

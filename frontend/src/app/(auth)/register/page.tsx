@@ -20,6 +20,7 @@ import Link from '@mui/material/Link';
 import { useRouter } from "next/navigation";
 import { registerFetch } from '../lib/fetch';
 import { useAuth } from '../context/AuthContext';
+import AlertDialog, { useDialog } from '@/app/components/dialogs/AppDialog';
 
 function CustomHelperText() {
   const { error } = useFormControl() || {};
@@ -50,99 +51,111 @@ export default function Register() {
   const [username, setUsername] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+
   const router = useRouter();
 
-  const {login} = useAuth();
+  const { login } = useAuth();
+  const { dialog, show, close } = useDialog()
 
   const onRegisterButtonClick = async () => {
-    registerFetch(username, email, password, router, login);
+    registerFetch(
+      username,
+      email,
+      password,
+      router,
+      login,
+      show
+    );
   }
 
   return (
-    <Box display="flex" justifyContent="center" alignItems="center">
-      <Paper elevation={1} sx={{ minWidth: 400, maxWidth: 600 }}>
-        <Stack spacing={2} justifyContent="center" alignItems="center" p={2} sx={{ margin: 2 }}>
-          <Typography variant="h4" gutterBottom>Welcome to Flashky!</Typography>
-          <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" required error={errorUsername}>
-            <InputLabel htmlFor="register-username-input">Username</InputLabel>
-            <OutlinedInput
-              id="register-username-input"
-              onChange={(e) => {
-                setUsername(e.target.value);
-                setErrorUsername(e.target.value.length < 1);
-              }}
-              endAdornment={
-                <InputAdornment position="end">
-                  <PersonIcon />
-                </InputAdornment>
-              }
-              label="Username"
-            />
-            <CustomHelperText />
-          </FormControl>
-          <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" required error={errorEmail}>
-            <InputLabel htmlFor="register-email-input">E-mail</InputLabel>
-            <OutlinedInput
-              id="register-email-input"
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setErrorEmail(e.target.value.length < 1);
-              }}
-              endAdornment={
-                <InputAdornment position="end">
-                  <AlternateEmailIcon />
-                </InputAdornment>
-              }
-              label="E-mail"
-            />
-            <CustomHelperText />
-          </FormControl>
-          <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" required error={errorPassword}>
-            <InputLabel htmlFor="register-password-input">Password</InputLabel>
-            <OutlinedInput
-              id="register-password-input"
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setErrorPassword(e.target.value.length < 1);
-              }}
-              type={showPassword ? 'text' : 'password'}
-              endAdornment={
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label={
-                      showPassword ? 'hide the password' : 'display the password'
-                    }
-                    onClick={handleClickShowPassword}
-                    onMouseDown={handleMouseDownPassword}
-                    onMouseUp={handleMouseUpPassword}
-                    edge="end"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              }
-              label="Password"
-            />
-            <CustomHelperText />
-          </FormControl>
-          <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined">
-            <InputLabel htmlFor="register-description-input">Description</InputLabel>
-            <OutlinedInput
-              id="register-description-input"
-              endAdornment={
-                <InputAdornment position="end">
-                  <DrawIcon />
-                </InputAdornment>
-              }
-              label="Description"
-              multiline={true}
-            />
-            <FormHelperText>Tell us a little about yourself</FormHelperText>
-          </FormControl>
-          <Button color="secondary" size="large" variant="contained" onClick={onRegisterButtonClick} disabled={username.length == 0 || email.length == 0 || password.length == 0}>Register</Button>
-          <Typography variant="caption" gutterBottom>Already have an account? <Link href="/login">Log in!</Link></Typography>
-        </Stack>
-      </Paper>
-    </Box>
+    <>
+      <AlertDialog {...dialog} onClose={close} />
+      <Box display="flex" justifyContent="center" alignItems="center">
+        <Paper elevation={1} sx={{ minWidth: 400, maxWidth: 600 }}>
+          <Stack spacing={2} justifyContent="center" alignItems="center" p={2} sx={{ margin: 2 }}>
+            <Typography variant="h4" gutterBottom>Welcome to Flashky!</Typography>
+            <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" required error={errorUsername}>
+              <InputLabel htmlFor="register-username-input">Username</InputLabel>
+              <OutlinedInput
+                id="register-username-input"
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                  setErrorUsername(e.target.value.length < 1);
+                }}
+                endAdornment={
+                  <InputAdornment position="end">
+                    <PersonIcon />
+                  </InputAdornment>
+                }
+                label="Username"
+              />
+              <CustomHelperText />
+            </FormControl>
+            <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" required error={errorEmail}>
+              <InputLabel htmlFor="register-email-input">E-mail</InputLabel>
+              <OutlinedInput
+                id="register-email-input"
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setErrorEmail(e.target.value.length < 1);
+                }}
+                endAdornment={
+                  <InputAdornment position="end">
+                    <AlternateEmailIcon />
+                  </InputAdornment>
+                }
+                label="E-mail"
+              />
+              <CustomHelperText />
+            </FormControl>
+            <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" required error={errorPassword}>
+              <InputLabel htmlFor="register-password-input">Password</InputLabel>
+              <OutlinedInput
+                id="register-password-input"
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setErrorPassword(e.target.value.length < 1);
+                }}
+                type={showPassword ? 'text' : 'password'}
+                endAdornment={
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label={
+                        showPassword ? 'hide the password' : 'display the password'
+                      }
+                      onClick={handleClickShowPassword}
+                      onMouseDown={handleMouseDownPassword}
+                      onMouseUp={handleMouseUpPassword}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                }
+                label="Password"
+              />
+              <CustomHelperText />
+            </FormControl>
+            <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined">
+              <InputLabel htmlFor="register-description-input">Description</InputLabel>
+              <OutlinedInput
+                id="register-description-input"
+                endAdornment={
+                  <InputAdornment position="end">
+                    <DrawIcon />
+                  </InputAdornment>
+                }
+                label="Description"
+                multiline={true}
+              />
+              <FormHelperText>Tell us a little about yourself</FormHelperText>
+            </FormControl>
+            <Button color="secondary" size="large" variant="contained" onClick={onRegisterButtonClick} disabled={username.length == 0 || email.length == 0 || password.length == 0}>Register</Button>
+            <Typography variant="caption" gutterBottom>Already have an account? <Link href="/login">Log in!</Link></Typography>
+          </Stack>
+        </Paper>
+      </Box>
+    </>
   );
 }

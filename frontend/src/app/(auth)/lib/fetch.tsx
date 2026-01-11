@@ -1,3 +1,4 @@
+import { DialogType, ShowDialog } from "@/app/components/dialogs/AppDialog";
 import { fetchAuthGET, fetchAuthPOST, fetchWithoutAuthPOST, OK } from "@/app/lib/fetch";
 import { RequestBodyType } from "@/app/lib/fetchOptions";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
@@ -6,8 +7,9 @@ import { Dispatch, SetStateAction } from "react";
 export const loginFetch = async (
     username: string,
     password: string,
-    router: AppRouterInstance, 
-    updateContext: (token: string) => void
+    router: AppRouterInstance,
+    updateContext: (token: string) => void,
+    showDialog: ShowDialog
 ) => {
     const body = {
         "login": username,
@@ -20,19 +22,24 @@ export const loginFetch = async (
             router.push("/");
         }
         else {
-            alert("Wrong credentials")
+            showDialog("Unexpected error", DialogType.ERROR);
         }
     }
 
-    fetchWithoutAuthPOST("login", OK, RequestBodyType.JSON, body, onSuccess);
+    const onFail = async () => {
+        showDialog("Wrong credentials", DialogType.ERROR);
+    }
+
+    fetchWithoutAuthPOST("login", OK, RequestBodyType.JSON, body, onSuccess, onFail);
 }
 
 export const registerFetch = async (
     username: string,
     email: string,
     password: string,
-    router: AppRouterInstance, 
-    updateContext: (token: string) => void
+    router: AppRouterInstance,
+    updateContext: (token: string) => void,
+    showDialog: ShowDialog
 ) => {
     const body = {
         "username": username,
@@ -46,30 +53,34 @@ export const registerFetch = async (
             router.push("/");
         }
         else {
-            if (result.detail) {
-                if (Array.isArray(result.detail)) {
-                    const errorMessages = result.detail.map(
-                        (err: { ctx: { reason: any; }; }) => err.ctx.reason
-                    ).join('\n');
-                    alert(errorMessages);
-                }
-                else if (result.detail.errors && Array.isArray(result.detail.errors)) {
-                    const errorMessages = result.detail.errors.join('\n');
-                    alert(errorMessages);
-                }
-                else {
-                    alert('Registration failed. Please try again.');
-                }
-
-            }
+            showDialog("Unexpected error", DialogType.ERROR);
         }
     }
 
-    fetchWithoutAuthPOST("register", OK, RequestBodyType.JSON, body, onSuccess);
+    const onFail = async (response: Response) => {
+        const result = await response.json()
+
+        if (result.detail) {
+            if (Array.isArray(result.detail)) {
+                const errorMessages = result.detail.map(
+                    (err: { ctx: { reason: string; }; }) => err.ctx.reason
+                ).join('\n');
+                showDialog(errorMessages, DialogType.ERROR);
+            }
+            else if (result.detail.errors && Array.isArray(result.detail.errors)) {
+                const errorMessages = result.detail.errors.join('\n');
+                showDialog(errorMessages, DialogType.ERROR);
+            }
+            else {
+                showDialog("Registration failed. Please try again.", DialogType.ERROR);
+            }
+        }
+    }
+    fetchWithoutAuthPOST("register", OK, RequestBodyType.JSON, body, onSuccess, onFail);
 }
 
 export const logoutFetch = async (
-    router: AppRouterInstance,     
+    router: AppRouterInstance,
     updateContext: () => void
 ) => {
     const onSuccess = async () => {

@@ -17,6 +17,7 @@ import Link from '@mui/material/Link';
 import { useRouter } from "next/navigation";
 import { loginFetch } from '../lib/fetch';
 import { useAuth } from '../context/AuthContext';
+import AlertDialog, { useDialog } from '@/app/components/dialogs/AppDialog';
 
 export default function Login() {
   const { login } = useAuth();
@@ -36,59 +37,62 @@ export default function Login() {
 
   const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const { dialog, show, close } = useDialog();
   const router = useRouter();
 
   const onLoginButtonClick = async () => {
-    loginFetch(username, password, router, login);
+    loginFetch(username, password, router, login, show);
   }
 
   return (
-    <Box display="flex" justifyContent="center" alignItems="center">
-      <Paper elevation={1} sx={{ minWidth: 400, maxWidth: 600 }}>
-        <Stack spacing={2} justifyContent="center" alignItems="center" p={2} sx={{ margin: 2 }}>
-          <Typography variant="h4" gutterBottom>Welcome back!</Typography>
-          <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" required>
-            <InputLabel htmlFor="login-username-input">Username</InputLabel>
-            <OutlinedInput
-              id="login-username-input"
-              onChange={(e) => setUsername(e.target.value)}
-
-              endAdornment={
-                <InputAdornment position="end">
-                  <PersonIcon />
-                </InputAdornment>
-              }
-              label="Username"
-            />
-          </FormControl>
-          <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" required>
-            <InputLabel htmlFor="login-password-input">Password</InputLabel>
-            <OutlinedInput
-              id="login-password-input"
-              type={showPassword ? 'text' : 'password'}
-              onChange={(e) => setPassword(e.target.value)}
-              endAdornment={
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label={
-                      showPassword ? 'hide the password' : 'display the password'
-                    }
-                    onClick={handleClickShowPassword}
-                    onMouseDown={handleMouseDownPassword}
-                    onMouseUp={handleMouseUpPassword}
-                    edge="end"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              }
-              label="Password"
-            />
-          </FormControl>
-          <Button color="secondary" size="large" variant="contained" onClick={onLoginButtonClick}>Log In</Button>
-          <Typography variant="caption" gutterBottom>New here? <Link href="/register">Register!</Link></Typography>
-        </Stack>
-      </Paper>
-    </Box>
+    <>
+      <AlertDialog {...dialog} onClose={close} />
+      <Box display="flex" justifyContent="center" alignItems="center">
+        <Paper elevation={1} sx={{ minWidth: 400, maxWidth: 600 }}>
+          <Stack spacing={2} justifyContent="center" alignItems="center" p={2} sx={{ margin: 2 }}>
+            <Typography variant="h4" gutterBottom>Welcome back!</Typography>
+            <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" required>
+              <InputLabel htmlFor="login-username-input">Username</InputLabel>
+              <OutlinedInput
+                id="login-username-input"
+                onChange={(e) => setUsername(e.target.value)}
+                endAdornment={
+                  <InputAdornment position="end">
+                    <PersonIcon />
+                  </InputAdornment>
+                }
+                label="Username"
+              />
+            </FormControl>
+            <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" required>
+              <InputLabel htmlFor="login-password-input">Password</InputLabel>
+              <OutlinedInput
+                id="login-password-input"
+                type={showPassword ? 'text' : 'password'}
+                onChange={(e) => setPassword(e.target.value)}
+                endAdornment={
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label={
+                        showPassword ? 'hide the password' : 'display the password'
+                      }
+                      onClick={handleClickShowPassword}
+                      onMouseDown={handleMouseDownPassword}
+                      onMouseUp={handleMouseUpPassword}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                }
+                label="Password"
+              />
+            </FormControl>
+            <Button color="secondary" size="large" variant="contained" onClick={onLoginButtonClick}>Log In</Button>
+            <Typography variant="caption" gutterBottom>New here? <Link href="/register">Register!</Link></Typography>
+          </Stack>
+        </Paper>
+      </Box>
+    </>
   );
 }

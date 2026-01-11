@@ -1,11 +1,11 @@
-import SearchClient from "../components/searchclient";
+import Search from "../components/Search";
 
-export default async function Search({
+export default async function SearchPage({
   searchParams,
 }: {
   searchParams: { q?: string };
 }) {
   const params = await searchParams
   const query = params.q ?? "";
-  return <SearchClient query={query} />;
+  return <Search query={query} />;
 }

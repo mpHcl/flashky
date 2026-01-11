@@ -162,6 +162,7 @@ def get_decks(
 def get_my_decks(
     user_id=Depends(authenticate()),
     db: Session = Depends(get_session),
+    q: Optional[str] = Query(None, description="Search query"),
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=0, le=100),
 ):
@@ -170,6 +171,8 @@ def get_my_decks(
     user_id = int(user_id)
 
     query = db.query(Deck).filter(Deck.owner_id == user_id)
+    if q:
+        query = query.filter(Flashcard.name.ilike(f"%{q}%"))
     total_number = query.count()
 
     if page_size > 0:

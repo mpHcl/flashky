@@ -209,6 +209,26 @@ def get_saved_deck(
         "decks": [create_deck_dto(deck) for deck in decks],
     }
 
+@router.get("/hasflashcard/{flashcard_id}", response_model=DeckGetAllDTO)
+def get_decks_containing_flashcard(
+    flashcard_id: int,
+    user_id: int = Depends(authenticate()),
+    db: Session = Depends(get_session),
+):
+    user_id = int(user_id)
+    if not user_id:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    flashcard = db.query(Flashcard).filter(Flashcard.id == flashcard_id).first()
+    if not flashcard:
+        raise HTTPException(status_code=404, detail="Flashcard not found")
+    decks = flashcard.decks
+    total_number = len(decks)
+
+    return {
+        "total_number": total_number,
+        "decks": [create_deck_dto(deck) for deck in decks],
+    }
 
 @router.get("/{deck_id}", response_model=DeckGetDTO)
 def get_deck(

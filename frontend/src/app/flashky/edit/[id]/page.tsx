@@ -23,10 +23,10 @@ import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import MovieIcon from "@mui/icons-material/Movie";
 import MoreIcon from '@mui/icons-material/More';
 import SearchIcon from '@mui/icons-material/Search';
-import { createFlashcard } from '../lib/fetch';
-import { Deck } from '@/app/lib/types';
+import { editFlashcard } from '../../lib/fetch';
+import { Deck, Flashcard } from '@/app/lib/types';
 import { fetchAuthGET } from '@/app/lib/fetch';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 type MediaProps = {
   name: string;
@@ -46,11 +46,19 @@ type CardEditorProps = {
 type DeckSelectionProps = {
     selectedDecks: Deck[];
     setSelectedDecks: (list: Deck[]) => void;
+    decksToAdd: Deck[];
+    setDecksToAdd: (list: Deck[]) => void;
+    decksToRemove: Deck[];
+    setDecksToRemove: (list: Deck[]) => void;
 }
 
 type AddTagsProps = {
-    tags: string[];
-    setTags: (list: string[]) => void;
+  tags: string[];
+  setTags: (list: string[]) => void;
+  tagsToAdd: string[];
+  setTagsToAdd: (list: string[]) => void;
+  tagsToRemove: string[];
+  setTagsToRemove: (list: string[]) => void;
 }
 
 const MediaItem = React.memo(({ name, url, type, onRemove }: MediaProps & { onRemove: () => void }) => {
@@ -140,7 +148,7 @@ const CardEditor = React.memo(({ side, media, textValue, textValueSetter, onAddM
 
 CardEditor.displayName = 'CardEditor';
 
-const DeckSelection = React.memo(({ selectedDecks, setSelectedDecks }: DeckSelectionProps) => {
+const DeckSelection = React.memo(({ selectedDecks, setSelectedDecks, decksToAdd, setDecksToAdd, decksToRemove, setDecksToRemove }: DeckSelectionProps) => {
     const [queryString, setQueryString] = React.useState("");
     const [searchDecks, setSearchDecks] = React.useState<Deck[]>([]);
     const TOOLTIP_LENGTH = 50;
@@ -157,13 +165,27 @@ const DeckSelection = React.memo(({ selectedDecks, setSelectedDecks }: DeckSelec
     }
 
     const handleSelectDeck = (index: number) => {
-        if (!selectedDecks.some(d => d.id === searchDecks[index].id)) {
+      const id = searchDecks[index].id;
+        if (!selectedDecks.some(d => d.id === id)) {
             setSelectedDecks([...selectedDecks, searchDecks[index]]);
+            if (decksToRemove.some(d => d.id === id)) { // if true, the deck is being added to back in the same edit
+              setDecksToRemove(decksToRemove.filter(d => d.id !== id));
+            }
+            else { // this is a new deck being added to
+              setDecksToAdd([...decksToAdd, searchDecks[index]]);
+            }
         }
     }
 
-    const deleteSelectedDeck = (id: number) => {
+    const deleteSelectedDeck = (deck: Deck) => {
+        const id = deck.id;
         setSelectedDecks(selectedDecks.filter(d => d.id !== id));
+        if (decksToAdd.some(d => d.id === id)) { // if true, this deck is not being added to after all
+          setDecksToAdd(decksToAdd.filter(d => d.id !== id));
+        }
+        else { // remove from this deck
+          setDecksToRemove([...decksToRemove, deck]);
+        }
     }
 
     return <Stack spacing={2}>
@@ -172,7 +194,7 @@ const DeckSelection = React.memo(({ selectedDecks, setSelectedDecks }: DeckSelec
         </Typography>
         <Box>
             {selectedDecks.map((el, index) =>
-                <Chip key={index} label={el.name} sx={{ m: 0.25 }} onDelete={(e) => deleteSelectedDeck(el.id)} />)}
+                <Chip key={index} label={el.name} sx={{ m: 0.25 }} onDelete={(e) => deleteSelectedDeck(el)} />)}
         </Box>
         <TextField
             placeholder="Find decks"
@@ -208,74 +230,63 @@ const DeckSelection = React.memo(({ selectedDecks, setSelectedDecks }: DeckSelec
 
 DeckSelection.displayName = "DeckSelection";
 
-const AddTags = React.memo(({ tags, setTags }: AddTagsProps) => {
-    const [newTag, setNewTag] = React.useState("");
+const AddTags = React.memo(({ tags, setTags, tagsToAdd, setTagsToAdd, tagsToRemove, setTagsToRemove }: AddTagsProps) => {
+  const [newTag, setNewTag] = React.useState("");
 
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter' && newTag.trim()) {
-            if (!tags.includes(newTag)) {
-                setTags([...tags, newTag]);
-            }
-            setNewTag("");
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter' && newTag.trim()) {
+      if (!tags.includes(newTag)) {
+        setTags([...tags, newTag]);
+        if (tagsToRemove.includes(newTag)) // if true, the tag is being added back in the same edit
+        {
+          setTagsToRemove(tagsToRemove.filter(t => t !== newTag));
         }
+        else // this is a new tag
+        {
+          setTagsToAdd([...tagsToAdd, newTag]);
+        }
+      }
+      setNewTag("");
     }
+  }
 
-    const deleteTag = (tag: string) => {
-        setTags(tags.filter(t => t !== tag));
+  const deleteTag = (tag: string) => {
+    setTags(tags.filter(t => t !== tag));
+    if (tagsToAdd.includes(tag)) // if true, this tag is not being added after all
+    {
+      setTagsToAdd(tagsToAdd.filter(t => t !== tag));
     }
+    else // remove this tag
+    {
+      setTagsToRemove([...tagsToRemove, tag]);
+    }
+  }
 
-    return <>
-        <Typography variant="h6" mb={2}>
-            Add tags
-        </Typography>
-        <TextField
-            variant="outlined"
-            label="Enter tag name"
-            size="small"
-            value={newTag ?? ""}
-            onChange={(e) => setNewTag(e.target.value)}
-            onKeyDown={handleKeyDown} />
-        <Box>
-            {tags.map((tag, index) =>
-                <Chip key={index} label={tag} sx={{ m: 0.25 }} onDelete={(e) => deleteTag(tag)} />)}
-        </Box>
-    </>
+  return <>
+    <Typography variant="h6" mb={2}>
+      Add tags
+    </Typography>
+    <TextField
+      variant="outlined"
+      label="Enter tag name"
+      size="small"
+      value={newTag ?? ""}
+      onChange={(e) => setNewTag(e.target.value)}
+      onKeyDown={handleKeyDown} />
+    <Box>
+      {tags.map((tag, index) =>
+        <Chip key={index} label={tag} sx={{ m: 0.25 }} onDelete={(e) => deleteTag(tag)} />)}
+    </Box>
+  </>
 })
 
 AddTags.displayName = "AddTags";
 
-function Tags() {
-  return (
-    <Box>
-      <Typography variant="subtitle2" mb={1}>Tags</Typography>
-      <Stack direction="row" spacing={1} flexWrap="wrap">
-        {/* TODO: CHANGE TO INTERACTIVE LOOP */}
-        <Chip label="tag1" onDelete={() => { }} />
-        <Chip label="tag2" onDelete={() => { }} />
-      </Stack>
-      <Button size="small" sx={{ mt: 1 }}>
-        + tag
-      </Button>
-    </Box>
-  );
-}
-
-function Decks() {
-  return (
-    <Paper variant="outlined" sx={{ p: 2 }}>
-      <Typography variant="subtitle2" mb={1}>Decks</Typography>
-      <Stack spacing={1}>
-        {/* TODO: CHANGE TO INTERACTIVE LOOP */}
-        <Chip label="deck1" onDelete={() => { }} />
-        <Chip label="deck2" onDelete={() => { }} />
-      </Stack>
-      <Button size="small" sx={{ mt: 1 }}>+ Deck</Button>
-    </Paper>
-  );
-}
-
-export default function NewFlashky() {
+export default function EditFlashky() {
   const router = useRouter();
+  const params = useParams();
+  const id = params.id;
+  const [flashcard, setFlashcard] = React.useState<Flashcard>();
   const [name, setName] = React.useState<string>("")
   const [frontTextContent, setFrontTextContent] = React.useState<string>("")
   const [backTextContent, setBackTextContent] = React.useState<string>("")
@@ -289,8 +300,40 @@ export default function NewFlashky() {
   const frontFileInputRef = React.useRef<HTMLInputElement>(null);
   const backFileInputRef = React.useRef<HTMLInputElement>(null);
 
+  const [frontMediaIds, setFrontMediaIds] = React.useState<number[]>([]);
+  const [backMediaIds, setBackMediaIds] = React.useState<number[]>([]);
+
   const [decks, setDecks] = React.useState<Deck[]>([]);
+  const [decksToAdd, setDecksToAdd] = React.useState<Deck[]>([]);
+  const [decksToRemove, setDecksToRemove] = React.useState<Deck[]>([]);
+
   const [tags, setTags] = React.useState<string[]>([]);
+  const [tagsToAdd, setTagsToAdd] = React.useState<string[]>([]);
+  const [tagsToRemove, setTagsToRemove] = React.useState<string[]>([]);
+
+  React.useEffect(() => {
+      const onSuccess = async (response: Response) => {
+        const result = await response.json();
+        setFlashcard(result);
+        setName(result.name);
+        setFrontTextContent(result.front_side.content);
+        setBackTextContent(result.back_side.content);
+        setTags(result.tags);
+        setFrontMediaIds(result.front_side.media);
+        setBackMediaIds(result.back_side.media);
+      }
+  
+      fetchAuthGET("flashcards/" + id, 200, onSuccess);
+
+      const onSuccessDeck = async (response: Response) => {
+        const result = await response.json();
+        result.decks.map((d: Deck) => {
+          setDecks([...decks, d]);
+        })
+      }
+
+      fetchAuthGET("decks/hasflashcard/" + id, 200, onSuccessDeck);
+    }, []);
 
   const getMediaType = (mimeType: string): "photo" | "audio" | "video" | null => {
     if (mimeType.startsWith('image/')) return 'photo';
@@ -355,7 +398,7 @@ export default function NewFlashky() {
   }, []);
 
   return (
-    <Paper sx={{ p: 3, mx: "auto" }}>
+    flashcard && <Paper sx={{ p: 3, mx: "auto" }}>
       {/* Hidden file inputs */}
       <input
         type="file"
@@ -375,7 +418,7 @@ export default function NewFlashky() {
       />
 
       <Typography variant="h4" mb={2}>
-        Create new Flashky
+        Edit Flashky
       </Typography>
       <Grid container spacing={2}>
         { /* Tags */}
@@ -386,7 +429,7 @@ export default function NewFlashky() {
               size="small"
               value={name ?? ""}
               onChange={(e) => setName(e.target.value)} />
-            <AddTags tags={tags} setTags={setTags} />
+            <AddTags tags={tags} setTags={setTags} tagsToAdd={tagsToAdd} setTagsToAdd={setTagsToAdd} tagsToRemove={tagsToRemove} setTagsToRemove={setTagsToRemove} />
           </Stack>
         </Grid>
 
@@ -415,34 +458,29 @@ export default function NewFlashky() {
         </Grid>
 
         { /* Decks */}
-        <Grid size={2}><DeckSelection selectedDecks={decks} setSelectedDecks={setDecks} /></Grid>
+        <Grid size={2}><DeckSelection selectedDecks={decks} setSelectedDecks={setDecks} decksToAdd={decksToAdd} setDecksToAdd={setDecksToAdd} decksToRemove={decksToRemove} setDecksToRemove={setDecksToRemove} /></Grid>
       </Grid>
 
       {/* Footer */}
       <Box display="flex" justifyContent="space-between" mt={3}>
         <Button color="inherit">CANCEL</Button>
         <Stack direction="row" spacing={1}>
-          <Button variant="outlined" onClick={() =>
-            createFlashcard(
-              name,
-              frontTextContent,
-              backTextContent,
-              frontMediaFiles,
-              backMediaFiles,
-              tags,
-              decks
-            )}>Add next</Button>
           <Button variant="contained"  onClick={() =>{
-            createFlashcard(
+            editFlashcard(
+              flashcard.id,
               name,
               frontTextContent,
               backTextContent,
               frontMediaFiles,
               backMediaFiles,
-              tags,
-              decks
+              [],
+              [],
+              tagsToAdd,
+              tagsToRemove,
+              decksToAdd,
+              decksToRemove
             );
-            router.push("/myflashky");}}>Add & finish</Button>
+            router.push("/flashky/" + id);}}>Edit</Button>
         </Stack>
       </Box>
     </Paper>

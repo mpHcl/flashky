@@ -8,6 +8,20 @@ export type FlashcardSideCreateDTO = {
     content: string
 }
 
+export type MediaInfo = {
+    id: number,
+    alt: string,
+    path: string,
+    type: string,
+    autoplay: boolean,
+    upload_date: Date
+}
+
+export type MediaUpdateDTO = {
+    alt: string,
+    autoplay: boolean
+}
+
 export type Flashcard = {
     id: number,
     name: string,

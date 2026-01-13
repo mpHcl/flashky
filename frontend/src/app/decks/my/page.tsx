@@ -2,10 +2,10 @@
 import AddIcon from '@mui/icons-material/Add';
 import { Suspense, useEffect, useState } from 'react';
 import { Box, Button, Link, Typography } from '@mui/material';
-import CrudList from '../components/crudlist';
-import { fetchAuthGET } from '../lib/fetch';
-import SavedDecks from '../decks/components/SavedDecks';
-import { checkAuthenticated, useAuth } from '../(auth)/context/AuthContext';
+import CrudList from '../../components/crudlist';
+import { fetchAuthGET } from '../../lib/fetch';
+import SavedDecks from '../components/SavedDecks';
+import { checkAuthenticated, useAuth } from '../../(auth)/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
 export default function MyDecks() {
@@ -41,7 +41,7 @@ export default function MyDecks() {
             </Typography>
 
             <Box ml="auto">
-              <Link href="/mydecks/add">
+              <Link href="/decks/add">
                 <Button
                   color="secondary"
                   size="large"

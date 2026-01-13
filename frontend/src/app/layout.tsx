@@ -18,8 +18,8 @@ export const metadata: Metadata = {
 
 const routes = [
   { name: "Home", route: "/" },
-  { name: "My Decks", route: "/mydecks" },
-  { name: "My Flashky", route: "/myflashky" },
+  { name: "My Decks", route: "/decks/my" },
+  { name: "My Flashky", route: "/flashky/my" },
   {
     name: "Account", route: "/profile", subroutes: [
       { name: "Profile", route: "/profile" },

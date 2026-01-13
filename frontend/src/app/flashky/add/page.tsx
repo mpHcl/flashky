@@ -442,7 +442,7 @@ export default function NewFlashky() {
               tags,
               decks
             );
-            router.push("/myflashky");}}>Add & finish</Button>
+            router.push("/flashky/my");}}>Add & finish</Button>
         </Stack>
       </Box>
     </Paper>

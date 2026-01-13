@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState, Suspense } from "react";
 import Box from '@mui/material/Box';
-import CrudList from "../components/crudlist";
-import { BASE_URL } from "../constants";
+import CrudList from "../../components/crudlist";
+import { BASE_URL } from "../../constants";
 import { Button, Link, Typography } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 

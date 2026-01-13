@@ -1,4 +1,4 @@
-import { RawCrudList } from "@/app/components/crudlist";
+import { RawCrudList } from "@/app/components/CrudList";
 import Pagination from "@/app/components/Pagination";
 import { Deck } from "@/app/lib/types";
 import { Box, Stack } from "@mui/material";

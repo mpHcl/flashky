@@ -1,36 +1,30 @@
 "use client";
 import { useEffect, useState, Suspense } from "react";
 import Box from '@mui/material/Box';
-import CrudList from "../../components/crudlist";
-import { BASE_URL } from "../../constants";
+import CrudList from "../../components/CrudList";
 import { Button, Link, Typography } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
+import { fetchAuthGET, OK } from "@/app/lib/fetch";
+import { checkAuthenticated, useAuth } from "@/app/(auth)/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 
 export default function MyFlashky() {
     const [data, setData] = useState([]);
+    const {isAuthenticated} = useAuth();
+    const router = useRouter();
+
     useEffect(() => {
-        const fetchData = async () => {
-            const myHeaders = new Headers();
-            const token = localStorage.getItem("token")
-            myHeaders.append("Content-Type", "application/json");
-            myHeaders.append("Authorization", `Bearer ${token}`);
+        if (!checkAuthenticated(router, isAuthenticated)) {
+          return;
+        }
 
-            const requestOptions = {
-                method: "GET",
-                headers: myHeaders
-            };
-            try {
-                const result = await fetch(BASE_URL + "flashcards/myflashcards", requestOptions);
-                const jsonResult = await result.json();
-                setData(jsonResult.flashcards);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
-
-        fetchData();
-    }, []);
+        const onSuccess = async (response: Response) => {
+          const result = await response.json();
+          setData(result.flashcards);
+        }
+        fetchAuthGET("flashcards/myflashcards", OK, onSuccess);
+    }, [isAuthenticated]);
 
     return (<Box>
         <Typography variant="h2" gutterBottom>
@@ -51,6 +45,5 @@ export default function MyFlashky() {
         <Suspense fallback={<div>Loading...</div>}>
             <CrudList data={data.map((el) => ({ id: el.id, name: el.name, preview: el.front_side.content == null ? "" : el.front_side.content }))} showUpdateDeleteBtns={true} path="flashky"></CrudList>
         </Suspense>
-
     </Box>);
 }

@@ -33,6 +33,7 @@ import { fetchAuthGET } from '@/app/lib/fetch';
 import { useParams, useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction } from 'react';
 import { BASE_URL } from '@/app/constants';
+import { checkAuthenticated, useAuth } from '@/app/(auth)/context/AuthContext';
 
 type ExistingMediaProps = {
   flashcardSideId: number;
@@ -457,7 +458,13 @@ export default function EditFlashky() {
   const [tagsToAdd, setTagsToAdd] = React.useState<string[]>([]);
   const [tagsToRemove, setTagsToRemove] = React.useState<string[]>([]);
 
+  const { isAuthenticated } = useAuth();
+
+
   React.useEffect(() => {
+    if (!checkAuthenticated(router, isAuthenticated)) {
+      return;
+    }
     const onSuccess = async (response: Response) => {
       const result = await response.json();
       setFlashcard(result);
@@ -479,7 +486,7 @@ export default function EditFlashky() {
     }
 
     fetchAuthGET("decks?flashcard_id=" + id, 200, onSuccessDeck);
-  }, []);
+  }, [isAuthenticated]);
 
   const getMediaType = (mimeType: string): "photo" | "audio" | "video" | null => {
     if (mimeType.startsWith('image/')) return 'photo';

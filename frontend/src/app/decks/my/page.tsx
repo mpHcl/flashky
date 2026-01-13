@@ -2,7 +2,7 @@
 import AddIcon from '@mui/icons-material/Add';
 import { Suspense, useEffect, useState } from 'react';
 import { Box, Button, Link, Typography } from '@mui/material';
-import CrudList from '../../components/crudlist';
+import CrudList from '../../components/CrudList';
 import { fetchAuthGET } from '../../lib/fetch';
 import SavedDecks from '../components/SavedDecks';
 import { checkAuthenticated, useAuth } from '../../(auth)/context/AuthContext';

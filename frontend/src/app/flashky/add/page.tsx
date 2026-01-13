@@ -27,6 +27,7 @@ import { createFlashcard } from '../lib/fetch';
 import { Deck } from '@/app/lib/types';
 import { fetchAuthGET } from '@/app/lib/fetch';
 import { useRouter } from 'next/navigation';
+import { checkAuthenticated, useAuth } from '@/app/(auth)/context/AuthContext';
 
 type MediaProps = {
   name: string;
@@ -347,12 +348,16 @@ export default function NewFlashky() {
     setBackMediaFiles(prev => prev.filter((_, i) => i !== index));
   }, []);
 
+  const {isAuthenticated} = useAuth()
   React.useEffect(() => {
+    if (!checkAuthenticated(router, isAuthenticated)) {
+            return;
+    }
     return () => {
       frontMedia.forEach(media => URL.revokeObjectURL(media.url));
       backMedia.forEach(media => URL.revokeObjectURL(media.url));
     };
-  }, []);
+  }, [isAuthenticated]);
 
   return (
     <Paper sx={{ p: 3, mx: "auto" }}>

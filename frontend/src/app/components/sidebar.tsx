@@ -1,6 +1,6 @@
 import { Drawer, List, ListItem, ListItemButton, ListItemText} from '@mui/material';
 import Typography from '@mui/material/Typography';
-import SidebarItemSubmenu from './sidebarItemSubmenu';
+import SidebarItemSubmenu from './SidebarItemSubmenu';
 
 const drawerWidth = 200;
 

@@ -116,6 +116,7 @@ def get_decks(
     q: Optional[str] = Query(None, description="Search query"),
     owner: Optional[str] = Query(None, description="Owner username or id"),
     tags: Optional[str] = Query(None, description="Comma-separated tags"),
+    flashcard_id: Optional[int] = Query(None, description="Flashcard contained in decks"),
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
     sort: Optional[str] = Query("created_at"),
@@ -128,6 +129,9 @@ def get_decks(
 
     query = db.query(Deck)
     query = query.filter(or_(Deck.public, Deck.owner_id == user_id))
+
+    if flashcard_id:
+        query = query.filter(Deck.flashcards.any(Flashcard.id == flashcard_id))
 
     if q:
         query = query.filter(Deck.name.ilike(f"%{q}%"))
@@ -203,27 +207,6 @@ def get_saved_deck(
         decks = query.offset(offset).limit(page_size).all()
     else:
         decks = query.all()
-
-    return {
-        "total_number": total_number,
-        "decks": [create_deck_dto(deck) for deck in decks],
-    }
-
-@router.get("/hasflashcard/{flashcard_id}", response_model=DeckGetAllDTO)
-def get_decks_containing_flashcard(
-    flashcard_id: int,
-    user_id: int = Depends(authenticate()),
-    db: Session = Depends(get_session),
-):
-    user_id = int(user_id)
-    if not user_id:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    flashcard = db.query(Flashcard).filter(Flashcard.id == flashcard_id).first()
-    if not flashcard:
-        raise HTTPException(status_code=404, detail="Flashcard not found")
-    decks = flashcard.decks
-    total_number = len(decks)
 
     return {
         "total_number": total_number,

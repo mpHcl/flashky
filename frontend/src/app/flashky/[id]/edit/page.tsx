@@ -478,7 +478,7 @@ export default function EditFlashky() {
       })
     }
 
-    fetchAuthGET("decks/hasflashcard/" + id, 200, onSuccessDeck);
+    fetchAuthGET("decks?flashcard_id=" + id, 200, onSuccessDeck);
   }, []);
 
   const getMediaType = (mimeType: string): "photo" | "audio" | "video" | null => {

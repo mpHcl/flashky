@@ -21,6 +21,7 @@ import { fetchAuthGET, OK } from '../lib/fetch';
 
 type MediaInfo = {
   id: number;
+  alt: string;
   type: string;
   autoplay: boolean;
 }
@@ -72,7 +73,7 @@ export default function Media({ flashcard_side_id }: MediaProps) {
           <CardMedia
             component="img"
             image={src}
-            alt={`media-${media.id}`}
+            alt={media.alt}
             sx={{ height: numOfElements !== 1 ? 240 : 400, objectFit: "contain" }}
           />
         );

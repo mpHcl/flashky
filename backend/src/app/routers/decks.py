@@ -116,6 +116,7 @@ def get_decks(
     q: Optional[str] = Query(None, description="Search query"),
     owner: Optional[str] = Query(None, description="Owner username or id"),
     tags: Optional[str] = Query(None, description="Comma-separated tags"),
+    flashcard_id: Optional[int] = Query(None, description="Flashcard contained in decks"),
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
     sort: Optional[str] = Query("created_at"),
@@ -128,6 +129,9 @@ def get_decks(
 
     query = db.query(Deck)
     query = query.filter(or_(Deck.public, Deck.owner_id == user_id))
+
+    if flashcard_id:
+        query = query.filter(Deck.flashcards.any(Flashcard.id == flashcard_id))
 
     if q:
         query = query.filter(Deck.name.ilike(f"%{q}%"))
@@ -162,6 +166,7 @@ def get_decks(
 def get_my_decks(
     user_id=Depends(authenticate()),
     db: Session = Depends(get_session),
+    q: Optional[str] = Query(None, description="Search query"),
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=0, le=100),
 ):
@@ -170,6 +175,8 @@ def get_my_decks(
     user_id = int(user_id)
 
     query = db.query(Deck).filter(Deck.owner_id == user_id)
+    if q:
+        query = query.filter(Flashcard.name.ilike(f"%{q}%"))
     total_number = query.count()
 
     if page_size > 0:
@@ -205,7 +212,6 @@ def get_saved_deck(
         "total_number": total_number,
         "decks": [create_deck_dto(deck) for deck in decks],
     }
-
 
 @router.get("/{deck_id}", response_model=DeckGetDTO)
 def get_deck(

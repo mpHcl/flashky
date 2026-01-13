@@ -35,7 +35,7 @@ export default function CrudList({ data, showUpdateDeleteBtns, path }: { data: L
     router.push("/" + path + "/" + id);
   }
   const editOnClick = (id: number) => {
-    router.push("/" + path + "/edit/" + id);
+    router.push("/" + path + "/" + id + "/edit");
   }
   const deleteOnClick = (id: number) => {
     console.log("delete " + path + " " + id);

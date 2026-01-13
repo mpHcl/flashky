@@ -4,6 +4,24 @@ type FlashcardSide = {
     media: number[]
 }
 
+export type FlashcardSideCreateDTO = {
+    content: string
+}
+
+export type MediaInfo = {
+    id: number,
+    alt: string,
+    path: string,
+    type: string,
+    autoplay: boolean,
+    upload_date: Date
+}
+
+export type MediaUpdateDTO = {
+    alt: string,
+    autoplay: boolean
+}
+
 export type Flashcard = {
     id: number,
     name: string,
@@ -11,6 +29,14 @@ export type Flashcard = {
     creation_date: string,
     front_side: FlashcardSide,
     back_side: FlashcardSide
+}
+
+export type FlashcardEditDTO = {
+    name: string,
+    front: FlashcardSideCreateDTO,
+    back: FlashcardSideCreateDTO,
+    tags_to_add: string[],
+    tags_to_remove: string[]
 }
 
 export type DeckPostDTO = {

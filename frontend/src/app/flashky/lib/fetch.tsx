@@ -3,12 +3,18 @@ import { fetchAuthDELETE, fetchAuthGET, fetchAuthPOST, fetchAuthPUT, OK } from "
 import { Dispatch, SetStateAction } from "react";
 import { Deck, DeckUpdateDTO, Flashcard, FlashcardEditDTO, FlashcardSideCreateDTO, MediaInfo, MediaUpdateDTO } from "@/app/lib/types";
 
-export const getFlashcard = async (id: number, setData: Dispatch<SetStateAction<Flashcard | undefined>>) => {
+export const getFlashcard = async (id: number, setData: Dispatch<SetStateAction<Flashcard | undefined>>, setOwnerId: Dispatch<SetStateAction<number>>) => {
     const onSuccess = async (response: Response) => {
         const result = await response.json();
         setData(result);
     }
     fetchAuthGET(`flashcards/${id}`, OK, onSuccess);
+
+    const onSuccessUser = async (response: Response) => {
+        const result = await response.json();
+        setOwnerId(result.id);
+    }
+    fetchAuthGET(`users/me`, 200, onSuccessUser)
 }
 
 export const uploadMedia = async (sideId: number, file: File) => {

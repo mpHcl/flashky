@@ -28,7 +28,7 @@ type RawCrudListProps = {
 }
 
 // for legacy support
-export default function CrudList({ data, showUpdateDeleteBtns, path }: { data: ListElement[], path: string, showUpdateDeleteBtns: boolean, }) {
+export default function CrudList({ data, showUpdateDeleteBtns, path, onDeleteAction = undefined }: { data: ListElement[], path: string, showUpdateDeleteBtns: boolean, onDeleteAction?: (id: number) => void}) {
   const router = useRouter();
 
   const viewOnClick = (id: number) => {
@@ -38,7 +38,9 @@ export default function CrudList({ data, showUpdateDeleteBtns, path }: { data: L
     router.push("/" + path + "/" + id + "/edit");
   }
   const deleteOnClick = (id: number) => {
-    console.log("delete " + path + " " + id);
+    if (onDeleteAction != undefined) {
+      onDeleteAction(id);
+    }
   }
 
   return <RawCrudList

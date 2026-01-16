@@ -5,10 +5,19 @@ import CrudList from "../../components/crudlist";
 import { BASE_URL } from "../../constants";
 import { Button, Link, Typography } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
+import { fetchAuthDELETE } from "@/app/lib/fetch";
 
 
 export default function MyFlashky() {
     const [data, setData] = useState([]);
+
+    const deleteFlashcard = async (id: number) => {
+      const onSuccess = async () => {
+        setData(data.filter(d => d.id != id));
+      }
+      fetchAuthDELETE(`flashcards/${id}`, 200, onSuccess);
+    }
+
     useEffect(() => {
         const fetchData = async () => {
             const myHeaders = new Headers();
@@ -49,7 +58,11 @@ export default function MyFlashky() {
               </Link>
             </Box>
         <Suspense fallback={<div>Loading...</div>}>
-            <CrudList data={data.map((el) => ({ id: el.id, name: el.name, preview: el.front_side.content == null ? "" : el.front_side.content }))} showUpdateDeleteBtns={true} path="flashky"></CrudList>
+            <CrudList 
+              data={data.map((el) => ({ id: el.id, name: el.name, preview: el.front_side.content == null ? "" : el.front_side.content }))} 
+              showUpdateDeleteBtns={true} 
+              path="flashky"
+              onDeleteAction={deleteFlashcard} />
         </Suspense>
 
     </Box>);

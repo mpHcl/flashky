@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import {
   Box,
   Button,
+  Chip,
   ClickAwayListener,
   Grid,
   List,
@@ -75,6 +76,10 @@ export default function Flashky() {
             </Box></ClickAwayListener>}
         </Grid>
       </Grid>
+
+      {data.tags.map((tag, index) =>
+        <Chip key={index} label={tag} sx={{ m: 0.25 }} />
+      )}
 
 
       <Grid container spacing={2}>

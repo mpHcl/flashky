@@ -28,7 +28,8 @@ export type Flashcard = {
     owner_id: number,
     creation_date: string,
     front_side: FlashcardSide,
-    back_side: FlashcardSide
+    back_side: FlashcardSide,
+    tags: string[]
 }
 
 export type FlashcardEditDTO = {

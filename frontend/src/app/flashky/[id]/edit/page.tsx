@@ -619,28 +619,26 @@ export default function EditFlashky() {
 
       {/* Footer */}
       <Box display="flex" justifyContent="space-between" mt={3}>
-        <Button color="inherit">CANCEL</Button>
-        <Stack direction="row" spacing={1}>
-          <Button variant="contained" onClick={() => {
-            editFlashcard(
-              flashcard.id,
-              name,
-              frontTextContent,
-              backTextContent,
-              frontMediaFiles,
-              backMediaFiles,
-              frontMediaToUpdate,
-              backMediaToUpdate,
-              frontMediaIdsToRemove,
-              backMediaIdsToRemove,
-              tagsToAdd,
-              tagsToRemove,
-              decksToAdd,
-              decksToRemove
-            );
-            router.push("/flashky/" + id);
-          }}>Edit</Button>
-        </Stack>
+        <Button color="inherit" href={`/flashky/${id}`}>CANCEL</Button>
+        <Button variant="contained" onClick={() => {
+          editFlashcard(
+            flashcard.id,
+            name,
+            frontTextContent,
+            backTextContent,
+            frontMediaFiles,
+            backMediaFiles,
+            frontMediaToUpdate,
+            backMediaToUpdate,
+            frontMediaIdsToRemove,
+            backMediaIdsToRemove,
+            tagsToAdd,
+            tagsToRemove,
+            decksToAdd,
+            decksToRemove
+          );
+          router.push("/flashky/" + id);
+        }}>Edit</Button>
       </Box>
     </Paper>
   );

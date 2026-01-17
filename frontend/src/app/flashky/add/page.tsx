@@ -420,7 +420,7 @@ export default function NewFlashky() {
 
       {/* Footer */}
       <Box display="flex" justifyContent="space-between" mt={3}>
-        <Button color="inherit">CANCEL</Button>
+        <Button color="inherit" href="/flashky/my">CANCEL</Button>
         <Stack direction="row" spacing={1}>
           <Button variant="outlined" onClick={() =>
             createFlashcard(

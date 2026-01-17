@@ -3,15 +3,32 @@ import AddIcon from '@mui/icons-material/Add';
 import { Suspense, useEffect, useState } from 'react';
 import { Box, Button, Link, Typography } from '@mui/material';
 import CrudList from '../../components/crudlist';
-import { fetchAuthGET } from '../../lib/fetch';
+import { fetchAuthDELETE, fetchAuthGET } from '../../lib/fetch';
 import SavedDecks from '../components/SavedDecks';
 import { checkAuthenticated, useAuth } from '../../(auth)/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import ConfirmDialog from '@/app/components/dialogs/ConfirmDialog';
 
 export default function MyDecks() {
   const [data, setData] = useState([]);
+  const [idToDelete, setIdToDelete] = useState<number>(-1);
+  // let idToDelete = -1;
+  const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
   const {isAuthenticated} = useAuth();
   const router = useRouter();
+
+  const deleteDeck = async (id: number) => {
+    await setIdToDelete(id);
+    setOpenDeleteDialog(true);
+  }
+
+  const confirmDelete = async () => {
+    const onSuccess = async () => {
+      setData(data.filter(d => d.id != idToDelete));
+    }
+    fetchAuthDELETE(`decks/${idToDelete}`, 200, onSuccess);
+    setOpenDeleteDialog(false);
+  }
 
   useEffect(() => {
       if (!checkAuthenticated(router, isAuthenticated)) {
@@ -28,6 +45,12 @@ export default function MyDecks() {
   
   return (
     <>
+      <ConfirmDialog
+            open={openDeleteDialog}
+            action="Are you sure you want to delete this deck?"
+            onYes={() => { confirmDelete() }}
+            onNo={() => setOpenDeleteDialog(false)}
+          />
       <Box
         display="flex"
         gap={4}
@@ -63,8 +86,9 @@ export default function MyDecks() {
                   name: el.name,
                   preview: el.description,
                 }))}
-                showUpdateDeleteBtns
+                showUpdateDeleteBtns={true}
                 path="decks"
+                onDeleteAction={deleteDeck}
               />
             </Suspense>
           </Box>

@@ -45,6 +45,7 @@ class DeckGetDTO(BaseModel):
     description: str | None
     public: bool
     has_media: bool
+    owner_id: int
     flashcards: list[FlashcardDTO]
     tags: Optional[list[str]] = None
 
@@ -375,6 +376,7 @@ def create_deck_dto(deck: Deck):
         description=deck.description,
         public=deck.public,
         has_media=deck.has_media,
+        owner_id=deck.owner_id,
         flashcards=[
             FlashcardDTO(
                 id=flashcard.id,

@@ -251,7 +251,9 @@ export default function EditDeck() {
             setFlashcardsToRemove={setFlashcardsToRemove} />
         </Grid>
       </Grid>
-      <Box display="flex" justifyContent="center" mt={3}>
+
+      <Box display="flex" justifyContent="space-between" mt={3}>
+        <Button color="inherit" href={`/decks/${id}`}>CANCEL</Button>
         <Button variant='contained' onClick={editDeck}>EDIT</Button>
       </Box>
     </Paper>

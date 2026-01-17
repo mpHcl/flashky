@@ -69,6 +69,7 @@ export type Deck = {
   description: string,
   public: boolean,
   has_media: boolean,
+  owner_id: number,
   tags: string[],
   flashcards: FlashcardInDeck[]
 }

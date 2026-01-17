@@ -3,7 +3,7 @@ import { fetchAuthDELETE, fetchAuthGET, fetchAuthPOST, fetchAuthPUT, OK } from "
 import { Dispatch, SetStateAction } from "react";
 import { Deck, DeckUpdateDTO, Flashcard, FlashcardEditDTO, FlashcardSideCreateDTO, MediaInfo, MediaUpdateDTO } from "@/app/lib/types";
 
-export const getFlashcard = async (id: number, setData: Dispatch<SetStateAction<Flashcard | undefined>>, setOwnerId: Dispatch<SetStateAction<number>>) => {
+export const getFlashcard = async (id: number, setData: Dispatch<SetStateAction<Flashcard | undefined>>, setCurrentUserId: Dispatch<SetStateAction<number>>) => {
     const onSuccess = async (response: Response) => {
         const result = await response.json();
         setData(result);
@@ -12,7 +12,7 @@ export const getFlashcard = async (id: number, setData: Dispatch<SetStateAction<
 
     const onSuccessUser = async (response: Response) => {
         const result = await response.json();
-        setOwnerId(result.id);
+        setCurrentUserId(result.id);
     }
     fetchAuthGET(`users/me`, 200, onSuccessUser)
 }

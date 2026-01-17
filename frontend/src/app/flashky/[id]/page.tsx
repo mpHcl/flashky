@@ -23,7 +23,7 @@ export default function Flashky() {
   const id = Number(params.id);
   const router = useRouter();
   const [data, setData] = useState<Flashcard>();
-  const [ownerId, setOwnerId] = useState<number>(-1);
+  const [currentUserId, setCurrentUserId] = useState<number>(-1);
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -41,7 +41,7 @@ export default function Flashky() {
 
 
   useEffect(() => {
-    getFlashcard(id, setData, setOwnerId);
+    getFlashcard(id, setData, setCurrentUserId);
   }, []);
 
   return (
@@ -54,7 +54,7 @@ export default function Flashky() {
           </Typography>
         </Grid>
         <Grid size={2} display="flex" justifyContent="right" alignItems="right">
-          {ownerId == data.owner_id && <ClickAwayListener onClickAway={(e) => setOpen(false)}>
+          {currentUserId == data.owner_id && <ClickAwayListener onClickAway={(e) => setOpen(false)}>
             <Box>
               <Button onClick={handleClickPopper}>More actions</Button>
               <Popper open={open} anchorEl={anchorEl} placement="bottom-end">

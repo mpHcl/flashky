@@ -30,6 +30,10 @@ class UserDTO(BaseModel):
         "from_attributes": True
     }
     
+class UserGetAllDTO(BaseModel):
+    total_number: int
+    users: list[UserDTO]
+    
 class UserUpdateDTO(BaseModel):
     username: Optional[str] = None
     email: Optional[str] = None
@@ -43,20 +47,28 @@ class PasswordChangeDTO(BaseModel):
 #    Get user endpoints
 ##############################
 
-@router.get("/", response_model=list[UserDTO])
-def get_all_users(q: Optional[str] = Query(None, min_length=1), db: Session = Depends(get_session)) -> list[User]:
-    if q:
-        users = db.query(User).filter(User.username.contains(q)).all()
-    else:
-        users = db.query(User).all()
-    return users
+@router.get("/", response_model=UserGetAllDTO)
+def get_all_users(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100),
+    _: int = Depends(authenticate(["MODERATOR"])),
+    db: Session = Depends(get_session)) -> list[User]:
+    
+    users = db.query(User)
+    
+    total_number = users.count()
+        
+    offset = (page - 1) * page_size
+    users = users.offset(offset).limit(page_size).all()
+
+    return {"total_number": total_number, "users": users}
 
 @router.get("/me", response_model=UserDTO)
 def get_current_user(user_id: int = Depends(authenticate()), db: Session = Depends(get_session)) -> User:
     return get_user_logic(user_id, db)
 
 @router.get("/{user_id}", response_model=UserDTO)
-def get_user(user_id: int, db: Session = Depends(get_session)):
+def get_user(user_id: int, _: int = Depends(authenticate(["MODERATOR"])), db: Session = Depends(get_session)):
     return get_user_logic(user_id, db)
 
 def get_user_logic(user_id: int, db: Session):
@@ -73,7 +85,7 @@ def deactivate_current_user(user_id: int = Depends(authenticate()), db: Session 
     return deactivate_user_logic(user_id, db)
 
 @router.delete("/{user_id}", response_model=UserDTO)
-def deactivate_user(user_id: int, current_user_id: int = Depends(authenticate()), db: Session = Depends(get_session)):
+def deactivate_user(user_id: int, _: int = Depends(authenticate(["MODERATOR"])), db: Session = Depends(get_session)):
     return deactivate_user_logic(user_id, db)
 
 def deactivate_user_logic(user_id: int, db: Session):
@@ -81,6 +93,20 @@ def deactivate_user_logic(user_id: int, db: Session):
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     user.active = False
+    db.commit()
+    
+    return user
+
+##############################
+#    Activate user endpoints
+##############################
+
+@router.put("/{user_id}/activate", response_model=UserDTO)
+def activate_user(user_id: int, _: int = Depends(authenticate(["MODERATOR"])), db: Session = Depends(get_session)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.active = True
     db.commit()
     
     return user
@@ -106,11 +132,19 @@ def change_password(params: PasswordChangeDTO, user_id: int = Depends(authentica
     return user    
 
 @router.put("/me", response_model=UserDTO)
-def update_current_user(updated_user: UserUpdateDTO, user_id: int = Depends(authenticate()), db: Session = Depends(get_session)):
+def update_current_user(
+    updated_user: UserUpdateDTO, 
+    user_id: int = Depends(authenticate()), 
+    db: Session = Depends(get_session)
+    ):
     return update_user_logic(user_id, updated_user, db)
 
 @router.put("/{user_id}", response_model=UserDTO)
-def update_user(user_id: int, updated_user: UserUpdateDTO, current_user_id: int = Depends(authenticate()), db: Session = Depends(get_session)):
+def update_user(
+    user_id: int, updated_user: UserUpdateDTO, 
+    _: int = Depends(authenticate(["MODERATOR"])), 
+    db: Session = Depends(get_session)
+    ):
     return update_user_logic(user_id, updated_user, db)
 
 def update_user_logic(user_id: int, updated_user: UserUpdateDTO, db: Session):

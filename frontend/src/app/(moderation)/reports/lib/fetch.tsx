@@ -1,0 +1,41 @@
+import { fetchAuthGET, fetchAuthPUT, OK } from "@/app/lib/fetch";
+import { RequestBodyType } from "@/app/lib/fetchOptions";
+import { Dispatch, SetStateAction } from "react";
+import { ReportType } from "./types";
+
+export const fetchGetReports = (
+    setData: Dispatch<SetStateAction<ReportType[] | undefined>>,
+    page: number,
+    setTotal: Dispatch<SetStateAction<number>>,
+    pageSize: number
+) => {
+    const onSuccess = async (response: Response) => {
+        const result = await response.json();
+        setData(result.reports);
+        setTotal(result.total_number)
+    }
+    fetchAuthGET(`reports?page=${page + 1}&page_size=${pageSize}`, OK, onSuccess);
+}
+
+export const fetchGetReport = (
+    setData: Dispatch<SetStateAction<ReportType | undefined>>,
+    id: number
+) => {
+    const onSuccess = async (response: Response) => {
+        const result = await response.json();
+        setData(result);
+    }
+    fetchAuthGET(`reports/${id}`, OK, onSuccess);
+}
+
+export const fetchSetVerdict = (
+    verdict: string,
+    id: number,
+    setReport: Dispatch<SetStateAction<ReportType | undefined>>
+) => {
+    const onSuccess = async (response: Response) => {
+        const result = await response.json();
+        setReport(result);
+    }
+    fetchAuthPUT(`reports/${id}`, OK, RequestBodyType.JSON, { verdict: verdict }, onSuccess);
+}

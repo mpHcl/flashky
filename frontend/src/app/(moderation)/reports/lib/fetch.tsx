@@ -1,6 +1,7 @@
-import { fetchAuthGET, fetchAuthPOST, fetchAuthPUT, OK } from "@/app/lib/fetch";
+import { fetchAuthGET, fetchAuthPUT, OK } from "@/app/lib/fetch";
 import { RequestBodyType } from "@/app/lib/fetchOptions";
 import { Dispatch, SetStateAction } from "react";
+import { ReportType } from "./types";
 
 export const fetchGetReports = (
     setData: Dispatch<SetStateAction<ReportType[] | undefined>>,

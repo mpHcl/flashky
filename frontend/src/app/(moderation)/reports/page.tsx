@@ -6,20 +6,27 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from "react";
 import { fetchGetReports } from "./lib/fetch";
 import { reportCardHeaderAction } from "./lib/functions";
+import { ReportType } from './lib/types';
+import { checkAuthenticated, useAuth } from '@/app/(auth)/context/AuthContext';
 
 
 const pageSize = 10;
 const MAX_PREVIEW = 100;
 
 export default function Users() {
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
-  const [reports, setReports] = useState<ReportType[]>();
   const [page, setPage] = useState(0);
   const [total, setTotal] = useState(0);
+  const [reports, setReports] = useState<ReportType[]>();
 
   useEffect(() => {
+    if (!checkAuthenticated(router, isAuthenticated)) {
+      return;
+    }
+
     fetchGetReports(setReports, page, setTotal, pageSize);
-  }, [page])
+  }, [fetchGetReports, isAuthenticated, page]);
 
   const viewOnClick = (id: number) => {
     router.push("/reports/" + id);

@@ -2,12 +2,16 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, Typography, Stack, Chip, Divider, Button, Select, MenuItem, FormControl, InputLabel, Box, } from "@mui/material";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { fetchGetReport, fetchSetVerdict } from "../lib/fetch";
 import Link from "next/link";
 import { reportCardHeaderAction } from "../lib/functions";
+import { ReportType } from "../lib/types";
+import { checkAuthenticated, useAuth } from "@/app/(auth)/context/AuthContext";
 
 export default function ReportDetails() {
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
   const params = useParams();
   const reportId = Number(params.id);
   const [report, setReport] = useState<ReportType>();
@@ -18,8 +22,12 @@ export default function ReportDetails() {
   }
 
   useEffect(() => {
+    if (!checkAuthenticated(router, isAuthenticated)) {
+      return;
+    }
+
     loadReport();
-  }, []);
+  }, [isAuthenticated, loadReport]);
 
   const submitVerdict = () => {
     fetchSetVerdict(verdict, reportId, setReport);
@@ -128,10 +136,10 @@ export default function ReportDetails() {
                   onChange={(e) => setVerdict(e.target.value as string)}
                 >
                   <MenuItem key={"violation"} value={"Violation"}>
-                      Violation
+                    Violation
                   </MenuItem>
                   <MenuItem key={"non-violation"} value={"Non-violation"}>
-                      Non-violation
+                    Non-violation
                   </MenuItem>
                 </Select>
               </FormControl>

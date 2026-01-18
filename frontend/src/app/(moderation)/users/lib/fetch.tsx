@@ -1,8 +1,8 @@
 import { DialogType, ShowDialog } from "@/app/components/dialogs/AppDialog";
 import { fetchAuthDELETE, fetchAuthGET, fetchAuthPUT, OK } from "@/app/lib/fetch";
 import { RequestBodyType } from "@/app/lib/fetchOptions";
-import { ConstructionOutlined } from "@mui/icons-material";
 import { Dispatch, SetStateAction } from "react";
+import { User } from "./types";
 
 export const getUsers = (
     setData: Dispatch<SetStateAction<User[] | undefined>>,
@@ -46,18 +46,18 @@ export const fetchDeactivateUser = (
     fetchAuthDELETE(`users/${userId}`, OK, onSuccess, onFail);
 }
 
-export const fetchReactivateUser = (
+export const fetchActivateUser = (
     userId: number,
     setUser: Dispatch<SetStateAction<User | undefined>>,
     showDialog: ShowDialog
 ) => {
     const onSuccess = async () => {
-        showDialog("User reactivated successfully.", DialogType.INFO);
+        showDialog("User activated successfully.", DialogType.INFO);
         setUser(prev => prev ? { ...prev, active: true } : prev);
     }
     const onFail = async () => {
-        showDialog(`Failed to reactivate profile.`, DialogType.ERROR);
+        showDialog(`Failed to activate profile.`, DialogType.ERROR);
     }
 
-    fetchAuthPUT(`users/${userId}/reactivate`, OK, RequestBodyType.EMPTY, {}, onSuccess, onFail);
+    fetchAuthPUT(`users/${userId}/activate`, OK, RequestBodyType.EMPTY, {}, onSuccess, onFail);
 }

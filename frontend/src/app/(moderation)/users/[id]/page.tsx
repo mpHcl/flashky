@@ -2,19 +2,22 @@
 import React, { useEffect, useState } from "react";
 import { Box, Button, Stack } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
-import { getUser, fetchDeactivateUser, fetchReactivateUser } from "../lib/fetch";
-import ProfileTile from "@/app/components/ProfileTile";
+import { getUser, fetchDeactivateUser, fetchActivateUser } from "../lib/fetch";
 import AlertDialog, { useDialog } from "@/app/components/dialogs/AppDialog";
 import ConfirmDialog from "@/app/components/dialogs/ConfirmDialog";
+import ProfileTile from "@/app/components/profileTile";
+import { User } from "../lib/types";
+import { checkAuthenticated, useAuth } from "@/app/(auth)/context/AuthContext";
 
 export default function Profile() {
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
   const params = useParams();
   const userId = Number(params.id);
   const [user, setUser] = useState<User>();
   const { dialog, show, close } = useDialog();
   const [deactivateConfirmOpen, setDeactivateConfirmOpen] = useState(false);
-  const [reactivateConfirmOpen, setReactivateConfirmOpen] = useState(false);
+  const [activateConfirmOpen, setActivateConfirmOpen] = useState(false);
 
   const loadUser = () => {
     getUser(setUser, userId);
@@ -25,14 +28,18 @@ export default function Profile() {
     setDeactivateConfirmOpen(false);
   }
 
-  const reactivateUser = () => {
-    fetchReactivateUser(userId, setUser, show);
-    setReactivateConfirmOpen(false);
+  const activateUser = () => {
+    fetchActivateUser(userId, setUser, show);
+    setActivateConfirmOpen(false);
   }
 
   useEffect(() => {
+    if (!checkAuthenticated(router, isAuthenticated)) {
+      return;
+    }
+
     loadUser();
-  }, []);
+  }, [isAuthenticated, loadUser]);
 
   return (
     user &&
@@ -49,10 +56,10 @@ export default function Profile() {
         ) :
         (
           <ConfirmDialog
-            open={reactivateConfirmOpen}
-            action="Are you sure you want to reactivate this user?"
-            onYes={() => reactivateUser()}
-            onNo={() => setReactivateConfirmOpen(false)}
+            open={activateConfirmOpen}
+            action="Are you sure you want to activate this user?"
+            onYes={() => activateUser()}
+            onNo={() => setActivateConfirmOpen(false)}
           />
         )
       }
@@ -77,8 +84,8 @@ export default function Profile() {
               </Button>
             ):
             (
-              <Button variant="contained" color="success" onClick={() => setReactivateConfirmOpen(true)}>
-                Reactivate User
+              <Button variant="contained" color="success" onClick={() => setActivateConfirmOpen(true)}>
+                Activate User
               </Button>
             )
             }

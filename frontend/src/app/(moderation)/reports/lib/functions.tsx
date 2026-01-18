@@ -1,4 +1,5 @@
 import { Chip } from "@mui/material";
+import { ReportType } from "./types";
 
 export const reportCardHeaderAction = (report: ReportType) => {
     let label: string;  

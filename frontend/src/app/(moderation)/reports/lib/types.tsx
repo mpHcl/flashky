@@ -1,4 +1,4 @@
-type ReportType = {
+export type ReportType = {
     id: number;
     type: string;
     description: string;

@@ -139,7 +139,7 @@ def create_user_report(report_data: ReportPostDTO, user_id: int, db: Session):
 @router.get("/", response_model=ReportGetAllDTO)
 def get_reports(
     # auth
-    _: int = Depends(authenticate(["Moderator"])),
+    _: int = Depends(authenticate(["MODERATOR"])),
     # query params
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
@@ -169,7 +169,7 @@ def get_reports(
 @router.get("/{report_id}", response_model=ReportGetDTO)
 def get_report(
     report_id: int,
-    _: int = Depends(authenticate(["Moderator"])),
+    _: int = Depends(authenticate(["MODERATOR"])),
     db: Session = Depends(get_session),
 ):
     report = db.query(Report).filter(Report.id == report_id).first()
@@ -183,7 +183,7 @@ def get_report(
 def update_report(
     report_id: int,
     report_data: ReportUpdateDTO,
-    user_id: int = Depends(authenticate(["Moderator"])),
+    user_id: int = Depends(authenticate(["MODERATOR"])),
     db: Session = Depends(get_session),
 ):
     report = db.query(Report).filter(Report.id == report_id).first()

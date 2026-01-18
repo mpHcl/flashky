@@ -30,6 +30,10 @@ class UserDTO(BaseModel):
         "from_attributes": True
     }
     
+class UserGetAllDTO(BaseModel):
+    total_number: int
+    users: list[UserDTO]
+    
 class UserUpdateDTO(BaseModel):
     username: Optional[str] = None
     email: Optional[str] = None
@@ -43,13 +47,20 @@ class PasswordChangeDTO(BaseModel):
 #    Get user endpoints
 ##############################
 
-@router.get("/", response_model=list[UserDTO])
-def get_all_users(q: Optional[str] = Query(None, min_length=1), db: Session = Depends(get_session)) -> list[User]:
-    if q:
-        users = db.query(User).filter(User.username.contains(q)).all()
-    else:
-        users = db.query(User).all()
-    return users
+@router.get("/", response_model=UserGetAllDTO)
+def get_all_users(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100),
+    db: Session = Depends(get_session)) -> list[User]:
+    
+    users = db.query(User)
+    
+    total_number = users.count()
+        
+    offset = (page - 1) * page_size
+    users = users.offset(offset).limit(page_size).all()
+
+    return {"total_number": total_number, "users": users}
 
 @router.get("/me", response_model=UserDTO)
 def get_current_user(user_id: int = Depends(authenticate()), db: Session = Depends(get_session)) -> User:
@@ -81,6 +92,20 @@ def deactivate_user_logic(user_id: int, db: Session):
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     user.active = False
+    db.commit()
+    
+    return user
+
+##############################
+#    Reactivate user endpoints
+##############################
+
+@router.put("/{user_id}/reactivate", response_model=UserDTO)
+def reactivate_user(user_id: int, current_user_id: int = Depends(authenticate()), db: Session = Depends(get_session)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.active = True
     db.commit()
     
     return user

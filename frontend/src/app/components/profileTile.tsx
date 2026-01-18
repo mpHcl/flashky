@@ -1,5 +1,5 @@
 import React, { ChangeEventHandler } from "react";
-import { Box, Avatar, Stack, Paper, TextField } from "@mui/material";
+import { Box, Avatar, Stack, Paper, TextField, Typography } from "@mui/material";
 
 interface ProfileData {
   username: string;
@@ -17,7 +17,7 @@ interface ProfileProps {
   editable: boolean;
 }
 
-export default function ProfileTile({ profileData, handleChange, editable }: ProfileProps) {
+export default function ProfileTile({ profileData, handleChange=() => {}, editable=false }: ProfileProps) {
 
   return (
     <Box>
@@ -37,12 +37,18 @@ export default function ProfileTile({ profileData, handleChange, editable }: Pro
             alt={profileData.username}
             sx={{ width: 120, height: 120 }}
           />
-          
+
+          {!profileData.active && (
+            <Typography color="error" fontWeight={600}>
+              Account Inactive
+            </Typography>
+          )}
+
           <TextField
             fullWidth
             label="Description"
             name="description"
-            value={profileData.description}
+            value={profileData.description || ""}
             onChange={handleChange}
             slotProps={{
               input: {
@@ -81,7 +87,7 @@ export default function ProfileTile({ profileData, handleChange, editable }: Pro
             fullWidth
             label="Joined"
             name="creation_date"
-            value={profileData.creation_date}
+            value={profileData.creation_date.split('T')[0] + ', ' + profileData.creation_date.split('T')[1].split('.')[0]}
             onChange={handleChange}
             slotProps={{
               input: {

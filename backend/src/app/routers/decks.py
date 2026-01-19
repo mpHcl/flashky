@@ -230,6 +230,22 @@ def get_deck(
 
     return create_deck_dto(deck)
 
+@router.get("/{deck_id}/isowned", response_model=bool)
+def get_is_owned_deck(
+    deck_id: int,
+    user_id: int = Depends(authenticate()),
+    db: Session = Depends(get_session),
+):
+    user_id = int(user_id)
+    if not user_id:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    deck = db.query(Deck).filter(Deck.id == deck_id).first()
+    if not deck:
+        raise HTTPException(status_code=404, detail="Deck not found")
+    
+    return deck.owner_id == user_id
+    
 
 @router.delete("/{deck_id}")
 def delete_deck(

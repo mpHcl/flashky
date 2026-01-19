@@ -13,7 +13,7 @@ export default function ViewDeck() {
   const id = params.id;
   const router = useRouter();
   const [deck, setDeck] = useState<Deck>();
-  const [currentUserId, setCurrentUserId] = useState<number>(-1);
+  const [isOwned, setIsOwned] = useState<boolean>(false);
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
@@ -26,11 +26,11 @@ export default function ViewDeck() {
 
     fetchAuthGET("decks/" + id, 200, onSuccess);
 
-    const onSuccessUser = async (response: Response) => {
+    const onSuccessIsOwned = async (response: Response) => {
       const result = await response.json();
-      setCurrentUserId(result.id);
+      setIsOwned(result);
     }
-    fetchAuthGET(`users/me`, 200, onSuccessUser)
+    fetchAuthGET(`decks/${id}/isowned`, 200, onSuccessIsOwned)
   }, []);
 
   const handleClickPopper = (event: React.MouseEvent<HTMLElement>) => {
@@ -65,12 +65,17 @@ export default function ViewDeck() {
           </Typography>
         </Grid>
         <Grid size={2} display="flex" justifyContent="right" alignItems="right">
-          {currentUserId == deck.owner_id && <ClickAwayListener onClickAway={(e) => setOpen(false)}>
+          {isOwned && <ClickAwayListener onClickAway={(e) => setOpen(false)}>
             <Box>
               <Button onClick={handleClickPopper}>More actions</Button>
               <Popper open={open} anchorEl={anchorEl} placement="bottom-end">
                 <Paper sx={{ minWidth: 180 }}>
                   <List>
+                    <ListItemButton
+                      component="a"
+                      href={`/flashky/add?deck=${id}`}>
+                      <ListItemText primary="Add new flashcards" />
+                    </ListItemButton>
                     <ListItemButton
                       component="a"
                       href={`/decks/${id}/edit`}>

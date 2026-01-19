@@ -3,18 +3,18 @@ import { fetchAuthDELETE, fetchAuthGET, fetchAuthPOST, fetchAuthPUT, OK } from "
 import { Dispatch, SetStateAction } from "react";
 import { Deck, DeckUpdateDTO, Flashcard, FlashcardEditDTO, FlashcardSideCreateDTO, MediaInfo, MediaUpdateDTO } from "@/app/lib/types";
 
-export const getFlashcard = async (id: number, setData: Dispatch<SetStateAction<Flashcard | undefined>>, setCurrentUserId: Dispatch<SetStateAction<number>>) => {
+export const getFlashcard = async (id: number, setData: Dispatch<SetStateAction<Flashcard | undefined>>, setIsOwned: Dispatch<SetStateAction<boolean>>) => {
     const onSuccess = async (response: Response) => {
         const result = await response.json();
         setData(result);
     }
     fetchAuthGET(`flashcards/${id}`, OK, onSuccess);
 
-    const onSuccessUser = async (response: Response) => {
-        const result = await response.json();
-        setCurrentUserId(result.id);
+    const onSuccessIsOwned = async (response: Response) => {
+      const result = await response.json();
+      setIsOwned(result);
     }
-    fetchAuthGET(`users/me`, 200, onSuccessUser)
+    fetchAuthGET(`flashcards/${id}/isowned`, 200, onSuccessIsOwned)
 }
 
 export const uploadMedia = async (sideId: number, file: File) => {

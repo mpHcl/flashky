@@ -12,6 +12,7 @@ import {
 import { Comment } from "./lib/types";
 import { getCommentChildren } from "./lib/fetch";
 import { ReplyInput } from "./ReplyInput";
+import ReportInputPopup from "../dialogs/ReportDialog";
 
 
 type CommentItemProps = {
@@ -24,6 +25,7 @@ export function CommentItem({ comment, depth = 0, showChildren }: CommentItemPro
   const [currentComment, setCurrentComment] = useState(comment);
   const [showChildrenState, setShowChildrenState] = useState(showChildren);
   const [showReplyInput, setShowReplyInput] = useState(false);
+  const [showReportDialog, setShowReportDialog] = useState(false);
 
   useEffect(
     () => {
@@ -36,81 +38,89 @@ export function CommentItem({ comment, depth = 0, showChildren }: CommentItemPro
     , [showChildrenState])
 
   return currentComment && (
-    <Box sx={{ ml: depth * 4, mt: 2 }}>
-      <Stack direction="row" spacing={2} alignItems="flex-start">
-        <Box sx={{ flex: 1 }}>
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Typography variant="subtitle2" fontWeight={600}>
-              {currentComment.author_name}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {new Date(currentComment.creation_date + "Z").toLocaleString()}
-            </Typography>
-          </Stack>
+    <>
+      <ReportInputPopup
+        open={showReportDialog}
+        setOpen={setShowReportDialog}
+        object_id={currentComment.id}
+        object_type="comment"
+      />
+      <Box sx={{ ml: depth * 4, mt: 2 }}>
+        <Stack direction="row" spacing={2} alignItems="flex-start">
+          <Box sx={{ flex: 1 }}>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Typography variant="subtitle2" fontWeight={600}>
+                {currentComment.author_name}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {new Date(currentComment.creation_date + "Z").toLocaleString()}
+              </Typography>
+            </Stack>
 
-          <Typography variant="body2" sx={{ mt: 0.5, whiteSpace: "pre-wrap" }}>
-            {currentComment.content}
-          </Typography>
+            <Typography variant="body2" sx={{ mt: 0.5, whiteSpace: "pre-wrap" }}>
+              {currentComment.content}
+            </Typography>
 
-          <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-            <Button
-              size="small"
-              onClick={() => {
-                setShowReplyInput(!showReplyInput);
-              }}
-            >
-              Reply
-            </Button>
-            <Button
-              size="small"
-              color="error"
-              onClick={() => { console.log("REPORT"); }}
-            >
-              Report
-            </Button>
-            { showChildrenState && currentComment.children.length !== 0 && 
+            <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
               <Button
                 size="small"
-                sx={{color: "lightblue"}}
-                onClick={() => setShowChildrenState(!showChildrenState)}
+                onClick={() => {
+                  setShowReplyInput(!showReplyInput);
+                }}
               >
-                Hide replies
+                Reply
               </Button>
-            }
-            {((currentComment.children?.length > 0 && !(showChildrenState)) || (currentComment.children.length === 0 && currentComment.children_ids.length > 0)) && (
+              <Button
+                size="small"
+                color="error"
+                onClick={() => { setShowReportDialog(true); }}
+              >
+                Report
+              </Button>
+              {showChildrenState && currentComment.children.length !== 0 &&
+                <Button
+                  size="small"
+                  sx={{ color: "lightblue" }}
+                  onClick={() => setShowChildrenState(!showChildrenState)}
+                >
+                  Hide replies
+                </Button>
+              }
+              {((currentComment.children?.length > 0 && !(showChildrenState)) || (currentComment.children.length === 0 && currentComment.children_ids.length > 0)) && (
+                <Box sx={{ mt: 2 }}>
+                  <Button
+                    sx={{ color: "lightblue" }}
+                    size="small"
+                    onClick={() => { setShowChildrenState(true); }}
+                  >
+                    Load replies
+                  </Button>
+                </Box>
+              )}
+            </Stack>
+
+            {showReplyInput && <ReplyInput
+              setShowReplyInput={setShowReplyInput}
+              parentComment={currentComment}
+              setParentComment={setCurrentComment}
+            />}
+          </Box>
+        </Stack>
+
+        {currentComment.children?.length > 0 && (showChildrenState) && (
           <Box sx={{ mt: 2 }}>
-            <Button
-              sx={{color: "lightblue"}}
-              size="small"
-              onClick={() => { setShowChildrenState(true); }}
-            >
-              Load replies
-            </Button>
+            {currentComment.children.map((child) => (
+              <CommentItem
+                key={child.id}
+                comment={child}
+                depth={depth + 1}
+                showChildren={false}
+              />
+            ))}
           </Box>
         )}
-          </Stack>
-
-          {showReplyInput && <ReplyInput
-            setShowReplyInput={setShowReplyInput}
-            parentComment={currentComment}
-            setParentComment={setCurrentComment}
-          />}
-        </Box>
-      </Stack>
-
-      {currentComment.children?.length > 0 && (showChildrenState) && (
-        <Box sx={{ mt: 2 }}>
-          {currentComment.children.map((child) => (
-            <CommentItem
-              key={child.id}
-              comment={child}
-              depth={depth + 1}
-              showChildren={false}
-            />
-          ))}
-        </Box>
-      )}
-      <Divider sx={{ mt: 2 }} />
-    </Box>
+        <Divider sx={{ mt: 2 }} />
+      </Box>
+    </>
   );
 }

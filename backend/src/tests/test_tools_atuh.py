@@ -5,7 +5,6 @@ from fastapi import HTTPException
 
 from app.tools.auth.authenticate import authenticate
 from app.tools.auth.jwt_handler import (
-    SECRET_KEY,
     get_token_handler,
     invalidate_token,
     generate_token,
@@ -18,6 +17,8 @@ from app.models import ExpireTokens, User
 
 from argon2 import PasswordHasher
 
+from app.tools.auth import jwt_handler
+
 # ---------- Fixtures ----------
 
 
@@ -27,6 +28,13 @@ def mock_db(mocker):
     db = mocker.MagicMock()
     mocker.patch("app.database.get_session", return_value=db)
     return db
+
+
+@pytest.fixture(autouse=True)
+def mock_secret_key(mocker):
+    mocker.patch(
+        "app.tools.auth.jwt_handler.get_secret_key", return_value="some key"
+    )
 
 
 @pytest.fixture
@@ -81,7 +89,7 @@ def test_decode_token_expired():
         "iat": datetime.utcnow() - timedelta(days=1),
         "sub": "user123",
     }
-    token = jwt.encode(expired_payload, SECRET_KEY, algorithm="HS256")
+    token = jwt.encode(expired_payload, jwt_handler.get_secret_key(), algorithm="HS256")
 
     with pytest.raises(HTTPException) as exc:
         decode_token(token)

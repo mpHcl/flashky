@@ -6,7 +6,11 @@ Flashky is a modern web application that helps you create, organize, and learn w
 Flashky runs as a containerized application. To get started, make sure Docker is installed on your machine.
 
 ### 1. Environment configurations
-Create a .env and .env.dev files in the root directory of the project with the following structures:
+Create two files in the project root:
+- `.env`
+- `.env.dev`
+
+Environment files should have following structure
 
 ```env
 POSTGRES_USER: user
@@ -16,7 +20,7 @@ DATABASE_URL=postgresql+psycopg2://postgres:postgres@db:5432/flashky
 AUTH_KEY:key
 ```
 
-*We recommend to create two different credentials and names for the dev and prod databases.*
+*⚠️ We recommend to create two different credentials sets and names for the dev and the prod databases.*
 
 ### 2. Run the application 
 Start the application using Docker Compose:
@@ -31,59 +35,123 @@ docker compose -f compose.dev.yaml -p flashky-dev up
 docker compose -f compose.yaml -p flashky up
 ```
 
-After the application is running: 
-- to populate the database with initial data see [database initialization](#database-initialization). 
-- if the database schema changes, new [database migrations](#database-migrations) should be created
+To apply frontend changes on production server you need to rebuild the frontend container 
+```sh
+docker compose -f compose.yaml -p flashky up --build
+```
+
+#### 📌 After Startup
+- Populate the database with sample data: see [database initialization](#database-initialization). 
+- If the schema changes, create new [database migrations](#database-migrations)
 
 ---
 
-## 📘 User Guide (Placeholder)
+## 📘 User Guide
 
-### Entering page
-In order to use the app you need to log in or register an account. 
+### 🟢 Entry & Home Page
+To use Flashky, you must log in or register.
 
 ![Entry page](/docs/images/entrypage.jpg)
 
-After log in you will see following page
-
-![Home page](/docs/images/homepage.jpg)
-
-From here you can:
+After login, you will see the Home Page, where you can:
 - Explore - search for decks from other users
 - View your decks - browse decks created or saved by you 
 - View your Flashky - browse flashcards created by you
 - Edit your profile
 
+![Home page](/docs/images/homepage.jpg)
 
-### Flashky
-#### Create
-To add Flashky you need to go to /flashky/add or click on Add Flashky on sidebar. 
+### 📝 Flashky (Flashcards)
+#### Create a Flashcard
+Go to:
+- /flashky/add
+- or click Add Flashky in the sidebar
 
 ![Add Flashky](/docs/images/add_flashcard.jpg)
 
 From here you can:
-- Change flashcard's name and content
-- Upload media (audio, video, photos) for your flashcard
+- Set flashcard title & content
+- Upload images, audio, or video
 - Add tags
-- Add flashcard to an existing deck
+- Add the card to an existing deck
 
-#### Browse
-Your flashcards are available in My Flashky page (/flashky/add).
+#### View & Manage Flashcards
+Go to **My Flashky**:
+- View all your cards
+- Edit or delete cards
+- Organize and manage your flashcards
 
 ![Flashcards list](/docs/images/flashcards_list.jpg)
 
-Where you can view, edit and delete your cards. 
 
-### Decks 
+### 📚 Decks 
 #### Create
+Go to:
+- /decks/add
+- or click Add Deck in the sidebar
 
-#### Browse
+![Add deck](/docs/images/add_deck.jpg)
 
-#### Explore
+From here you can:
+- Set deck name & description
+- Add tags
+- Add flashcards to the deck
 
-#### Learn 
+#### View Your Decks
+Your decks are available in My Decks page (/decks/add).
 
-### Profile
+![Decks list](/docs/images/decks_list.jpg)
+
+Where you can view, edit, delete and learn your decks. You can also view, learn and remove your saved decks.  
+
+#### Explore Community Decks
+You can search, save and comment decks made by the Flashky community. 
+
+![Search](/docs/images/search.jpg)
+
+
+![View search item](/docs//images/search_view.jpg)
+
+### 🎓 Learn 
+Learning is the core feature of Flashky.
+To start learning:
+- Open a deck
+- Click the Academic Cap icon
+
+![Learn](/docs//images/learn.jpg)
+
+While studying, rate your confidence:
+
+| Rating | Meaning         |
+| ------ | --------------- |
+| 1      | Not confident   |
+| 5      | Fully confident |
+
+
+### 👤 Profile
+You can edit your profile:
+- Change description
+- Upload profile picture
+- Update credentials
+- Delete your account
+
+![Profile](/docs/images/profile.jpg)
+
+### 🛡️ Moderator
+You need moderator role to access those pages
+
+#### Reports
+View and verify user reports:
+- /reports
+
+![Reports](/docs/images/reports.jpg)
+
+#### Users
+View and manage users:
+- /users
+- Deactivate accounts if needed
+
+![Users](/docs/images/users.jpg)
 
 --- 
 
@@ -109,27 +177,27 @@ Database migrations are managed using Alembic and should be executed from inside
 ### Common commands
 - Generate migration
 ```sh
-alembic revision --autogenerate -m "description" - Generate migration
+alembic revision --autogenerate -m "description" 
 ```
 
 - Apply all pending migrations
 ```sh
-alembic upgrade head - Apply all pending migrations
+alembic upgrade head
 ```
 
 - Rollback last migration
 ```sh
-alembic downgrade -1 - Rollback last migration
+alembic downgrade -1
 ```
 
 -  View migration history
 ```sh
-alembic history - View migration history
+alembic history 
 ```
 
 - Show current revision
 ```sh
-alembic current - Show current revision
+alembic current
 ```
 ### Notes on SQLModel Compatibility
 If a migration contains mixed `sqlalchemy` and `SQLModel` types, you may need to adjust it manually.
@@ -149,3 +217,10 @@ To insert sample data into the database, run the following command from inside t
 ```sh
 python -m app.init_db
 ``` 
+---
+
+## 🔬 Backend tests
+You can run tests using command from within the backend container  
+```sh
+pytest
+```

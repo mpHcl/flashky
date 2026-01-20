@@ -5,8 +5,7 @@ import { Box } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from "./theme";
-<<<<<<< HEAD
-
+import Sidebar from "./components/Sidebar"
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import ExploreIcon from '@mui/icons-material/Explore';
@@ -14,8 +13,6 @@ import HomeIcon from '@mui/icons-material/Home';
 import LogoutIcon from '@mui/icons-material/Logout';
 import NoteIcon from '@mui/icons-material/Note';
 import PortraitIcon from '@mui/icons-material/Portrait';
-import Sidebar from "./components/Sidebar"
->>>>>>> main
 import SearchBox from "./components/searchbox";
 import SettingsIcon from '@mui/icons-material/Settings';
 import StyleIcon from '@mui/icons-material/Style';

@@ -95,7 +95,7 @@ export default function ViewDeck() {
       {deck.tags.map((tag, index) =>
         <Chip key={index} label={tag} sx={{ m: 0.25 }} />
       )}
-      <Paper variant='outlined' sx={{ maxHeight: 500, overflow: 'scroll' }}>
+      <Paper variant='outlined' sx={{ maxHeight: 500, overflow: 'auto' }}>
         <Typography variant="subtitle1" gutterBottom whiteSpace={'pre-wrap'} sx={{ p: 1 }}>
           {deck.description}
         </Typography>

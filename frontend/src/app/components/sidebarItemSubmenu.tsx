@@ -1,10 +1,11 @@
 "use client";
-import { Box, List, ListItemButton, ListItemText, Popper, Paper, Typography, ListItem } from '@mui/material';
+import { Box, List, ListItemButton, ListItemText, Popper, Paper, Typography, ListItem, ListItemIcon } from '@mui/material';
 import * as React from 'react';
 
 interface Route {
   name: string;
   route: string;
+  icon?: React.ReactNode;
   subroutes?: Route[];
 }
 
@@ -36,6 +37,7 @@ export default function SidebarItemSubmenu({ routeParam }: Props) {
         <ListItemButton
           component="a"
           href={routeParam.route}>
+          {routeParam.icon && <ListItemIcon>{routeParam.icon!}</ListItemIcon>}
           <ListItemText disableTypography>
             <Typography color="primary.contrastText">
               {routeParam.name}
@@ -50,6 +52,7 @@ export default function SidebarItemSubmenu({ routeParam }: Props) {
                   key={route.name}
                   component="a"
                   href={route.route}>
+                  {route.icon && <ListItemIcon>{route.icon!}</ListItemIcon>}
                   <ListItemText primary={route.name} />
                 </ListItemButton>
               ))}

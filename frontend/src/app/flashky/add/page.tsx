@@ -27,6 +27,7 @@ import { createFlashcard } from '../lib/fetch';
 import { Deck } from '@/app/lib/types';
 import { fetchAuthGET } from '@/app/lib/fetch';
 import { useRouter } from 'next/navigation';
+import { checkAuthenticated, useAuth } from '@/app/(auth)/context/AuthContext';
 
 type MediaProps = {
   name: string;
@@ -292,6 +293,9 @@ export default function NewFlashky() {
   const [decks, setDecks] = React.useState<Deck[]>([]);
   const [tags, setTags] = React.useState<string[]>([]);
 
+  const {isAuthenticated} = useAuth()
+
+
   const getMediaType = (mimeType: string): "photo" | "audio" | "video" | null => {
     if (mimeType.startsWith('image/')) return 'photo';
     if (mimeType.startsWith('audio/')) return 'audio';
@@ -348,11 +352,14 @@ export default function NewFlashky() {
   }, []);
 
   React.useEffect(() => {
+    if (!checkAuthenticated(router, isAuthenticated)) {
+            return;
+    }
     return () => {
       frontMedia.forEach(media => URL.revokeObjectURL(media.url));
       backMedia.forEach(media => URL.revokeObjectURL(media.url));
     };
-  }, []);
+  }, [isAuthenticated]);
 
   return (
     <Paper sx={{ p: 3, mx: "auto" }}>

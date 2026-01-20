@@ -5,7 +5,7 @@ import { Box } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from "./theme";
-import Sidebar from "./components/sidebar"
+import Sidebar from "./components/Sidebar"
 import SearchBox from "./components/searchbox";
 import { AuthProvider } from "./(auth)/context/AuthContext";
 

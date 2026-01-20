@@ -10,13 +10,14 @@ import {
   Typography
 } from '@mui/material';
 
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react';
 
 import Media from '../../components/media';
 
 import { getNextCardToLearn, initLearning, postReview } from './lib/fetch';
 import { CardToLearnResult } from './lib/types';
+import { checkAuthenticated, useAuth } from '@/app/(auth)/context/AuthContext';
 
 export default function Learn() {
   const params = useParams();
@@ -30,10 +31,16 @@ export default function Learn() {
   const [cardToLearn, setCardToLearn] = useState<CardToLearnResult>();
   const [nextDate, setNextDate] = useState<Date>();
 
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
+
   useEffect(() => {
+    if (!checkAuthenticated(router, isAuthenticated)) {
+      return;
+    }
     initLearning(deck_id, setInitializing);
     getNextCardToLearn(deck_id, setLoading, setCardToLearn, setNextDate);
-  }, [])
+  }, [isAuthenticated])
 
   return (
     <>{initializing || loading ?

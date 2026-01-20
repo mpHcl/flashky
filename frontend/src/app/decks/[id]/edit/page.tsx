@@ -24,6 +24,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { RequestBodyType } from '@/app/lib/fetchOptions';
 import { fetchAuthGET, fetchAuthPUT } from '@/app/lib/fetch';
 import { Deck, DeckUpdateDTO, Flashcard, FlashcardInDeck } from '@/app/lib/types';
+import { checkAuthenticated, useAuth } from '@/app/(auth)/context/AuthContext';
 
 type FlashcardSelectionProps = {
   selectedFlashcards: FlashcardInDeck[];
@@ -192,7 +193,13 @@ export default function EditDeck() {
   const [tagsToRemove, setTagsToRemove] = React.useState<string[]>([]);
   const [deck, setDeck] = React.useState<Deck>();
 
+  const { isAuthenticated   } = useAuth();
+
   React.useEffect(() => {
+    if (!checkAuthenticated(router, isAuthenticated)) {
+      return;
+    }
+
     const onSuccess = async (response: Response) => {
       const result = await response.json();
       setDeck(result);
@@ -204,7 +211,7 @@ export default function EditDeck() {
     }
 
     fetchAuthGET("decks/" + id, 200, onSuccess);
-  }, []);
+  }, [isAuthenticated]);
 
   const editDeck = async () => {
     const updatedDeck: DeckUpdateDTO = { name: name, description: description, public: isPublic, flashcards_to_add: flashcardsToAdd, flashcards_to_remove: flashcardsToRemove, tags_to_add: tagsToAdd, tags_to_remove: tagsToRemove };

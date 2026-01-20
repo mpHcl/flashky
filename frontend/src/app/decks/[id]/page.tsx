@@ -7,6 +7,7 @@ import { fetchAuthDELETE, fetchAuthGET } from '@/app/lib/fetch';
 import CrudList from '@/app/components/crudlist';
 import Comments from '@/app/components/comments/Comments';
 import ConfirmDialog from '@/app/components/dialogs/ConfirmDialog';
+import { checkAuthenticated, useAuth } from '@/app/(auth)/context/AuthContext';
 
 export default function ViewDeck() {
   const params = useParams();
@@ -17,8 +18,14 @@ export default function ViewDeck() {
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
+  
+  const {isAuthenticated} = useAuth();
 
   useEffect(() => {
+    if (!checkAuthenticated(router, isAuthenticated)) {
+      return;
+    }
+    
     const onSuccess = async (response: Response) => {
       const result = await response.json();
       setDeck(result);

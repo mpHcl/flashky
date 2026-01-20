@@ -24,6 +24,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { DeckPostDTO, Flashcard } from '@/app/lib/types';
 import { RequestBodyType } from '@/app/lib/fetchOptions';
 import { fetchAuthGET, fetchAuthPOST } from '@/app/lib/fetch';
+import { checkAuthenticated, useAuth } from '@/app/(auth)/context/AuthContext';
 
 type FlashcardSelectionProps = {
   selectedFlashcards: Flashcard[];
@@ -147,6 +148,14 @@ export default function NewDeck() {
   const [isPublic, setIsPublic] = React.useState<boolean>(false);
   const [selectedFlashcards, setSelectedFlashcards] = React.useState<Flashcard[]>([]);
   const [tags, setTags] = React.useState<string[]>([]);
+
+  const { isAuthenticated} = useAuth();
+
+  React.useEffect(() => {
+    if (!checkAuthenticated(router, isAuthenticated)) {
+      return;
+    }
+  }, [isAuthenticated])
 
   const createDeck = async () => {
     const newDeck: DeckPostDTO = { name: name, description: description, isPublic: isPublic, flashcards_ids: selectedFlashcards.map(f => f.id), tags: tags };

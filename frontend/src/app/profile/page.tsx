@@ -6,7 +6,7 @@ import ProfileTile from "../components/ProfileTile";
 import ConfirmDialog from "../components/dialogs/ConfirmDialog";
 import ChangePasswordDialog from "./components/PasswordChangeDialog";
 import { fetchChangePassword, fetchDeleteProfile, fetchProfile, fetchSaveProfile } from "./lib/fetch";
-import { useAuth } from "../(auth)/context/AuthContext";
+import { checkAuthenticated, useAuth } from "../(auth)/context/AuthContext";
 import AlertDialog, { useDialog } from "../components/dialogs/AppDialog";
 
 
@@ -20,7 +20,7 @@ export default function Profile() {
   const [profile, setProfile] = useState<Profile>();
 
   const { dialog, show, close } = useDialog();
-  const { logout } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
 
   const loadProfile = () => {
     fetchProfile(setProfile);
@@ -28,8 +28,11 @@ export default function Profile() {
   }
 
   useEffect(() => {
+    if (!checkAuthenticated(router, isAuthenticated)) {
+      return;
+    }
     loadProfile();
-  }, []);
+  }, [isAuthenticated]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

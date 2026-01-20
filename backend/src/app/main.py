@@ -29,14 +29,3 @@ app.add_middleware(
 )
 
 app.mount("/files", StaticFiles(directory="./files"), name="files")
-
-@app.get("/")
-def read_root(user_id=Depends(authenticate())):
-    # ad hoc tests for auth
-    return {"Hello": "World", "id": user_id}
-
-
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    # ad hoc tests for auth
-    return {"item_id": item_id, "q": q}

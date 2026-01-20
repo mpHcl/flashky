@@ -1,3 +1,4 @@
+import os
 import jwt
 
 from datetime import datetime, timedelta, timezone
@@ -8,7 +9,7 @@ from app.database import get_session
 from ...models import ExpireTokens
 
 
-SECRET_KEY = "some key"
+SECRET_KEY = os.getenv("AUTH_KEY") #"some key"
 
 
 def get_token_handler(authorization: str = Header(...)):

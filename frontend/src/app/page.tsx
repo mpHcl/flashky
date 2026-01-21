@@ -2,9 +2,6 @@
 import { useEffect, useState } from "react";
 
 import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import Link from '@mui/material/Link';
-import { BASE_URL } from "./constants";
 import { useAuth } from "./(auth)/context/AuthContext";
 import { Card, CardActionArea, CardContent, Grid } from "@mui/material";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';

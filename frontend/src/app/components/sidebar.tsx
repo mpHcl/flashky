@@ -1,7 +1,9 @@
+"use client";
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import SidebarItemSubmenu from './SidebarItemSubmenu';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
+import { useAuth } from '../(auth)/context/AuthContext';
 
 const drawerWidth = 200;
 
@@ -18,7 +20,13 @@ interface Routes {
 }
 
 export default function Sidebar({ routes }: Routes) {
-  return (
+  const { isAuthenticated } = useAuth();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(isAuthenticated === null);
+  }, [isAuthenticated])
+  return (!loading && isAuthenticated &&
     <Drawer
       variant="permanent"
       anchor="left"
@@ -40,7 +48,7 @@ export default function Sidebar({ routes }: Routes) {
                 <ListItemButton
                   component="a"
                   href={el.route}>
-                    {el.icon && <ListItemIcon>{el.icon!}</ListItemIcon>}
+                  {el.icon && <ListItemIcon>{el.icon!}</ListItemIcon>}
                   <ListItemText disableTypography>
                     <Typography color="primary.contrastText">
                       {el.name}

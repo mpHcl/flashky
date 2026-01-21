@@ -8,6 +8,7 @@ import CrudList from '@/app/components/crudlist';
 import Comments from '@/app/components/comments/Comments';
 import ConfirmDialog from '@/app/components/dialogs/ConfirmDialog';
 import { checkAuthenticated, useAuth } from '@/app/(auth)/context/AuthContext';
+import SchoolIcon from '@mui/icons-material/School';
 
 export default function ViewDeck() {
   const params = useParams();
@@ -18,14 +19,15 @@ export default function ViewDeck() {
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
-  
-  const {isAuthenticated} = useAuth();
+
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (!checkAuthenticated(router, isAuthenticated)) {
+      console.log("return")
       return;
     }
-    
+
     const onSuccess = async (response: Response) => {
       const result = await response.json();
       setDeck(result);
@@ -38,7 +40,7 @@ export default function ViewDeck() {
       setIsOwned(result);
     }
     fetchAuthGET(`decks/${id}/isowned`, 200, onSuccessIsOwned)
-  }, []);
+  }, [isAuthenticated]);
 
   const handleClickPopper = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(anchorEl ? null : event.currentTarget);
@@ -107,10 +109,13 @@ export default function ViewDeck() {
           {deck.description}
         </Typography>
       </Paper>
+      <Box textAlign='center' margin={1}>
+        <Button href={`/learn/${id}`} size="large" color="secondary" startIcon={<SchoolIcon />}>LEARN</Button>
+      </Box>
       <Typography variant='h6'>
         Flashcards:
       </Typography>
-      <CrudList data={deck.flashcards.map((el) => ({ id: el.id, name: el.name, preview: '' }))} showUpdateDeleteBtns={false} path={'flashky'} />
+      <CrudList data={deck.flashcards.map((el) => ({ id: el.id, name: el.name, preview: '' }))} showUpdateDeleteBtns={false} showLearnBtn={false} path={'flashky'} />
     </Paper>
     <Paper sx={{ p: 3, mx: "auto" }}>
       <Comments deck_id={deck.id} />

@@ -54,6 +54,7 @@ export default function MyFlashky() {
             <CrudList 
               data={data.map((el) => ({ id: el.id, name: el.name, preview: el.front_side.content == null ? "" : el.front_side.content }))} 
               showUpdateDeleteBtns={true} 
+              showLearnBtn={false}
               path="flashky"
               onDeleteAction={deleteFlashcard} />
         </Suspense>

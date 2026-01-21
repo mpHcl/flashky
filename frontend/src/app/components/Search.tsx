@@ -165,6 +165,7 @@ export default function Search({ query }: { query: string }) {
           showDeleteBtn={false}
           showSaveBtn={true}
           showUpdateBtn={false}
+          showLearnBtn={true}
           viewOnClick={(id: number) => { router.push(`decks/${id}`) }}
           saveOnClick={(id: number) => { saveDeck(id) }}
           editOnClick={() => { }}

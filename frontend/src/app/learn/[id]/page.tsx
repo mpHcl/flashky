@@ -147,6 +147,7 @@ export default function Learn() {
             {[1, 2, 3, 4, 5].map((value) => (
               <Button key={value} variant="outlined" onClick={async (_) => {
                 if (await postReview(value, cardToLearn.id) === 200) {
+                  setIsFront(true);
                   getNextCardToLearn(deck_id, setLoading, setCardToLearn, setNextDate);
                 }
               }}>

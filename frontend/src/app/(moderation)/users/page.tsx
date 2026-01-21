@@ -40,6 +40,7 @@ export default function Users() {
         showUpdateBtn={false}
         showDeleteBtn={false}
         showSaveBtn={false}
+        showLearnBtn={false}
         viewOnClick={viewOnClick}
         
         deleteOnClick={() => { }}

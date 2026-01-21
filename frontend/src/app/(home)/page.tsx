@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 
 import Typography from '@mui/material/Typography';
-import { useAuth } from "./(auth)/context/AuthContext";
+import { useAuth } from "@/app/(auth)/context/AuthContext";
 import { Card, CardActionArea, CardContent, Grid } from "@mui/material";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ExploreIcon from '@mui/icons-material/Explore';

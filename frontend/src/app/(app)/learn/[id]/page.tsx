@@ -13,10 +13,10 @@ import {
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react';
 
-import Media from '../../components/media';
+import Media from '@/app/components/media';
 
-import { getNextCardToLearn, initLearning, postReview } from './lib/fetch';
-import { CardToLearnResult } from './lib/types';
+import { getNextCardToLearn, initLearning, postReview } from '../lib/fetch';
+import { CardToLearnResult } from '../lib/types';
 import { checkAuthenticated, useAuth } from '@/app/(auth)/context/AuthContext';
 
 export default function Learn() {
@@ -34,12 +34,20 @@ export default function Learn() {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
 
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+
   useEffect(() => {
     if (!checkAuthenticated(router, isAuthenticated)) {
       return;
     }
-    initLearning(deck_id, setInitializing);
-    getNextCardToLearn(deck_id, setLoading, setCardToLearn, setNextDate);
+    initLearning(deck_id, setInitializing)
+      .then(() => delay(100))
+      .then(
+        () => {
+          getNextCardToLearn(deck_id, setLoading, setCardToLearn, setNextDate)
+        }
+      );
   }, [isAuthenticated])
 
   return (

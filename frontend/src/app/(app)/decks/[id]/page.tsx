@@ -2,7 +2,7 @@
 import { Box, Button, Chip, ClickAwayListener, Grid, List, ListItemButton, ListItemText, Paper, Popper, Typography } from '@mui/material';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from "react";
-import { Deck } from "../../lib/types";
+import { Deck } from "@/app/lib/types";
 import { fetchAuthDELETE, fetchAuthGET } from '@/app/lib/fetch';
 import CrudList from '@/app/components/crudlist';
 import Comments from '@/app/components/comments/Comments';

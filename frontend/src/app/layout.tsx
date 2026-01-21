@@ -5,7 +5,7 @@ import { Box } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from "./theme";
-import Sidebar from "./components/Sidebar"
+import Sidebar from "./components/Sidebar";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import ExploreIcon from '@mui/icons-material/Explore';

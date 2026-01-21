@@ -1,22 +1,17 @@
 'use client';
 
-import { Box, TextField, InputAdornment} from '@mui/material';
+import { Box, TextField, InputAdornment } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../(auth)/context/AuthContext';
+import { usePathname } from 'next/navigation';
 
 
 export default function SearchBox() {
   const router = useRouter();
   const [queryString, setQueryString] = useState("");
-  const { isAuthenticated } = useAuth();
-    const [loading, setLoading] = useState(true);
-  
-    useEffect(() => {
-      setLoading(isAuthenticated === null);
-    }, [isAuthenticated])
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter' && queryString.trim()) {
@@ -24,13 +19,13 @@ export default function SearchBox() {
     }
   }
 
-  return (!loading && isAuthenticated &&
+  return (
     <Box display="flex" justifyContent="center" alignItems="center">
-      <TextField 
-        placeholder="Find decks" 
-        fullWidth size="small" 
-        variant="outlined" 
-        color="primary" 
+      <TextField
+        placeholder="Find decks"
+        fullWidth size="small"
+        variant="outlined"
+        color="primary"
         value={queryString}
         onChange={(e) => setQueryString(e.target.value)}
         onKeyDown={handleKeyDown}
@@ -38,7 +33,7 @@ export default function SearchBox() {
           '& .MuiOutlinedInput-root': {
             backgroundColor: 'primary.main'
           },
-        }} 
+        }}
         slotProps={{
           input: {
             startAdornment: (
@@ -47,7 +42,7 @@ export default function SearchBox() {
               </InputAdornment>
             ),
           },
-        }}/>
+        }} />
     </Box>
   );
 }

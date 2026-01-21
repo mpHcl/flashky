@@ -14,7 +14,7 @@ import {
   Popper,
   Typography
 } from '@mui/material'
-import Media from '../../components/media';
+import Media from '@/app/components/media';
 import { getFlashcard } from '../lib/fetch';
 import { Flashcard } from '@/app/lib/types';
 import { fetchAuthDELETE } from '@/app/lib/fetch';

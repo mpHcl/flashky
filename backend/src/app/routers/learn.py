@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -32,6 +32,7 @@ def get_next_learning_card(
     deck_id: int, user_id=Depends(authenticate()), db: Session = Depends(get_session)
 ):
     now = datetime.utcnow()
+    now = now + timedelta(seconds=10)
 
     if not user_id:
         raise HTTPException(status_code=404, detail="User not found")

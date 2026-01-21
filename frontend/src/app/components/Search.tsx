@@ -11,7 +11,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 
 import { useState, useEffect } from 'react';
-import { RawCrudList } from "./CrudList";
+import { RawCrudList } from "./crudlist";
 import { Deck } from "../lib/types";
 import { fetchAuthGET, fetchAuthPOST } from "../lib/fetch";
 

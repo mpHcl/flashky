@@ -1,32 +1,50 @@
 "use client";
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import Typography from '@mui/material/Typography';
-import SidebarItemSubmenu from './SidebarItemSubmenu';
-import { ReactNode, useEffect, useState } from 'react';
+import SidebarItemSubmenu from './sidebarItemSubmenu';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import AddBoxIcon from '@mui/icons-material/AddBox';
+import ExploreIcon from '@mui/icons-material/Explore';
+import HomeIcon from '@mui/icons-material/Home';
+import LogoutIcon from '@mui/icons-material/Logout';
+import NoteIcon from '@mui/icons-material/Note';
+import PortraitIcon from '@mui/icons-material/Portrait';
+import SettingsIcon from '@mui/icons-material/Settings';
+import StyleIcon from '@mui/icons-material/Style';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../(auth)/context/AuthContext';
 
 const drawerWidth = 200;
 
-interface Route {
-  name: string;
-  route: string;
-  submenu?: boolean;
-  icon?: ReactNode;
-  subroutes?: Route[];
-}
+const routes = [
+  { name: "Home", route: "/", submenu: false, icon: <HomeIcon/> },
+  { name: "Decks", route: "/decks/my", submenu: false, icon: <StyleIcon/>, subroutes: [
+    {name: "Explore", icon: <ExploreIcon/>, route: "/search"},
+    {name: "My Decks", icon: <PortraitIcon/>, route: "/decks/my"},
+    {name: "Add Decks", icon: <AddBoxIcon/>, route: "/decks/add"},
+  ] },
+  { name: "Flashky", route: "/flashky/my", submenu: false, icon: <NoteIcon/>, subroutes: [
+    {name: "My Flashky", icon: <PortraitIcon/>, route: "/flashky/my"},
+    {name: "Add Flashky", icon: <AddBoxIcon/>, route: "/flashky/add"},
+  ] },
+  {
+    name: "Account", route: "/profile", submenu: true, icon: <AccountCircleIcon/>, subroutes: [
+      { name: "Profile", icon: <AccountCircleIcon/>, route: "/profile" },
+      { name: "Settings", icon: <SettingsIcon/>, route: "/profile/settings" },
+      { name: "Logout", icon: <LogoutIcon/>, route: "/logout" },
+    ]
+  },
+];
 
-interface Routes {
-  routes: Route[];
-}
-
-export default function Sidebar({ routes }: Routes) {
+export default function Sidebar() {
   const { isAuthenticated } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    setLoading(isAuthenticated === null);
+    setIsVisible(isAuthenticated !== false);
   }, [isAuthenticated])
-  return (!loading && isAuthenticated &&
+
+  return (isVisible &&
     <Drawer
       variant="permanent"
       anchor="left"

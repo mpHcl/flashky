@@ -2,10 +2,10 @@
 import AddIcon from '@mui/icons-material/Add';
 import { Suspense, useEffect, useState } from 'react';
 import { Box, Button, Link, Typography } from '@mui/material';
-import CrudList from '../../components/crudlist';
-import { fetchAuthDELETE, fetchAuthGET } from '../../lib/fetch';
+import CrudList from '@/app/components/crudlist';
+import { fetchAuthDELETE, fetchAuthGET } from '@/app/lib/fetch';
 import SavedDecks from '../components/SavedDecks';
-import { checkAuthenticated, useAuth } from '../../(auth)/context/AuthContext';
+import { checkAuthenticated, useAuth } from '@/app/(auth)/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import ConfirmDialog from '@/app/components/dialogs/ConfirmDialog';
 

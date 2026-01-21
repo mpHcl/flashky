@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 
 import Typography from '@mui/material/Typography';
-import { useAuth } from "./(auth)/context/AuthContext";
+import { useAuth } from "@/app/(auth)/context/AuthContext";
 import { Card, CardActionArea, CardContent, Grid } from "@mui/material";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ExploreIcon from '@mui/icons-material/Explore';
@@ -25,7 +25,7 @@ export default function Home() {
       {
         isAuthenticated ?
           <>
-            <Grid container rowSpacing={8} columnSpacing={8} sx={{display: 'flex', mx: '20px', px: '20px'}}>
+            <Grid container rowSpacing={8} columnSpacing={8} sx={{display: 'flex', my: '80px', mx: '40px', px: '20px'}}>
               <Grid size={6}>
                 <Card sx={{ borderRadius: '30px', bgcolor: 'primary.dark' }}>
                   <CardActionArea href="/search" sx={{ display: 'flex', height: '35dvh'  }}>

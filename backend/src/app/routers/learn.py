@@ -4,6 +4,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, and_, or_
 
 from app.tools.auth.authenticate import authenticate
@@ -115,13 +116,21 @@ def post_init_learning(
         ).first()
 
         if not exists:
-            db.add(
-                Progress(
-                    user_id=user_id,
-                    flashcard_id=card.id,
-                    next_review_date=now,
+            savepoint = db.begin_nested()
+
+            try:
+                db.add(
+                    Progress(
+                        user_id=user_id,
+                        flashcard_id=card.id,
+                        next_review_date=now,
+                    )
                 )
-            )
+                db.flush()
+                savepoint.commit() 
+            except IntegrityError:
+                savepoint.rollback() 
+                continue
 
     db.commit()
 

@@ -25,7 +25,7 @@ export default function Home() {
       {
         isAuthenticated ?
           <>
-            <Grid container rowSpacing={8} columnSpacing={8} sx={{display: 'flex', mx: '20px', px: '20px'}}>
+            <Grid container rowSpacing={8} columnSpacing={8} sx={{display: 'flex', my: '80px', mx: '40px', px: '20px'}}>
               <Grid size={6}>
                 <Card sx={{ borderRadius: '30px', bgcolor: 'primary.dark' }}>
                   <CardActionArea href="/search" sx={{ display: 'flex', height: '35dvh'  }}>

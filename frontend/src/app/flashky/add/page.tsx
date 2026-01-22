@@ -26,7 +26,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import { createFlashcard } from '../lib/fetch';
 import { Deck } from '@/app/lib/types';
 import { fetchAuthGET } from '@/app/lib/fetch';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 import { checkAuthenticated, useAuth } from '@/app/(auth)/context/AuthContext';
 
 type MediaProps = {
@@ -142,8 +143,8 @@ const CardEditor = React.memo(({ side, media, textValue, textValueSetter, onAddM
 CardEditor.displayName = 'CardEditor';
 
 const DeckSelection = React.memo(({ selectedDecks, setSelectedDecks }: DeckSelectionProps) => {
-    const [queryString, setQueryString] = React.useState("");
-    const [searchDecks, setSearchDecks] = React.useState<Deck[]>([]);
+    const [queryString, setQueryString] = useState("");
+    const [searchDecks, setSearchDecks] = useState<Deck[]>([]);
     const TOOLTIP_LENGTH = 50;
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -210,7 +211,7 @@ const DeckSelection = React.memo(({ selectedDecks, setSelectedDecks }: DeckSelec
 DeckSelection.displayName = "DeckSelection";
 
 const AddTags = React.memo(({ tags, setTags }: AddTagsProps) => {
-    const [newTag, setNewTag] = React.useState("");
+    const [newTag, setNewTag] = useState("");
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter' && newTag.trim()) {
@@ -277,21 +278,24 @@ function Decks() {
 
 export default function NewFlashky() {
   const router = useRouter();
-  const [name, setName] = React.useState<string>("")
-  const [frontTextContent, setFrontTextContent] = React.useState<string>("")
-  const [backTextContent, setBackTextContent] = React.useState<string>("")
+  const searchParams = useSearchParams();
+ 
+  const deckId = searchParams.get('deck');
+  const [name, setName] = useState<string>("")
+  const [frontTextContent, setFrontTextContent] = useState<string>("")
+  const [backTextContent, setBackTextContent] = useState<string>("")
 
-  const [frontMedia, setFrontMedia] = React.useState<MediaProps[]>([])
-  const [backMedia, setBackMedia] = React.useState<MediaProps[]>([])
+  const [frontMedia, setFrontMedia] = useState<MediaProps[]>([])
+  const [backMedia, setBackMedia] = useState<MediaProps[]>([])
 
-  const [frontMediaFiles, setFrontMediaFiles] = React.useState<File[]>([]);
-  const [backMediaFiles, setBackMediaFiles] = React.useState<File[]>([]);
+  const [frontMediaFiles, setFrontMediaFiles] = useState<File[]>([]);
+  const [backMediaFiles, setBackMediaFiles] = useState<File[]>([]);
 
   const frontFileInputRef = React.useRef<HTMLInputElement>(null);
   const backFileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const [decks, setDecks] = React.useState<Deck[]>([]);
-  const [tags, setTags] = React.useState<string[]>([]);
+  const [decks, setDecks] = useState<Deck[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
 
   const {isAuthenticated} = useAuth()
 
@@ -351,10 +355,44 @@ export default function NewFlashky() {
     setBackMediaFiles(prev => prev.filter((_, i) => i !== index));
   }, []);
 
+  const addAndNext = () => {
+    createFlashcard(name, frontTextContent, backTextContent, frontMediaFiles, backMediaFiles, tags, decks);
+    setName("");
+    setFrontTextContent("");
+    setBackTextContent("");
+
+    frontMedia.forEach(mediaProp => URL.revokeObjectURL(mediaProp.url));
+    backMedia.forEach(mediaProp => URL.revokeObjectURL(mediaProp.url));
+
+    setFrontMedia([]);
+    setBackMedia([]);
+    setFrontMediaFiles([]);
+    setBackMediaFiles([]);
+  }
+
+  const addAndFinish = () => {
+    createFlashcard(name, frontTextContent, backTextContent, frontMediaFiles, backMediaFiles, tags, decks);
+    router.push("/flashky/my");
+  }
+
   React.useEffect(() => {
     if (!checkAuthenticated(router, isAuthenticated)) {
             return;
     }
+    if (deckId != null) {
+      const onSuccess = async (response: Response) => {
+        const isOwned = await response.json();
+        if (isOwned === true) {
+          const onSuccessDeck = async (response: Response) => {
+            const deck = await response.json();
+            setDecks([...decks, deck]);
+          }
+          fetchAuthGET("decks/" + Number(deckId), 200, onSuccessDeck);
+        }
+      }
+      fetchAuthGET(`decks/${Number(deckId)}/isowned`, 200, onSuccess);
+    }
+
     return () => {
       frontMedia.forEach(media => URL.revokeObjectURL(media.url));
       backMedia.forEach(media => URL.revokeObjectURL(media.url));
@@ -429,27 +467,8 @@ export default function NewFlashky() {
       <Box display="flex" justifyContent="space-between" mt={3}>
         <Button color="inherit" href="/flashky/my">CANCEL</Button>
         <Stack direction="row" spacing={1}>
-          <Button variant="outlined" onClick={() =>
-            createFlashcard(
-              name,
-              frontTextContent,
-              backTextContent,
-              frontMediaFiles,
-              backMediaFiles,
-              tags,
-              decks
-            )}>Add next</Button>
-          <Button variant="contained"  onClick={() =>{
-            createFlashcard(
-              name,
-              frontTextContent,
-              backTextContent,
-              frontMediaFiles,
-              backMediaFiles,
-              tags,
-              decks
-            );
-            router.push("/flashky/my");}}>Add & finish</Button>
+          <Button variant="outlined" onClick={() => addAndNext()}>Add next</Button>
+          <Button variant="contained"  onClick={() => addAndFinish()}>Add & finish</Button>
         </Stack>
       </Box>
     </Paper>

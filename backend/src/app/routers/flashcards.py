@@ -239,6 +239,19 @@ def get_flashcard_by_id(id: int, db: Session = Depends(get_session)):
     return create_flashcard_dto(flashcard)
 
 
+@router.get("/{id}/isowned", response_model=bool)
+def get_is_owned_flashcard(id: int, user_id=Depends(authenticate()), db: Session = Depends(get_session)):
+    if not user_id:
+        raise HTTPException(status_code=404, detail="User not found")
+    user_id = int(user_id)
+
+    flashcard = db.query(Flashcard).filter(Flashcard.id == id).first()
+    if not flashcard:
+        raise HTTPException(status_code=404, detail="Flashcard not found")
+
+    return flashcard.owner_id == user_id
+
+
 @router.put("/{id}", response_model=FlashcardGetDTO)
 def update_flashcard(
     id: int,

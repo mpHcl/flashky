@@ -41,6 +41,7 @@ export default function SavedDecks() {
         showUpdateBtn={false}
         showDeleteBtn={true}
         showSaveBtn={false}
+        showLearnBtn={true}
         viewOnClick={viewOnClick}
         deleteOnClick={deleteOnClick}
 

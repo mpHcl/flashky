@@ -39,8 +39,6 @@ export default function Search({ query }: { query: string }) {
   const { dialog, show, close } = useDialog();
 
   useEffect(() => {
-    if (!query) return;
-
     setLoading(true);
     const onSuccess = async (response: Response) => {
       const result = await response.json();
@@ -167,6 +165,7 @@ export default function Search({ query }: { query: string }) {
           showDeleteBtn={false}
           showSaveBtn={true}
           showUpdateBtn={false}
+          showLearnBtn={true}
           viewOnClick={(id: number) => { router.push(`decks/${id}`) }}
           saveOnClick={(id: number) => { saveDeck(id) }}
           editOnClick={() => { }}

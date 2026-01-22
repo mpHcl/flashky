@@ -8,24 +8,26 @@ import CrudList from '@/app/components/crudlist';
 import Comments from '@/app/components/comments/Comments';
 import ConfirmDialog from '@/app/components/dialogs/ConfirmDialog';
 import { checkAuthenticated, useAuth } from '@/app/(auth)/context/AuthContext';
+import SchoolIcon from '@mui/icons-material/School';
 
 export default function ViewDeck() {
   const params = useParams();
   const id = params.id;
   const router = useRouter();
   const [deck, setDeck] = useState<Deck>();
-  const [currentUserId, setCurrentUserId] = useState<number>(-1);
+  const [isOwned, setIsOwned] = useState<boolean>(false);
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
-  
-  const {isAuthenticated} = useAuth();
+
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (!checkAuthenticated(router, isAuthenticated)) {
+      console.log("return")
       return;
     }
-    
+
     const onSuccess = async (response: Response) => {
       const result = await response.json();
       setDeck(result);
@@ -33,12 +35,12 @@ export default function ViewDeck() {
 
     fetchAuthGET("decks/" + id, 200, onSuccess);
 
-    const onSuccessUser = async (response: Response) => {
+    const onSuccessIsOwned = async (response: Response) => {
       const result = await response.json();
-      setCurrentUserId(result.id);
+      setIsOwned(result);
     }
-    fetchAuthGET(`users/me`, 200, onSuccessUser)
-  }, []);
+    fetchAuthGET(`decks/${id}/isowned`, 200, onSuccessIsOwned)
+  }, [isAuthenticated]);
 
   const handleClickPopper = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(anchorEl ? null : event.currentTarget);
@@ -72,12 +74,17 @@ export default function ViewDeck() {
           </Typography>
         </Grid>
         <Grid size={2} display="flex" justifyContent="right" alignItems="right">
-          {currentUserId == deck.owner_id && <ClickAwayListener onClickAway={(e) => setOpen(false)}>
+          {isOwned && <ClickAwayListener onClickAway={(e) => setOpen(false)}>
             <Box>
               <Button onClick={handleClickPopper}>More actions</Button>
               <Popper open={open} anchorEl={anchorEl} placement="bottom-end">
                 <Paper sx={{ minWidth: 180 }}>
                   <List>
+                    <ListItemButton
+                      component="a"
+                      href={`/flashky/add?deck=${id}`}>
+                      <ListItemText primary="Add new flashcards" />
+                    </ListItemButton>
                     <ListItemButton
                       component="a"
                       href={`/decks/${id}/edit`}>
@@ -97,15 +104,18 @@ export default function ViewDeck() {
       {deck.tags.map((tag, index) =>
         <Chip key={index} label={tag} sx={{ m: 0.25 }} />
       )}
-      <Paper variant='outlined' sx={{ maxHeight: 500, overflow: 'scroll' }}>
+      <Paper variant='outlined' sx={{ maxHeight: 500, overflow: 'auto' }}>
         <Typography variant="subtitle1" gutterBottom whiteSpace={'pre-wrap'} sx={{ p: 1 }}>
           {deck.description}
         </Typography>
       </Paper>
+      <Box textAlign='center' margin={1}>
+        <Button href={`/learn/${id}`} size="large" color="secondary" startIcon={<SchoolIcon />}>LEARN</Button>
+      </Box>
       <Typography variant='h6'>
         Flashcards:
       </Typography>
-      <CrudList data={deck.flashcards.map((el) => ({ id: el.id, name: el.name, preview: '' }))} showUpdateDeleteBtns={false} path={'flashky'} />
+      <CrudList data={deck.flashcards.map((el) => ({ id: el.id, name: el.name, preview: '' }))} showUpdateDeleteBtns={false} showLearnBtn={false} path={'flashky'} />
     </Paper>
     <Paper sx={{ p: 3, mx: "auto" }}>
       <Comments deck_id={deck.id} />

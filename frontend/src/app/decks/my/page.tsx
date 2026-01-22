@@ -87,6 +87,7 @@ export default function MyDecks() {
                   preview: el.description,
                 }))}
                 showUpdateDeleteBtns={true}
+                showLearnBtn={true}
                 path="decks"
                 onDeleteAction={deleteDeck}
               />

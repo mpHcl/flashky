@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, Suspense } from "react";
 import Box from '@mui/material/Box';
-import CrudList from "../../components/CrudList";
+import CrudList from "@/app/components/crudlist";
 import { Button, Link, Typography } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import { fetchAuthGET, fetchAuthDELETE, OK } from "@/app/lib/fetch";

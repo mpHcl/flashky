@@ -1,6 +1,6 @@
 import { ParamValue } from "next/dist/server/request/params";
 import { Dispatch, SetStateAction } from "react";
-import { CardToLearnResult } from "../lib/types";
+import { CardToLearnResult } from "./types";
 import { RequestBodyType } from "@/app/lib/fetchOptions";
 import { fetchAuthGET, fetchAuthPOST, OK } from "@/app/lib/fetch";
 

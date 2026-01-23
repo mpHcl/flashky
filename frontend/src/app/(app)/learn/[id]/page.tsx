@@ -11,12 +11,12 @@ import {
 } from '@mui/material';
 
 import { useParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import Media from '../../components/media';
+import Media from '@/app/components/media';
 
-import { getNextCardToLearn, initLearning, postReview } from './lib/fetch';
-import { CardToLearnResult } from './lib/types';
+import { getNextCardToLearn, initLearning, postReview } from '../lib/fetch';
+import { CardToLearnResult } from '../lib/types';
 import { checkAuthenticated, useAuth } from '@/app/(auth)/context/AuthContext';
 
 export default function Learn() {
@@ -34,12 +34,28 @@ export default function Learn() {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
 
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+  const hasInitialized = useRef(false);
+
+
   useEffect(() => {
     if (!checkAuthenticated(router, isAuthenticated)) {
       return;
     }
-    initLearning(deck_id, setInitializing);
-    getNextCardToLearn(deck_id, setLoading, setCardToLearn, setNextDate);
+
+    if (hasInitialized.current) {
+      return;
+    } 
+    hasInitialized.current = true;
+
+    initLearning(deck_id, setInitializing)
+      .then(() => delay(100))
+      .then(
+        () => {
+          getNextCardToLearn(deck_id, setLoading, setCardToLearn, setNextDate)
+        }
+      );
   }, [isAuthenticated])
 
   return (
@@ -147,8 +163,8 @@ export default function Learn() {
             {[1, 2, 3, 4, 5].map((value) => (
               <Button key={value} variant="outlined" onClick={async (_) => {
                 if (await postReview(value, cardToLearn.id) === 200) {
+                  await getNextCardToLearn(deck_id, setLoading, setCardToLearn, setNextDate);
                   setIsFront(true);
-                  getNextCardToLearn(deck_id, setLoading, setCardToLearn, setNextDate);
                 }
               }}>
                 +{value}

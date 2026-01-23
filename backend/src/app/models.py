@@ -1,4 +1,4 @@
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import SQLModel, Field, Relationship, UniqueConstraint
 from sqlalchemy.orm import Mapped
 
 from typing import Optional, List
@@ -521,6 +521,10 @@ class Progress(SQLModel, table=True):
     # Relationships
     user: Mapped["User"] = Relationship(back_populates="progress")
     flashcard: Mapped["Flashcard"] = Relationship(back_populates="progress")
+    
+    __table_args__ = (
+        UniqueConstraint('user_id', 'flashcard_id', name='uq_user_flashcard'),
+    )
 
 
 class Comment(SQLModel, table=True):

@@ -30,7 +30,7 @@ export default function SidebarItemSubmenu({ routeParam }: Props) {
 
   const open = Boolean(anchorEl);
 
-  var sxMt = routeParam.name === "Account" ? 'auto' : '0';
+  let sxMt = routeParam.name === "Account" ? 'auto' : '0';
   return (
     <Box onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} sx={{ mt: sxMt }}>
       <ListItem disablePadding >

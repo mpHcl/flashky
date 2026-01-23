@@ -5,6 +5,7 @@ from .database import engine
 
 from .models import (
     Media,
+    Report,
     User,
     Role,
     Permission,
@@ -178,6 +179,9 @@ def init_data():
         session.add_all([deck1, deck2, deck3])
         session.commit()
 
+        # --------------------------
+        # Comments
+        # --------------------------
         comment1 = Comment(
             content="Amazing deck!",
             creation_date=datetime.utcnow(),
@@ -292,6 +296,67 @@ def init_data():
         # --------------------------
         saved_deck = SavedDeck(user_id=user3.id, deck_id=deck3.id)
         session.add(saved_deck)
+        session.commit()
+        
+        # --------------------------
+        # Reports
+        # --------------------------
+        report1 = Report(
+            type="deck",
+            description="This deck contains misleading math information.",
+            deck_id=deck1.id,
+            reporter_id=user3.id,
+        )
+
+        report2 = Report(
+            type="flashcard",
+            description="The flashcard explanation is incorrect.",
+            flashcard_id=flashcard3.id,
+            reporter_id=user2.id,
+        )
+
+        report3 = Report(
+            type="comment",
+            description="This comment is abusive and inappropriate.",
+            comment_id=comment9.id,
+            reporter_id=user4.id,
+        )
+
+        report4 = Report(
+            type="user",
+            description="User is repeatedly posting offensive comments.",
+            reported_user_id=user4.id,
+            reporter_id=user2.id,
+        )
+
+        report5 = Report(
+            type="comment",
+            description="Spam content detected.",
+            comment_id=comment12.id,
+            reporter_id=user3.id,
+            moderator_id=user5.id,
+            verdict="violation",
+            resolution_date=datetime.utcnow(),
+        )
+
+        report6 = Report(
+            type="deck",
+            description="Deck was reported but found compliant.",
+            deck_id=deck2.id,
+            reporter_id=user4.id,
+            moderator_id=user5.id,
+            verdict="no-violation",
+            resolution_date=datetime.utcnow(),
+        )
+
+        session.add_all([
+            report1,
+            report2,
+            report3,
+            report4,
+            report5,
+            report6,
+        ])
         session.commit()
 
         print("Database initialized with sample data!")

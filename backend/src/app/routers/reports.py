@@ -31,7 +31,7 @@ class ReportGetDTO(BaseModel):
     deck_id: Optional[int]
     flashcard_id: Optional[int]
     comment_id: Optional[int]
-    reported_user_id: int
+    reported_user_id: Optional[int]
     reporter_id: int
     moderator_id: Optional[int]
 
@@ -152,13 +152,15 @@ def get_reports(
 
     total_number = reports.count()
 
+    if verdict == "pending":
+        reports = reports.filter(Report.verdict.is_(None))
+    elif verdict and verdict != "all":
+        reports = reports.filter(Report.verdict.ilike(f"{verdict}"))
+
     if sort == "desc":
         reports = reports.order_by(Report.creation_date.desc())
     else:
         reports = reports.order_by(Report.creation_date.asc())
-
-    if verdict:
-        reports = reports.filter(Report.verdict.ilike(f"%{verdict}%"))
 
     offset = (page - 1) * page_size
     reports = reports.offset(offset).limit(page_size).all()

@@ -27,7 +27,7 @@ export default function ReportDetails() {
     }
 
     loadReport();
-  }, [isAuthenticated, loadReport]);
+  }, [isAuthenticated]);
 
   const submitVerdict = () => {
     fetchSetVerdict(verdict, reportId, setReport);
@@ -95,15 +95,6 @@ export default function ReportDetails() {
               <Typography variant="subtitle1">Related Users</Typography>
 
               <Chip
-                label={`Reported User #${report.reported_user_id}`}
-                component={Link}
-                href={`/users/${report.reported_user_id}`}
-                clickable
-                variant="outlined"
-                size="medium"
-              />
-
-              <Chip
                 label={`Report Owner #${report.reporter_id}`}
                 component={Link}
                 href={`/users/${report.reporter_id}`}
@@ -111,6 +102,17 @@ export default function ReportDetails() {
                 variant="outlined"
                 size="medium"
               />
+
+              {report.reported_user_id && (
+                <Chip
+                  label={`Reported User #${report.reported_user_id}`}
+                  component={Link}
+                  href={`/users/${report.reported_user_id}`}
+                  clickable
+                  variant="outlined"
+                  size="medium"
+                />
+              )}
 
               {report.moderator_id && (
                 <Chip
@@ -135,11 +137,11 @@ export default function ReportDetails() {
                   label="Verdict"
                   onChange={(e) => setVerdict(e.target.value as string)}
                 >
-                  <MenuItem key={"violation"} value={"Violation"}>
+                  <MenuItem key={"violation"} value={"violation"}>
                     Violation
                   </MenuItem>
-                  <MenuItem key={"non-violation"} value={"Non-violation"}>
-                    Non-violation
+                  <MenuItem key={"non-violation"} value={"no-violation"}>
+                    No-violation
                   </MenuItem>
                 </Select>
               </FormControl>

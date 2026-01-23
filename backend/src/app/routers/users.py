@@ -1,5 +1,6 @@
+import os
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from pydantic import BaseModel
 from typing import Optional
 from uuid import uuid4
@@ -23,6 +24,7 @@ class UserDTO(BaseModel):
     email: str
     description: Optional[str] = ""
     creation_date: datetime
+    avatar: Optional[str] = None
     active: bool
     verified: bool
     
@@ -183,23 +185,33 @@ def update_user_logic(user_id: int, updated_user: UserUpdateDTO, db: Session):
 ##############################
 
 @router.post("/upload_avatar")
-def upload_avatar(file: UploadFile, user_id: int = Depends(authenticate()), db: Session = Depends(get_session)):
+async def upload_avatar(
+    avatar: UploadFile = File(...),
+    user_id: int = Depends(authenticate()),
+    db: Session = Depends(get_session),
+):
     if not user_id:
         raise HTTPException(status_code=404, detail="User not found")
-    
-    type = file.content_type.split("/")[0]
-    if type not in ["image"]:
-        raise HTTPException(status_code=415, detail="Unsupported media type, avatar must be an image")
-    
-    name_split = file.filename.split(".")
-    filepath = str(uuid4()) + "." + name_split[len(name_split) - 1]
-    f = file.file.read()
-    with open(files_dir + filepath, "wb") as new_file:
-        new_file.write(f)
-        
-    user = db.query(User).filter(User.id == int(user_id)).first()
-    user.avatar_path = filepath
+
+    if not avatar.content_type or not avatar.content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=415,
+            detail="Unsupported media type, avatar must be an image",
+        )
+
+    ext = avatar.filename.split(".")[-1] if avatar.filename else "png"
+    filename = f"{uuid4()}.{ext}"
+    filepath = os.path.join(files_dir, filename)
+
+    contents = await avatar.read()
+    with open(filepath, "wb") as f:
+        f.write(contents)
+
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user.avatar = filename
     db.commit()
-    db.refresh(user)
-    
-    return {"avatar_path": filepath}
+
+    return {"avatar": filename}

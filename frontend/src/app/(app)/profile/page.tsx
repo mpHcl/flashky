@@ -4,10 +4,10 @@ import { Box, Stack, Button } from "@mui/material";
 import { useRouter } from "next/navigation";
 import ConfirmDialog from "@/app/components/dialogs/ConfirmDialog";
 import ChangePasswordDialog from "./components/PasswordChangeDialog";
-import { fetchChangePassword, fetchDeleteProfile, fetchProfile, fetchSaveProfile } from "./lib/fetch";
 import { checkAuthenticated, useAuth } from "@/app/(auth)/context/AuthContext";
 import AlertDialog, { useDialog } from "@/app/components/dialogs/AppDialog";
 import ProfileTile from "@/app/components/profileTile";
+import { fetchChangeAvatar, fetchChangePassword, fetchDeleteProfile, fetchProfile, fetchSaveProfile } from "./lib/fetch";
 
 
 export default function Profile() {
@@ -43,6 +43,10 @@ export default function Profile() {
 
       setProfile((prev) => prev && ({ ...prev, [name]: value }));
     }
+  };
+
+  const handleAvatarChange = (file: File) => {
+    fetchChangeAvatar(file, setProfile);
   };
 
   const handleEditClick = () => {
@@ -93,7 +97,7 @@ export default function Profile() {
       />
       <Box minHeight={"80vh"} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <Stack spacing={5} justifyContent="center" alignItems="center">
-          <ProfileTile profileData={profile} handleChange={handleChange} editable={editable} />
+          <ProfileTile profileData={profile} handleChange={handleChange} editable={editable} onAvatarChange={handleAvatarChange} />
 
           <Box width="100%" justifyContent="center" alignItems="center">
             <Stack direction="row" spacing={2} justifyContent="center" alignItems="center">

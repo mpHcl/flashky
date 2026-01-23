@@ -1,6 +1,6 @@
 import { logoutFetch } from "@/app/(auth)/lib/fetch";
 import { RequestBodyType } from "@/app/lib/fetchOptions";
-import { fetchAuthDELETE, fetchAuthGET, fetchAuthPUT, OK } from "@/app/lib/fetch";
+import { fetchAuthDELETE, fetchAuthGET, fetchAuthPOST, fetchAuthPUT, OK } from "@/app/lib/fetch";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { DialogType, ShowDialog } from "@/app/components/dialogs/AppDialog";
 
@@ -35,7 +35,6 @@ export const fetchSaveProfile = (
     fetchAuthPUT("users/me", OK, RequestBodyType.JSON, data, onSuccess);
 }
 
-
 export const fetchDeleteProfile = (
     router: AppRouterInstance,
     updateContext: () => void,
@@ -51,7 +50,6 @@ export const fetchDeleteProfile = (
 
     fetchAuthDELETE("users/me", OK, onSuccess, onFail);
 }
-
 
 export const fetchChangePassword = (
     oldPassword: string,
@@ -83,4 +81,17 @@ export const fetchChangePassword = (
 
     const data = { old_password: oldPassword.trim(), new_password: newPassword.trim() };
     fetchAuthPUT("users/change_password", OK, RequestBodyType.JSON, data, onSuccess, onFail);
+}
+
+export const fetchChangeAvatar = (
+    file: File,
+    setProfile: React.Dispatch<React.SetStateAction<Profile | undefined>>) => {
+    const onSuccess = async (response: Response) => {
+        const result = await response.json();
+        setProfile(prev => prev && ({ ...prev, avatar: result.avatar }));
+    }
+    
+    const data = new FormData();
+    data.append("avatar", file);
+    fetchAuthPOST("users/upload_avatar", OK, RequestBodyType.FORM_DATA, data, onSuccess);
 }

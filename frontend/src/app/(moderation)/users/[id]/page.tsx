@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { getUser, fetchDeactivateUser, fetchActivateUser } from "../lib/fetch";
 import AlertDialog, { useDialog } from "@/app/components/dialogs/AppDialog";
 import ConfirmDialog from "@/app/components/dialogs/ConfirmDialog";
-import ProfileTile from "@/app/components/ProfileTile";
+import ProfileTile from "@/app/components/profileTile";
 import { User } from "../lib/types";
 import { checkAuthenticated, useAuth } from "@/app/(auth)/context/AuthContext";
 

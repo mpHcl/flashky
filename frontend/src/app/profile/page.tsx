@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Box, Stack, Button } from "@mui/material";
 import { useRouter } from "next/navigation";
-import ProfileTile from "../components/ProfileTile";
+import ProfileTile from "../components/profileTile";
 import ConfirmDialog from "../components/dialogs/ConfirmDialog";
 import ChangePasswordDialog from "./components/PasswordChangeDialog";
 import { fetchChangeAvatar, fetchChangePassword, fetchDeleteProfile, fetchProfile, fetchSaveProfile } from "./lib/fetch";

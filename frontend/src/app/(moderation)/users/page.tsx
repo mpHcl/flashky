@@ -9,7 +9,7 @@ import { User } from "./lib/types";
 import { checkAuthenticated, useAuth } from "@/app/(auth)/context/AuthContext";
 
 
-export const pageSize = 10;
+const pageSize = 10;
 
 export default function Users() {
   const { isAuthenticated } = useAuth();

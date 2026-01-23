@@ -177,7 +177,8 @@ def get_my_decks(
 
     query = db.query(Deck).filter(Deck.owner_id == user_id)
     if q:
-        query = query.filter(Flashcard.name.ilike(f"%{q}%"))
+        query = query.filter(Deck.name.ilike(f"%{q}%"))
+    
     total_number = query.count()
 
     if page_size > 0:

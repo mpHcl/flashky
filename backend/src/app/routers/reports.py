@@ -150,17 +150,17 @@ def get_reports(
 ):
     reports = db.query(Report)
 
-    total_number = reports.count()
-
     if verdict == "pending":
         reports = reports.filter(Report.verdict.is_(None))
     elif verdict and verdict != "all":
-        reports = reports.filter(Report.verdict.ilike(f"{verdict}"))
+        reports = reports.filter(Report.verdict.ilike(verdict))
 
     if sort == "desc":
         reports = reports.order_by(Report.creation_date.desc())
     else:
         reports = reports.order_by(Report.creation_date.asc())
+
+    total_number = reports.count()
 
     offset = (page - 1) * page_size
     reports = reports.offset(offset).limit(page_size).all()

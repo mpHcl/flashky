@@ -7,7 +7,7 @@ from uuid import uuid4
 from sqlmodel import Session
 
 
-from ..models import User
+from ..models import Role, User
 from ..database import get_session
 from app.tools.auth.authenticate import authenticate
 from app.tools.auth.validation import check_password
@@ -51,13 +51,26 @@ class PasswordChangeDTO(BaseModel):
 def get_all_users(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
+    username: Optional[str] = Query(None),
+    status: Optional[str] = Query(None, regex="^(all|active|inactive)$"),
+    role: Optional[str] = Query(None, regex="^(all|admin|moderator|user)$"),
     _: int = Depends(authenticate(["MODERATOR"])),
-    db: Session = Depends(get_session)) -> list[User]:
+    db: Session = Depends(get_session)
+    ) -> list[User]:
     
     users = db.query(User)
     
-    total_number = users.count()
+    if username:
+        users = users.filter(User.username.contains(username))
         
+    if status and status != "all":
+        users = users.filter(User.active.is_(status == "active"))
+        
+    if role and role != "all":
+        users = users.join(User.roles).filter(Role.name == role.upper())
+        
+    total_number = users.count()
+
     offset = (page - 1) * page_size
     users = users.offset(offset).limit(page_size).all()
 

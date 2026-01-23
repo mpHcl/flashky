@@ -2,11 +2,11 @@
 import React, { useEffect, useState } from "react";
 import { Box, Stack, Button } from "@mui/material";
 import { useRouter } from "next/navigation";
+import ProfileTile from "@/app/components/profileTile";
 import ConfirmDialog from "@/app/components/dialogs/ConfirmDialog";
 import ChangePasswordDialog from "./components/PasswordChangeDialog";
-import { checkAuthenticated, useAuth } from "@/app/(auth)/context/AuthContext";
 import AlertDialog, { useDialog } from "@/app/components/dialogs/AppDialog";
-import ProfileTile from "@/app/components/profileTile";
+import { checkAuthenticated, useAuth } from "@/app/(auth)/context/AuthContext";
 import { fetchChangeAvatar, fetchChangePassword, fetchDeleteProfile, fetchProfile, fetchSaveProfile } from "./lib/fetch";
 
 

@@ -1,5 +1,6 @@
+import os
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from pydantic import BaseModel
 from typing import Optional
 from uuid import uuid4
@@ -7,7 +8,7 @@ from uuid import uuid4
 from sqlmodel import Session
 
 
-from ..models import User
+from ..models import Role, User
 from ..database import get_session
 from app.tools.auth.authenticate import authenticate
 from app.tools.auth.validation import check_password
@@ -23,6 +24,7 @@ class UserDTO(BaseModel):
     email: str
     description: Optional[str] = ""
     creation_date: datetime
+    avatar: Optional[str] = None
     active: bool
     verified: bool
     
@@ -51,13 +53,26 @@ class PasswordChangeDTO(BaseModel):
 def get_all_users(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
+    username: Optional[str] = Query(None),
+    status: Optional[str] = Query(None, regex="^(all|active|inactive)$"),
+    role: Optional[str] = Query(None, regex="^(all|admin|moderator|user)$"),
     _: int = Depends(authenticate(["MODERATOR"])),
-    db: Session = Depends(get_session)) -> list[User]:
+    db: Session = Depends(get_session)
+    ) -> list[User]:
     
     users = db.query(User)
     
-    total_number = users.count()
+    if username:
+        users = users.filter(User.username.contains(username))
         
+    if status and status != "all":
+        users = users.filter(User.active.is_(status == "active"))
+        
+    if role and role != "all":
+        users = users.join(User.roles).filter(Role.name == role.upper())
+        
+    total_number = users.count()
+
     offset = (page - 1) * page_size
     users = users.offset(offset).limit(page_size).all()
 
@@ -170,23 +185,33 @@ def update_user_logic(user_id: int, updated_user: UserUpdateDTO, db: Session):
 ##############################
 
 @router.post("/upload_avatar")
-def upload_avatar(file: UploadFile, user_id: int = Depends(authenticate()), db: Session = Depends(get_session)):
+async def upload_avatar(
+    avatar: UploadFile = File(...),
+    user_id: int = Depends(authenticate()),
+    db: Session = Depends(get_session),
+):
     if not user_id:
         raise HTTPException(status_code=404, detail="User not found")
-    
-    type = file.content_type.split("/")[0]
-    if type not in ["image"]:
-        raise HTTPException(status_code=415, detail="Unsupported media type, avatar must be an image")
-    
-    name_split = file.filename.split(".")
-    filepath = str(uuid4()) + "." + name_split[len(name_split) - 1]
-    f = file.file.read()
-    with open(files_dir + filepath, "wb") as new_file:
-        new_file.write(f)
-        
-    user = db.query(User).filter(User.id == int(user_id)).first()
-    user.avatar_path = filepath
+
+    if not avatar.content_type or not avatar.content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=415,
+            detail="Unsupported media type, avatar must be an image",
+        )
+
+    ext = avatar.filename.split(".")[-1] if avatar.filename else "png"
+    filename = f"{uuid4()}.{ext}"
+    filepath = os.path.join(files_dir, filename)
+
+    contents = await avatar.read()
+    with open(filepath, "wb") as f:
+        f.write(contents)
+
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user.avatar = filename
     db.commit()
-    db.refresh(user)
-    
-    return {"avatar_path": filepath}
+
+    return {"avatar": filename}

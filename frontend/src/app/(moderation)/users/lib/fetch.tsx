@@ -8,14 +8,22 @@ export const getUsers = (
     setData: Dispatch<SetStateAction<User[] | undefined>>,
     page: number,
     setTotal: Dispatch<SetStateAction<number>>,
-    pageSize: number
+    pageSize: number,
+    usernameFilter?: string,
+    statusFilter?: "all" | "active" | "inactive",
+    roleFilter?: "all" | "admin" | "moderator" | "user",
 ) => {
     const onSuccess = async (response: Response) => {
         const result = await response.json();
         setData(result.users);
         setTotal(result.total_number)
     }
-    fetchAuthGET(`users?page=${page + 1}&page_size=${pageSize}`, OK, onSuccess);
+    
+    let url = `users?page=${page + 1}&page_size=${pageSize}`;
+    if (usernameFilter) url += `&username=${usernameFilter}`;
+    if (statusFilter)   url += `&status=${statusFilter}`;
+    if (roleFilter)     url += `&role=${roleFilter}`;
+    fetchAuthGET(url, OK, onSuccess);
 }
 
 export const getUser = (

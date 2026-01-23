@@ -39,7 +39,7 @@ export default function Profile() {
     }
 
     loadUser();
-  }, [isAuthenticated, loadUser]);
+  }, [isAuthenticated]);
 
   return (
     user &&

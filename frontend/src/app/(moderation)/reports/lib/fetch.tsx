@@ -7,14 +7,16 @@ export const fetchGetReports = (
     setData: Dispatch<SetStateAction<ReportType[] | undefined>>,
     page: number,
     setTotal: Dispatch<SetStateAction<number>>,
-    pageSize: number
+    pageSize: number,
+    verdictFilter?: 'all' | 'violation' | 'no-violation' | 'pending',
+    sortOrder?: 'asc' | 'desc'
 ) => {
     const onSuccess = async (response: Response) => {
         const result = await response.json();
         setData(result.reports);
         setTotal(result.total_number)
     }
-    fetchAuthGET(`reports?page=${page + 1}&page_size=${pageSize}`, OK, onSuccess);
+    fetchAuthGET(`reports?page=${page + 1}&page_size=${pageSize}&verdict=${verdictFilter}&sort_order=${sortOrder}`, OK, onSuccess);
 }
 
 export const fetchGetReport = (

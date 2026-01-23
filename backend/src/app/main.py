@@ -1,6 +1,7 @@
 from typing import Union
 
 from fastapi import FastAPI, Depends
+from fastapi.staticfiles import StaticFiles
 
 from app.routers import authentication, decks, flashcards, media, learn, comments, reports, users
 from app.tools.auth.authenticate import authenticate
@@ -26,6 +27,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.mount("/files", StaticFiles(directory="./files"), name="files")
 
 @app.get("/")
 def read_root(user_id=Depends(authenticate())):

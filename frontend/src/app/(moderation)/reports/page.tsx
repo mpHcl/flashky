@@ -38,8 +38,7 @@ export default function Users() {
   return ( 
     reports &&
     <Stack>
-      <Box sx={{ width: '40%', margin: 'auto', mb: 2, p: 2, bgcolor: 'background.card', 
-                 display: 'flex', gap: 2, justifyContent: 'space-between', flexWrap: 'wrap' }}>
+      <Box display="flex" justifyContent="center" alignItems="flex-end" gap={5} mb={3}>
         <FormControl size="small" sx={{ minWidth: 200 }}>
           <InputLabel>Verdict</InputLabel>
           <Select
@@ -66,7 +65,7 @@ export default function Users() {
           </Select>
         </FormControl>
       </Box>
-      <Box sx={{ width: '80%', bgcolor: 'background.card', margin: "auto" }}>
+      <Box sx={{ width: '60%', bgcolor: 'background.card', margin: "auto" }}>
         <List>
           {reports.map((el, index) =>
             <ListItem key={el.id} secondaryAction={

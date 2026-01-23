@@ -8,31 +8,28 @@ services:
         volumes:
             - ./backend/src:/src/
         env_file:
-            - ./.env.dev
+            - ./.env
         depends_on:
             db:
                 condition: service_healthy
     frontend:
         build:
             context: .
-            dockerfile: frontend/Dockerfile.dev
+            dockerfile: frontend/Dockerfile
         ports:
             - "3000:3000"
-        volumes:
-            - ./frontend:/app:cached
-            - /app/node_modules
     db:
         image: postgres:16
         container_name: database
         restart: always
         env_file:
-            - ./.env.dev
+            - ./.env
         ports:
             - "5432:5432"
         volumes:
             - postgres_data:/var/lib/postgresql/data
         healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U flashky_user -d flashky_dev"]
+            test: ["CMD-SHELL", "pg_isready -U flashky_user -d flashky"]
             interval: 5s
             timeout: 3s
             retries: 5

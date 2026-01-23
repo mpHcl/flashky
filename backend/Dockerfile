@@ -6,7 +6,6 @@ RUN pip install --no-cache-dir --upgrade -r /src/requirements.txt
 
 ENV ENV=dev
 ENV PYTHONPATH=/src
-ENV DATABASE_URL=postgresql+psycopg2://flashky_user:flashky_pass@db:5432/flashky
 
 # Copy and set executable permission for entrypoint
 COPY backend/entrypoint.sh /entrypoint.sh

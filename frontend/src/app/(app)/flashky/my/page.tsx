@@ -17,7 +17,7 @@ export default function MyFlashky() {
 
     const deleteFlashcard = async (id: number) => {
       const onSuccess = async () => {
-        setData(data.filter(d => d.id != id));
+        setData(data.filter((d : {id: number}) => d.id != id));
       }
       fetchAuthDELETE(`flashcards/${id}`, 200, onSuccess);
     }
@@ -52,7 +52,9 @@ export default function MyFlashky() {
             </Box>
         <Suspense fallback={<div>Loading...</div>}>
             <CrudList 
-              data={data.map((el) => ({ id: el.id, name: el.name, preview: el.front_side.content == null ? "" : el.front_side.content }))} 
+              data={data.map((el : {id: number, name: string, front_side: { content: string}}) => (
+                { id: el.id, name: el.name, preview: el.front_side.content == null ? "" : el.front_side.content }
+              ))} 
               showUpdateDeleteBtns={true} 
               showLearnBtn={false}
               path="flashky"

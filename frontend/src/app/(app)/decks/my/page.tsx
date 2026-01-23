@@ -24,7 +24,7 @@ export default function MyDecks() {
 
   const confirmDelete = async () => {
     const onSuccess = async () => {
-      setData(data.filter(d => d.id != idToDelete));
+      setData(data.filter((d : { id: number })=> d.id != idToDelete));
     }
     fetchAuthDELETE(`decks/${idToDelete}`, 200, onSuccess);
     setOpenDeleteDialog(false);
@@ -81,7 +81,7 @@ export default function MyDecks() {
           <Box>
             <Suspense fallback={<div>Loading...</div>}>
               <CrudList
-                data={data.map(el => ({
+                data={data.map((el: {id: number,  name: string, description: string})=> ({
                   id: el.id,
                   name: el.name,
                   preview: el.description,

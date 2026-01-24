@@ -5,7 +5,6 @@ import HomeIcon from '@mui/icons-material/Home';
 import LogoutIcon from '@mui/icons-material/Logout';
 import NoteIcon from '@mui/icons-material/Note';
 import PortraitIcon from '@mui/icons-material/Portrait';
-import SettingsIcon from '@mui/icons-material/Settings';
 import StyleIcon from '@mui/icons-material/Style';
 import FlagCircleIcon from '@mui/icons-material/FlagCircle';
 import PeopleIcon from '@mui/icons-material/People';
@@ -29,7 +28,6 @@ export const userRoutes: Route[] = [
     {
         name: "Account", route: "/profile", submenu: true, icon: <AccountCircleIcon />, subroutes: [
             { name: "Profile", icon: <AccountCircleIcon />, route: "/profile" },
-            { name: "Settings", icon: <SettingsIcon />, route: "/profile/settings" },
             { name: "Logout", icon: <LogoutIcon />, route: "/logout" },
         ]
     },
@@ -41,7 +39,6 @@ export const moderatorRoutes: Route[] = [
     {
         name: "Account", route: "/profile", submenu: true, icon: <AccountCircleIcon />, subroutes: [
             { name: "Profile", icon: <AccountCircleIcon />, route: "/profile" },
-            { name: "Settings", icon: <SettingsIcon />, route: "/profile/settings" },
             { name: "Logout", icon: <LogoutIcon />, route: "/logout" },
         ]
     },

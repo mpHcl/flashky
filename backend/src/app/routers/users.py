@@ -1,3 +1,4 @@
+import json
 import os
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
@@ -35,6 +36,12 @@ class UserDTO(BaseModel):
 class UserGetAllDTO(BaseModel):
     total_number: int
     users: list[UserDTO]
+    
+class SettingsDTO(BaseModel):
+    theme: str
+
+class SettingsGetDTO(BaseModel):
+    settings: SettingsDTO
     
 class UserUpdateDTO(BaseModel):
     username: Optional[str] = None
@@ -215,3 +222,43 @@ async def upload_avatar(
     db.commit()
 
     return {"avatar": filename}
+
+##############################
+#    User settings endpoint
+##############################
+
+@router.get("/me/settings", response_model=SettingsGetDTO)
+def get_user_settings(
+    user_id: int = Depends(authenticate()),
+    db: Session = Depends(get_session)
+):
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    default_settings = {"theme": "light"}
+
+    if user.settings:
+        try:
+            settings = json.loads(user.settings)
+        except json.JSONDecodeError:
+            settings = default_settings
+    else:
+        settings = default_settings
+
+    return {"settings": settings}
+
+@router.put("/me/settings", response_model=SettingsGetDTO)
+def update_user_settings(
+    settings: SettingsDTO,
+    user_id: int = Depends(authenticate()),
+    db: Session = Depends(get_session)
+):
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user.settings = json.dumps(settings.model_dump())
+    db.commit()
+
+    return {"settings": settings}

@@ -1,15 +1,10 @@
 "use client";
 import { Box, List, ListItemButton, ListItemText, Popper, Paper, Typography, ListItem, ListItemIcon } from '@mui/material';
 import * as React from 'react';
+import { Route } from '../lib/type';
 
-interface Route {
-  name: string;
-  route: string;
-  icon?: React.ReactNode;
-  subroutes?: Route[];
-}
 
-interface Props {
+type Props = {
   routeParam: Route;
 }
 

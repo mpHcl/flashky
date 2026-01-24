@@ -46,13 +46,13 @@ type CardEditorProps = {
 }
 
 type DeckSelectionProps = {
-    selectedDecks: Deck[];
-    setSelectedDecks: (list: Deck[]) => void;
+  selectedDecks: Deck[];
+  setSelectedDecks: (list: Deck[]) => void;
 }
 
 type AddTagsProps = {
-    tags: string[];
-    setTags: (list: string[]) => void;
+  tags: string[];
+  setTags: (list: string[]) => void;
 }
 
 const MediaItem = React.memo(({ name, url, type, onRemove }: MediaProps & { onRemove: () => void }) => {
@@ -143,146 +143,116 @@ const CardEditor = React.memo(({ side, media, textValue, textValueSetter, onAddM
 CardEditor.displayName = 'CardEditor';
 
 const DeckSelection = React.memo(({ selectedDecks, setSelectedDecks }: DeckSelectionProps) => {
-    const [queryString, setQueryString] = useState("");
-    const [searchDecks, setSearchDecks] = useState<Deck[]>([]);
-    const TOOLTIP_LENGTH = 50;
+  const [queryString, setQueryString] = useState("");
+  const [searchDecks, setSearchDecks] = useState<Deck[]>([]);
+  const TOOLTIP_LENGTH = 50;
 
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter' && queryString.trim()) {
-            const onSuccess = async (response: Response) => {
-                const result = await response.json();
-                setSearchDecks(result.decks);
-            }
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter' && queryString.trim()) {
+      const onSuccess = async (response: Response) => {
+        const result = await response.json();
+        setSearchDecks(result.decks);
+      }
 
-            fetchAuthGET("decks/mydecks?q=" + queryString, 200, onSuccess);
-        }
+      fetchAuthGET("decks/mydecks?q=" + queryString, 200, onSuccess);
     }
+  }
 
-    const handleSelectDeck = (index: number) => {
-        if (!selectedDecks.some(d => d.id === searchDecks[index].id)) {
-            setSelectedDecks([...selectedDecks, searchDecks[index]]);
-        }
+  const handleSelectDeck = (index: number) => {
+    if (!selectedDecks.some(d => d.id === searchDecks[index].id)) {
+      setSelectedDecks([...selectedDecks, searchDecks[index]]);
     }
+  }
 
-    const deleteSelectedDeck = (id: number) => {
-        setSelectedDecks(selectedDecks.filter(d => d.id !== id));
-    }
+  const deleteSelectedDeck = (id: number) => {
+    setSelectedDecks(selectedDecks.filter(d => d.id !== id));
+  }
 
-    return <Stack spacing={2}>
-        <Typography variant="h6" mb={2}>
-            Add to decks
-        </Typography>
-        <Box>
-            {selectedDecks.map((el, index) =>
-                <Chip key={index} label={el.name} sx={{ m: 0.25 }} onDelete={(e) => deleteSelectedDeck(el.id)} />)}
-        </Box>
-        <TextField
-            placeholder="Find decks"
-            fullWidth size="small"
-            variant="outlined"
-            value={queryString}
-            onChange={(e) => setQueryString(e.target.value)}
-            onKeyDown={handleKeyDown}
-            slotProps={{
-                input: {
-                    startAdornment: (
-                        <InputAdornment position="start">
-                            <SearchIcon />
-                        </InputAdornment>
-                    ),
-                },
-            }} />
-        <List>
-            {searchDecks.map((el, index) =>
-                <ListItemButton key={el.id} onClick={(e) => handleSelectDeck(index)}>
-                        <ListItemText primary={el.name} />
-                    <Tooltip title={
-                        <React.Fragment>
-                            <b>{'Description: '}</b> {el.description == null ? "" : (el.description.length > TOOLTIP_LENGTH ? el.description.substring(0, TOOLTIP_LENGTH) + "..." : el.description)}
-                        </React.Fragment>
-                    } placement="bottom" enterDelay={500}>
-                        <ListItemIcon><MoreIcon/></ListItemIcon>
-                    </Tooltip>
-                </ListItemButton>)}
-        </List>
-    </Stack>
+  return <Stack spacing={2}>
+    <Typography variant="h6" mb={2}>
+      Add to decks
+    </Typography>
+    <Box>
+      {selectedDecks.map((el, index) =>
+        <Chip key={index} label={el.name} sx={{ m: 0.25 }} onDelete={() => deleteSelectedDeck(el.id)} />)}
+    </Box>
+    <TextField
+      placeholder="Find decks"
+      fullWidth size="small"
+      variant="outlined"
+      value={queryString}
+      onChange={(e) => setQueryString(e.target.value)}
+      onKeyDown={handleKeyDown}
+      slotProps={{
+        input: {
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          ),
+        },
+      }} />
+    <List>
+      {searchDecks.map((el, index) =>
+        <ListItemButton key={el.id} onClick={() => handleSelectDeck(index)}>
+          <ListItemText primary={el.name} />
+          <Tooltip title={
+            <React.Fragment>
+              <b>{'Description: '}</b> {el.description == null ? "" : (el.description.length > TOOLTIP_LENGTH ? el.description.substring(0, TOOLTIP_LENGTH) + "..." : el.description)}
+            </React.Fragment>
+          } placement="bottom" enterDelay={500}>
+            <ListItemIcon><MoreIcon /></ListItemIcon>
+          </Tooltip>
+        </ListItemButton>)}
+    </List>
+  </Stack>
 });
 
 DeckSelection.displayName = "DeckSelection";
 
 const AddTags = React.memo(({ tags, setTags }: AddTagsProps) => {
-    const [newTag, setNewTag] = useState("");
+  const [newTag, setNewTag] = useState("");
 
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter' && newTag.trim()) {
-            if (!tags.includes(newTag)) {
-                setTags([...tags, newTag]);
-            }
-            setNewTag("");
-        }
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter' && newTag.trim()) {
+      if (!tags.includes(newTag)) {
+        setTags([...tags, newTag]);
+      }
+      setNewTag("");
     }
+  }
 
-    const deleteTag = (tag: string) => {
-        setTags(tags.filter(t => t !== tag));
-    }
+  const deleteTag = (tag: string) => {
+    setTags(tags.filter(t => t !== tag));
+  }
 
-    return <>
-        <Typography variant="h6" mb={2}>
-            Add tags
-        </Typography>
-        <TextField
-            variant="outlined"
-            label="Enter tag name"
-            size="small"
-            value={newTag ?? ""}
-            onChange={(e) => setNewTag(e.target.value)}
-            onKeyDown={handleKeyDown} />
-        <Box>
-            {tags.map((tag, index) =>
-                <Chip key={index} label={tag} sx={{ m: 0.25 }} onDelete={(e) => deleteTag(tag)} />)}
-        </Box>
-    </>
+  return <>
+    <Typography variant="h6" mb={2}>
+      Add tags
+    </Typography>
+    <TextField
+      variant="outlined"
+      label="Enter tag name"
+      size="small"
+      value={newTag ?? ""}
+      onChange={(e) => setNewTag(e.target.value)}
+      onKeyDown={handleKeyDown} />
+    <Box>
+      {tags.map((tag, index) =>
+        <Chip key={index} label={tag} sx={{ m: 0.25 }} onDelete={() => deleteTag(tag)} />)}
+    </Box>
+  </>
 })
 
 AddTags.displayName = "AddTags";
-
-function Tags() {
-  return (
-    <Box>
-      <Typography variant="subtitle2" mb={1}>Tags</Typography>
-      <Stack direction="row" spacing={1} flexWrap="wrap">
-        {/* TODO: CHANGE TO INTERACTIVE LOOP */}
-        <Chip label="tag1" onDelete={() => { }} />
-        <Chip label="tag2" onDelete={() => { }} />
-      </Stack>
-      <Button size="small" sx={{ mt: 1 }}>
-        + tag
-      </Button>
-    </Box>
-  );
-}
-
-function Decks() {
-  return (
-    <Paper variant="outlined" sx={{ p: 2 }}>
-      <Typography variant="subtitle2" mb={1}>Decks</Typography>
-      <Stack spacing={1}>
-        {/* TODO: CHANGE TO INTERACTIVE LOOP */}
-        <Chip label="deck1" onDelete={() => { }} />
-        <Chip label="deck2" onDelete={() => { }} />
-      </Stack>
-      <Button size="small" sx={{ mt: 1 }}>+ Deck</Button>
-    </Paper>
-  );
-}
 
 type Props = {
   deckId: string | null;
 };
 
-export default function NewFlashkyInner({deckId}: Props) {
+export default function NewFlashkyInner({ deckId }: Props) {
   const router = useRouter();
- 
+
   const [name, setName] = useState<string>("")
   const [frontTextContent, setFrontTextContent] = useState<string>("")
   const [backTextContent, setBackTextContent] = useState<string>("")
@@ -299,7 +269,7 @@ export default function NewFlashkyInner({deckId}: Props) {
   const [decks, setDecks] = useState<Deck[]>([]);
   const [tags, setTags] = useState<string[]>([]);
 
-  const {isAuthenticated} = useAuth()
+  const { isAuthenticated } = useAuth()
 
 
   const getMediaType = (mimeType: string): "photo" | "audio" | "video" | null => {
@@ -379,7 +349,7 @@ export default function NewFlashkyInner({deckId}: Props) {
 
   React.useEffect(() => {
     if (!checkAuthenticated(router, isAuthenticated)) {
-            return;
+      return;
     }
     if (deckId != null) {
       const onSuccess = async (response: Response) => {
@@ -470,7 +440,7 @@ export default function NewFlashkyInner({deckId}: Props) {
         <Button color="inherit" href="/flashky/my">CANCEL</Button>
         <Stack direction="row" spacing={1}>
           <Button variant="outlined" onClick={() => addAndNext()}>Add next</Button>
-          <Button variant="contained"  onClick={() => addAndFinish()}>Add & finish</Button>
+          <Button variant="contained" onClick={() => addAndFinish()}>Add & finish</Button>
         </Stack>
       </Box>
     </Paper>

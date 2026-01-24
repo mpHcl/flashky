@@ -74,7 +74,7 @@ export default function ViewDeck() {
           </Typography>
         </Grid>
         <Grid size={2} display="flex" justifyContent="right" alignItems="right">
-          {isOwned && <ClickAwayListener onClickAway={(e) => setOpen(false)}>
+          {isOwned && <ClickAwayListener onClickAway={() => setOpen(false)}>
             <Box>
               <Button onClick={handleClickPopper}>More actions</Button>
               <Popper open={open} anchorEl={anchorEl} placement="bottom-end">

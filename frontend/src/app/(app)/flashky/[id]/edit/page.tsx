@@ -190,7 +190,7 @@ const ExistingMedia = React.memo(({ flashcardSideId, mediaInfos, setMediaInfos, 
                     onChange={(e) => handleChangeAlt(media.id, e.target.value)}
                   />
                   <FormControlLabel control={<Checkbox disabled={media.type === "image"} onChange={(e) => handleChangeAutoplay(media.id, e.target.checked)} />} label="Autoplay" />
-                  <Button sx={{ mt: 1 }} onClick={(e) => removeMedia(media.id)}>X</Button>
+                  <Button sx={{ mt: 1 }} onClick={() => removeMedia(media.id)}>X</Button>
                 </Card>
               </Grid>
             );
@@ -337,7 +337,7 @@ const DeckSelection = React.memo(({ selectedDecks, setSelectedDecks, decksToAdd,
     </Typography>
     <Box>
       {selectedDecks.map((el, index) =>
-        <Chip key={index} label={el.name} sx={{ m: 0.25 }} onDelete={(e) => deleteSelectedDeck(el)} />)}
+        <Chip key={index} label={el.name} sx={{ m: 0.25 }} onDelete={() => deleteSelectedDeck(el)} />)}
     </Box>
     <TextField
       placeholder="Find decks"
@@ -357,7 +357,7 @@ const DeckSelection = React.memo(({ selectedDecks, setSelectedDecks, decksToAdd,
       }} />
     <List>
       {searchDecks.map((el, index) =>
-        <ListItemButton key={el.id} onClick={(e) => handleSelectDeck(index)}>
+        <ListItemButton key={el.id} onClick={() => handleSelectDeck(index)}>
           <ListItemText primary={el.name} />
           <Tooltip title={
             <React.Fragment>
@@ -418,7 +418,7 @@ const AddTags = React.memo(({ tags, setTags, tagsToAdd, setTagsToAdd, tagsToRemo
       onKeyDown={handleKeyDown} />
     <Box>
       {tags.map((tag, index) =>
-        <Chip key={index} label={tag} sx={{ m: 0.25 }} onDelete={(e) => deleteTag(tag)} />)}
+        <Chip key={index} label={tag} sx={{ m: 0.25 }} onDelete={() => deleteTag(tag)} />)}
     </Box>
   </>
 })

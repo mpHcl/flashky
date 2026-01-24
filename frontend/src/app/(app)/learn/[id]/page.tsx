@@ -21,7 +21,7 @@ import { checkAuthenticated, useAuth } from '@/app/(auth)/context/AuthContext';
 
 export default function Learn() {
   const params = useParams();
-  const deck_id = params.id;
+  const deckId = params.id;
 
   const [initializing, setInitializing] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -49,11 +49,11 @@ export default function Learn() {
     } 
     hasInitialized.current = true;
 
-    initLearning(deck_id, setInitializing)
+    initLearning(deckId, setInitializing)
       .then(() => delay(100))
       .then(
         () => {
-          getNextCardToLearn(deck_id, setLoading, setCardToLearn, setNextDate)
+          getNextCardToLearn(deckId, setLoading, setCardToLearn, setNextDate)
         }
       );
   }, [isAuthenticated])
@@ -161,9 +161,9 @@ export default function Learn() {
             sx={{ mt: 3 }}
           >
             {[1, 2, 3, 4, 5].map((value) => (
-              <Button key={value} variant="outlined" onClick={async (_) => {
+              <Button key={value} variant="outlined" onClick={async () => {
                 if (await postReview(value, cardToLearn.id) === 200) {
-                  await getNextCardToLearn(deck_id, setLoading, setCardToLearn, setNextDate);
+                  await getNextCardToLearn(deckId, setLoading, setCardToLearn, setNextDate);
                   setIsFront(true);
                 }
               }}>

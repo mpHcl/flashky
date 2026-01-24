@@ -88,7 +88,7 @@ const FlashcardSelection = React.memo(({ selectedFlashcards, setSelectedFlashcar
       }} />
     <List>
       {searchFlashcards.map((el, index) =>
-        <ListItemButton key={el.id} onClick={(e) => handleSelectFlashcard(index)}>
+        <ListItemButton key={el.id} onClick={() => handleSelectFlashcard(index)}>
           <ListItemText primary={el.name} />
           <Tooltip title={
             <React.Fragment>
@@ -133,7 +133,7 @@ const AddTags = React.memo(({ tags, setTags }: AddTagsProps) => {
       onKeyDown={handleKeyDown} />
     <Box>
       {tags.map((tag, index) =>
-        <Chip key={index} label={tag} sx={{ m: 0.25 }} onDelete={(e) => deleteTag(tag)} />)}
+        <Chip key={index} label={tag} sx={{ m: 0.25 }} onDelete={() => deleteTag(tag)} />)}
     </Box>
   </>
 })

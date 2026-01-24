@@ -1,5 +1,6 @@
 services:
     backend:
+        image: flashky-backend
         container_name: backend
         build:
             context: .
@@ -14,6 +15,7 @@ services:
             db:
                 condition: service_healthy
     frontend:
+        image: flashky-frontend
         container_name: frontend
         build:
             context: .

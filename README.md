@@ -4,6 +4,16 @@ Flashcards web application
 
 ---
 
+Run dev 
+```sh
+docker compose -f compose.dev.yaml -p flashky-dev up
+```
+
+Run prod
+```sh
+docker compose -f compose.yaml -p flashky up
+```
+
 ## Database migrations 
 To manage migrations from the **container** use following commends: 
 

@@ -29,7 +29,6 @@ export const userRoutes: Route[] = [
     {
         name: "Account", route: "/profile", submenu: true, icon: <AccountCircleIcon />, subroutes: [
             { name: "Profile", icon: <AccountCircleIcon />, route: "/profile" },
-            { name: "Settings", icon: <SettingsIcon />, route: "/profile/settings" },
             { name: "Logout", icon: <LogoutIcon />, route: "/logout" },
         ]
     },
@@ -41,7 +40,6 @@ export const moderatorRoutes: Route[] = [
     {
         name: "Account", route: "/profile", submenu: true, icon: <AccountCircleIcon />, subroutes: [
             { name: "Profile", icon: <AccountCircleIcon />, route: "/profile" },
-            { name: "Settings", icon: <SettingsIcon />, route: "/profile/settings" },
             { name: "Logout", icon: <LogoutIcon />, route: "/logout" },
         ]
     },

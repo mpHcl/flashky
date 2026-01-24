@@ -4,9 +4,7 @@ import { Box, TextField, InputAdornment } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { useAuth } from '../(auth)/context/AuthContext';
-import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 
 
 export default function SearchBox() {

@@ -8,6 +8,7 @@ import ChangePasswordDialog from "./components/PasswordChangeDialog";
 import AlertDialog, { useDialog } from "@/app/components/dialogs/AppDialog";
 import { checkAuthenticated, useAuth } from "@/app/(auth)/context/AuthContext";
 import { fetchChangeAvatar, fetchChangePassword, fetchDeleteProfile, fetchProfile, fetchSaveProfile } from "./lib/fetch";
+import { Profile as ProfileType } from "./lib/types";
 
 
 export default function Profile() {
@@ -17,7 +18,7 @@ export default function Profile() {
   const [saveConfirmOpen, setSaveConfirmOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
-  const [profile, setProfile] = useState<Profile>();
+  const [profile, setProfile] = useState<ProfileType>();
 
   const { dialog, show, close } = useDialog();
   const { isAuthenticated, logout } = useAuth();

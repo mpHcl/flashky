@@ -52,7 +52,7 @@ export default function Users() {
           <Select label="Status" value={statusFilter}
             onChange={(e) => {
               setPage(0);
-              setStatusFilter(e.target.value as any);
+              setStatusFilter(e.target.value as "all" | "active" | "inactive");
             }}
           >
             <MenuItem value="all">All</MenuItem>
@@ -66,7 +66,7 @@ export default function Users() {
           <Select label="Role" value={roleFilter}
             onChange={(e) => {
               setPage(0);
-              setRoleFilter(e.target.value as any);
+              setRoleFilter(e.target.value as "all" | "admin" | "moderator" | "user");
             }}
           >
             <MenuItem value="all">All</MenuItem>

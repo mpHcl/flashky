@@ -89,7 +89,7 @@ const FlashcardSelection = React.memo(({ selectedFlashcards, setSelectedFlashcar
     </Typography>
     <Box>
       {selectedFlashcards.map((el, index) =>
-        <Chip key={index} label={el.name} sx={{ m: 0.25 }} onDelete={(e) => deleteSelectedFlashcard(el.id)} />)}
+        <Chip key={index} label={el.name} sx={{ m: 0.25 }} onDelete={() => deleteSelectedFlashcard(el.id)} />)}
     </Box>
     <TextField
       placeholder="Find flashcards"
@@ -170,7 +170,7 @@ const AddTags = React.memo(({ tags, setTags, tagsToAdd, setTagsToAdd, tagsToRemo
       onKeyDown={handleKeyDown} />
     <Box>
       {tags.map((tag, index) =>
-        <Chip key={index} label={tag} sx={{ m: 0.25 }} onDelete={(e) => deleteTag(tag)} />)}
+        <Chip key={index} label={tag} sx={{ m: 0.25 }} onDelete={() => deleteTag(tag)} />)}
     </Box>
   </>
 })

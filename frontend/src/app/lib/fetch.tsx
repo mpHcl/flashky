@@ -1,5 +1,5 @@
 import { BASE_URL } from "../constants";
-import { authHeadersJSON, deleteRequestOptionsAuthorized, getRequestOptionsAuthorized, RequestBodyType, RequestOptions, requestWithBodyOptionsAuthorized } from "./fetchOptions";
+import { deleteRequestOptionsAuthorized, getRequestOptionsAuthorized, RequestBodyType, RequestOptions, requestWithBodyOptionsAuthorized } from "./fetchOptions";
 
 export const OK = 200;
 

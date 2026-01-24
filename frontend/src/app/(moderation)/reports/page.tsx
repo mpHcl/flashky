@@ -44,7 +44,7 @@ export default function Users() {
           <Select
             value={verdictFilter}
             label="Verdict"
-            onChange={(e) => setVerdictFilter(e.target.value as any)}
+            onChange={(e) => setVerdictFilter(e.target.value as "all" | "violation" | "no-violation" | "pending")}
           >
             <MenuItem value="all">All</MenuItem>
             <MenuItem value="violation">Violation</MenuItem>
@@ -58,7 +58,7 @@ export default function Users() {
           <Select
             value={sortOrder}
             label="Sort by date"
-            onChange={(e) => setSortOrder(e.target.value as any)}
+            onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
           >
             <MenuItem value="desc">Newest first</MenuItem>
             <MenuItem value="asc">Oldest first</MenuItem>

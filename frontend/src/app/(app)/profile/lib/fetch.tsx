@@ -3,6 +3,7 @@ import { RequestBodyType } from "@/app/lib/fetchOptions";
 import { fetchAuthDELETE, fetchAuthGET, fetchAuthPOST, fetchAuthPUT, OK } from "@/app/lib/fetch";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { DialogType, ShowDialog } from "@/app/components/dialogs/AppDialog";
+import { Profile } from "./types";
 
 export const fetchProfile = (
     setProfile: React.Dispatch<React.SetStateAction<Profile | undefined>>

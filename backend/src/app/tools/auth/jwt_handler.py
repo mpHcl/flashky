@@ -1,3 +1,4 @@
+import os
 import jwt
 
 from datetime import datetime, timedelta, timezone
@@ -8,7 +9,8 @@ from app.database import get_session
 from ...models import ExpireTokens
 
 
-SECRET_KEY = "some key"
+def get_secret_key():
+    return os.getenv("AUTH_KEY")
 
 
 def get_token_handler(authorization: str = Header(...)):
@@ -71,7 +73,7 @@ def generate_token(user_id: str):
         "sub": user_id,
     }
     print(user_id)
-    token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+    token = jwt.encode(payload, get_secret_key(), algorithm="HS256")
     return token
 
 
@@ -90,7 +92,7 @@ def decode_token(token):
         HTTPException: (401) If the token is invalid, returns 'Invalid token. Please log in again.'
     """
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        payload = jwt.decode(token, get_secret_key(), algorithms=["HS256"])
         return payload
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Login expired")

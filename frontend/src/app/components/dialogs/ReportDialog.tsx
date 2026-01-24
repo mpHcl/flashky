@@ -48,7 +48,7 @@ export default function ReportInputPopup({ open, setOpen, object_id, object_type
 
 
   return (
-    <Dialog open={open} onClose={handleCancel} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={handleCancel} maxWidth="sm" fullWidth disableScrollLock>
       <DialogTitle>Report an element</DialogTitle>
       <DialogContent>
         <TextField

@@ -81,6 +81,7 @@ export default function AlertDialog({
       open={open}
       onClose={onClose}
       aria-labelledby="app-dialog-title"
+      disableScrollLock
       slotProps={{
         paper: {
           sx: {

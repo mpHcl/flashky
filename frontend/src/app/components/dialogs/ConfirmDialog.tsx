@@ -21,6 +21,7 @@ export default function ConfirmDialog({ open, action, onYes, onNo }: ConfirmDial
       open={open}
       onClose={onNo}
       aria-labelledby="confirm-dialog-title"
+      disableScrollLock
     >
       <DialogTitle id="confirm-dialog-title">
         Confirm Action

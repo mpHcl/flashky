@@ -58,14 +58,14 @@ export default function ViewDeck() {
     setOpenDeleteDialog(true);
   }
 
-  return (deck && <>
+  return (deck && <Box sx={{overflow: "auto"}}>
     <ConfirmDialog
       open={openDeleteDialog}
       action="Are you sure you want to delete this deck?"
       onYes={() => { confirmDelete() }}
       onNo={() => setOpenDeleteDialog(false)}
     />
-    <Paper sx={{ p: 3, mx: "auto" }}>
+    <Paper sx={{ p: 3, mx: "auto", maxHeight:"600px"}}>
       <Grid container spacing={2}>
         <Grid size={10}>
           <Typography variant="h4" gutterBottom>
@@ -74,9 +74,12 @@ export default function ViewDeck() {
           </Typography>
         </Grid>
         <Grid size={2} display="flex" justifyContent="right" alignItems="right">
+          <Box textAlign='center' >
+            <Button sx={{height: '80px'}} href={`/learn/${id}`} size="large" color="secondary" startIcon={<SchoolIcon />}>LEARN</Button>
+          </Box>
           {isOwned && <ClickAwayListener onClickAway={() => setOpen(false)}>
             <Box>
-              <Button onClick={handleClickPopper}>More actions</Button>
+              <Button onClick={handleClickPopper} sx={{height: '80px'}}>More actions</Button>
               <Popper open={open} anchorEl={anchorEl} placement="bottom-end">
                 <Paper sx={{ minWidth: 180 }}>
                   <List>
@@ -101,24 +104,28 @@ export default function ViewDeck() {
         </Grid>
       </Grid>
 
-      {deck.tags.map((tag, index) =>
-        <Chip key={index} label={tag} sx={{ m: 0.25 }} />
-      )}
-      <Paper variant='outlined' sx={{ maxHeight: 500, overflow: 'auto' }}>
-        <Typography variant="subtitle1" gutterBottom whiteSpace={'pre-wrap'} sx={{ p: 1 }}>
-          {deck.description}
-        </Typography>
-      </Paper>
-      <Box textAlign='center' margin={1}>
-        <Button href={`/learn/${id}`} size="large" color="secondary" startIcon={<SchoolIcon />}>LEARN</Button>
-      </Box>
-      <Typography variant='h6'>
-        Flashcards:
-      </Typography>
-      <CrudList data={deck.flashcards.map((el) => ({ id: el.id, name: el.name, preview: '' }))} showUpdateDeleteBtns={false} showLearnBtn={false} path={'flashky'} />
+      <Grid container spacing={3}>
+        <Grid size={4} sx={{padding: "8px"}}>
+          <Paper variant='outlined' sx={{ maxHeight: 500, overflow: 'auto' }}>
+            <Typography variant="subtitle1" gutterBottom whiteSpace={'pre-wrap'} sx={{ p: 1 }}>
+              {deck.description}
+            </Typography>
+          </Paper>
+          <Box sx={{ mt: 2 }}>
+            {deck.tags.map((tag, index) =>
+              <Chip key={index} label={tag} sx={{ m: 0.25 }} />
+            )}
+          </Box>
+        </Grid>
+        <Grid size={8} sx={{maxHeight:"500px", overflow:"auto"}}>
+          <CrudList data={deck.flashcards.map((el) => ({ id: el.id, name: el.name, preview: '' }))} showUpdateDeleteBtns={false} showLearnBtn={false} path={'flashky'} />
+        </Grid>
+
+      </Grid>
+
     </Paper>
     <Paper sx={{ p: 3, mx: "auto" }}>
       <Comments deck_id={deck.id} />
     </Paper>
-  </>);
+  </Box>);
 }

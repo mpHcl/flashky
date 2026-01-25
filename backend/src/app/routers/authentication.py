@@ -81,7 +81,13 @@ def login(user: UserLoginDTO, db: Session = Depends(get_session)):
 
     verify_password(user_entry.password, user.password)
 
-    return {"token": generate_token(f"{user_entry.id}")}
+    is_mod = False
+    for role in user_entry.roles:
+        if role.name == "MODERATOR":
+            is_mod = True
+            break
+
+    return {"token": generate_token(f"{user_entry.id}"), "is_mod": is_mod}
 
 
 @router.post("/logout")

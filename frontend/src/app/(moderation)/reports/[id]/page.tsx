@@ -16,9 +16,10 @@ export default function ReportDetails() {
   const reportId = Number(params.id);
   const [report, setReport] = useState<ReportType>();
   const [verdict, setVerdict] = useState<string>("");
+  const [deckId, setDeckId] = useState<number>();
 
   const loadReport = () => {
-    fetchGetReport(setReport, reportId);
+    fetchGetReport(setReport, setDeckId, reportId);
   }
 
   useEffect(() => {
@@ -83,6 +84,9 @@ export default function ReportDetails() {
               {report.comment_id && (
                 <Chip
                   label={`Comment #${report.comment_id}`}
+                  component={Link}
+                  href={`/decks/${deckId}`}
+                  clickable
                   variant="outlined"
                   size="medium"
                 />

@@ -19,7 +19,10 @@ export const loginFetch = async (
         const result = await response.json()
         if (result['token']) {
             updateContext(result['token'])
-            router.push("/");
+            if (result['is_mod'])
+                router.push("/users");
+            else
+                router.push("/");
         }
         else {
             showDialog("Unexpected error", DialogType.ERROR);

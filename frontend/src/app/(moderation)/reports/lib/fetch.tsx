@@ -21,11 +21,19 @@ export const fetchGetReports = (
 
 export const fetchGetReport = (
     setData: Dispatch<SetStateAction<ReportType | undefined>>,
+    setDeckId: Dispatch<SetStateAction<number | undefined>>,
     id: number
 ) => {
     const onSuccess = async (response: Response) => {
         const result = await response.json();
         setData(result);
+        if (result.comment_id !== undefined) {
+            const onSuccessComment = async (responseComment: Response) => {
+                const resultComment = await responseComment.json();
+                setDeckId(resultComment.deck_id);
+            }
+            fetchAuthGET(`comments/${result.comment_id}`, OK, onSuccessComment);
+        }
     }
     fetchAuthGET(`reports/${id}`, OK, onSuccess);
 }
